@@ -94,7 +94,8 @@ namespace Water_Features.Tools
         /// <inheritdoc/>
         public override PrefabBase GetPrefab()
         {
-            if (m_ToolSystem.activeTool == this)
+            m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(GetPrefab)}");
+            if (m_ToolSystem.activeTool == this && m_ActivePrefab != null)
             {
                 return m_ActivePrefab;
             }
@@ -105,9 +106,11 @@ namespace Water_Features.Tools
         /// <inheritdoc/>
         public override bool TrySetPrefab(PrefabBase prefab)
         {
+            m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(TrySetPrefab)}");
             if (prefab is WaterSourcePrefab)
             {
                 m_ActivePrefab = prefab;
+                m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(TrySetPrefab)} prefab is WaterSourcePrefab");
                 return true;
             }
 
@@ -163,6 +166,7 @@ namespace Water_Features.Tools
         /// <inheritdoc/>
         protected override void OnStartRunning()
         {
+            m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(OnStartRunning)}");
             m_ApplyAction.shouldBeEnabled = true;
             m_SecondaryApplyAction.shouldBeEnabled = true;
             m_RaycastPoint = default;
@@ -178,9 +182,11 @@ namespace Water_Features.Tools
         /// <inheritdoc/>
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+            m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(OnUpdate)}");
             __TypeHandle.__Game_Simulation_WaterSourceData_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__Game_Objects_Transform_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__Unity_Entities_Entity_TypeHandle.Update(ref CheckedStateRef);
+            m_Log.Debug("point 1");
             if (m_ApplyAction.WasPressedThisFrame())
             {
                 GetRaycastResult(out m_RaycastPoint);
@@ -243,6 +249,7 @@ namespace Water_Features.Tools
                 }
             }
 
+            m_Log.Debug("point 2");
             GetRaycastResult(out m_RaycastPoint);
             m_WaterTooltipSystem.HitPosition = m_RaycastPoint.m_HitPosition;
             WaterSourceCirclesRenderJob waterSourceCirclesRenderJob = new ()
@@ -258,6 +265,8 @@ namespace Water_Features.Tools
             m_OverlayRenderSystem.AddBufferWriter(inputDeps);
             m_TerrainSystem.AddCPUHeightReader(inputDeps);
             m_WaterSystem.AddSurfaceReader(inputDeps);
+
+            m_Log.Debug("point 3");
             if (LakeLikeSources.Contains(m_WaterToolUISystem.SelectedSourceType))
             {
                 float amount = m_WaterToolUISystem.Amount;
@@ -279,6 +288,7 @@ namespace Water_Features.Tools
                 inputDeps = JobHandle.CombineDependencies(jobHandle, inputDeps);
             }
 
+            m_Log.Debug("point 4");
             if (m_HoveredWaterSources.IsEmpty)
             {
                 float radius = m_WaterToolUISystem.Radius;
@@ -304,6 +314,8 @@ namespace Water_Features.Tools
                 m_MapExtents = MapExtents,
             };
             inputDeps = JobChunkExtensions.Schedule(hoverOverWaterSourceJob, m_WaterSourcesQuery, inputDeps);
+
+            m_Log.Debug("point 4");
             return inputDeps;
         }
 

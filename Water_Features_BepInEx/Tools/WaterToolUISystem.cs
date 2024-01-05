@@ -52,8 +52,8 @@ namespace Water_Features.Tools
         private bool m_WaterToolPanelShown;
         private List<BoundEventHandle> m_BoundEventHandles;
         private SourceType m_SelectedSourceType = SourceType.Creek;
-        private float m_Radius;
-        private float m_Amount;
+        private float m_Radius = 10f;
+        private float m_Amount = 5f;
         private Dictionary<string, Action> m_ChangeValueActions;
 
         /// <summary>

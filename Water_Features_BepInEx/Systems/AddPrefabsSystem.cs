@@ -11,6 +11,7 @@ namespace Water_Features.Systems
     using Game.Citizens;
     using Game.Net;
     using Game.Prefabs;
+    using Game.Settings;
     using System.Collections.Generic;
     using Unity.Entities;
     using UnityEngine;
@@ -100,7 +101,7 @@ namespace Water_Features.Systems
         {
             base.OnGameLoadingComplete(purpose, mode);
 
-            if (m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetCategoryData), TabName), out var waterToolTabPrefab) || waterToolTabPrefab is UIAssetCategoryPrefab)
+            if (m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetCategoryPrefab), TabName), out var waterToolTabPrefab) || waterToolTabPrefab is UIAssetCategoryPrefab)
             {
                 if (!m_PrefabSystem.TryGetEntity(waterToolTabPrefab, out Entity waterToolTabPrefabEntity))
                 {
@@ -112,13 +113,22 @@ namespace Water_Features.Systems
                     return;
                 }
 
-                if (currentMenu.m_Menu == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetMenuPrefab), "Landscaping"), out PrefabBase prefab1))
+                if (currentMenu.m_Menu == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetMenuPrefab), "Landscaping"), out PrefabBase landscapeTabPrefab))
                 {
-                    Entity entity = m_PrefabSystem.GetEntity(prefab1);
-                    m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} currentMenu = Entity.Null so set to {entity.Index}.{entity.Version}");
-                    currentMenu.m_Menu = entity;
+                    Entity landscapeTabEntity = m_PrefabSystem.GetEntity(landscapeTabPrefab);
+                    m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} currentMenu = Entity.Null so set to {landscapeTabEntity.Index}.{landscapeTabEntity.Version}");
+                    currentMenu.m_Menu = landscapeTabEntity;
                     EntityManager.SetComponentData(waterToolTabPrefabEntity, currentMenu);
-                    m_PrefabSystem.UpdatePrefab(prefab1);
+                    if (!EntityManager.TryGetBuffer(landscapeTabEntity, false, out DynamicBuffer<UIGroupElement> uiGroupBuffer))
+                    {
+                        m_Log.Info("Couldn't find buffer");
+                    }
+
+                    UIGroupElement groupElement = new UIGroupElement()
+                    {
+                        m_Prefab = waterToolTabPrefabEntity,
+                    };
+                    uiGroupBuffer.Add(groupElement);
                 }
             }
 
@@ -136,12 +146,22 @@ namespace Water_Features.Systems
                         continue;
                     }
 
-                    if (uIObjectData.m_Group == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetCategoryData), TabName), out PrefabBase prefab1))
+                    if (uIObjectData.m_Group == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetCategoryPrefab), TabName), out PrefabBase prefab1))
                     {
-                        Entity entity = m_PrefabSystem.GetEntity(prefab1);
-                        m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} uIObjectData.m_Group = Entity.Null so set to {entity.Index}.{entity.Version}");
-                        uIObjectData.m_Group = entity;
+                        Entity waterToolTabPrefabEntity = m_PrefabSystem.GetEntity(prefab1);
+                        if (!EntityManager.TryGetBuffer(waterToolTabPrefabEntity, false, out DynamicBuffer<UIGroupElement> uiGroupBuffer))
+                        {
+                            m_Log.Info("Couldn't find buffer");
+                        }
+
+                        m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} uIObjectData.m_Group = Entity.Null so set to {waterToolTabPrefabEntity.Index}.{waterToolTabPrefabEntity.Version}");
+                        uIObjectData.m_Group = waterToolTabPrefabEntity;
                         EntityManager.SetComponentData(waterSourcePrefabEntity, uIObjectData);
+                        UIGroupElement groupElement = new UIGroupElement()
+                        {
+                            m_Prefab = waterSourcePrefabEntity,
+                        };
+                        uiGroupBuffer.Insert(uiGroupBuffer.Length, groupElement);
                     }
                 }
             }
@@ -166,7 +186,7 @@ namespace Water_Features.Systems
             newCategory.m_Menu = menu;
             UIObject uiObjectComponent = ScriptableObject.CreateInstance<UIObject>();
             uiObjectComponent.m_Icon = path;
-            uiObjectComponent.m_Priority = 10;
+            uiObjectComponent.m_Priority = 12;
             uiObjectComponent.active = true;
             uiObjectComponent.m_IsDebugObject = false;
             newCategory.AddComponentFrom(uiObjectComponent);

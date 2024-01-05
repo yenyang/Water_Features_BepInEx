@@ -38,19 +38,6 @@ namespace Water_Features.Systems
     {
         public static readonly int kUpdatesPerDay = 128;
 
-        private const string PrefabPrefix = "WaterSource ";
-        private const string TabName = "Water Tool";
-        private readonly Dictionary<SourceType, string> m_SourceTypeIcons = new Dictionary<SourceType, string>()
-        {
-            { SourceType.Creek, "coui://uil/Standard/Creek.svg" },
-            { SourceType.Lake, "coui://uil/Standard/Lake.svg" },
-            { SourceType.River, "coui://uil/Standard/River.svg" },
-            { SourceType.Sea, "coui://uil/Standard/Sea.svg" },
-            { SourceType.AutofillingLake, "coui://uil/Standard/AutomaticFill.svg" },
-            { SourceType.DetentionBasin, "coui://uil/Standard/DetentionBasin.svg" },
-            { SourceType.RetentionBasin, "coui://uil/Standard/RetentionBasin.svg" },
-        };
-
         private TypeHandle __TypeHandle;
         private ClimateSystem m_ClimateSystem;
         private string m_CurrentSeason;
@@ -164,66 +151,6 @@ namespace Water_Features.Systems
             JobHandle jobHandle = JobChunkExtensions.Schedule(jobData, m_OriginalAmountsQuery, Dependency);
             m_TerrainSystem.AddCPUHeightReader(jobHandle);
             Dependency = jobHandle;
-
-            if (m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetCategoryData), TabName), out var waterToolTabPrefab) || waterToolTabPrefab is UIAssetCategoryPrefab)
-            {
-                if (!m_PrefabSystem.TryGetEntity(waterToolTabPrefab, out Entity waterToolTabPrefabEntity))
-                {
-                    m_Log.Info("Couldn't find prefab entitty");
-                    return;
-                }
-
-                if (!EntityManager.TryGetComponent(waterToolTabPrefabEntity, out UIAssetCategoryData currentMenu))
-                {
-                    m_Log.Info("Couldn't find menu component");
-                    return;
-                }
-
-                if (currentMenu.m_Menu == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetMenuPrefab), "Landscaping"), out PrefabBase prefab1))
-                {
-                    Entity entity = m_PrefabSystem.GetEntity(prefab1);
-                    m_Log.Info($"{nameof(SeasonalStreamsSystem)}.{nameof(OnUpdate)} currentMenu = Entity.Null so set to {entity.Index}.{entity.Version}");
-                    currentMenu.m_Menu = entity;
-                    EntityManager.SetComponentData(waterToolTabPrefabEntity, currentMenu);
-                    m_PrefabSystem.UpdatePrefab(prefab1);
-                }
-                else
-                {
-                    m_Log.Info("Couldn't find menu or menu is not null");
-                }
-            }
-            else
-            {
-                m_Log.Info("Couldn't find prefab anymore.");
-            }
-
-            foreach (KeyValuePair<SourceType, string> sources in m_SourceTypeIcons)
-            {
-                if (m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(WaterSourcePrefab), $"{PrefabPrefix}{sources.Key}"), out var waterSourcePrefab) || waterSourcePrefab is WaterSourcePrefab)
-                {
-                    if (!m_PrefabSystem.TryGetEntity(waterSourcePrefab, out Entity waterSourcePrefabEntity))
-                    {
-                        continue;
-                    }
-
-                    if (!EntityManager.TryGetComponent(waterSourcePrefabEntity, out UIObjectData uIObjectData))
-                    {
-                        continue;
-                    }
-
-                    if (uIObjectData.m_Group == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetCategoryData), TabName), out PrefabBase prefab1))
-                    {
-                        Entity entity = m_PrefabSystem.GetEntity(prefab1);
-                        m_Log.Info($"{nameof(SeasonalStreamsSystem)}.{nameof(OnUpdate)} uIObjectData.m_Group = Entity.Null so set to {entity.Index}.{entity.Version}");
-                        uIObjectData.m_Group = entity;
-                        EntityManager.SetComponentData(waterSourcePrefabEntity, uIObjectData);
-                    }
-                }
-                else
-                {
-                    m_Log.Info("Couldn't find tab name or entity is not null.");
-                }
-            }
         }
 
         /// <inheritdoc/>
