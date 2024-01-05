@@ -4,27 +4,34 @@
 
 namespace Water_Features.Systems
 {
+    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
+    using Colossal.Entities;
     using Colossal.Logging;
     using Colossal.Serialization.Entities;
     using Game;
     using Game.Common;
+    using Game.Prefabs;
     using Game.Tools;
     using Unity.Burst.Intrinsics;
     using Unity.Collections;
     using Unity.Entities;
     using Unity.Jobs;
     using Water_Features.Components;
+    using static Water_Features.Tools.WaterToolUISystem;
+    using Water_Features.Prefabs;
 
     /// <summary>
     /// A system for finding different water sources and assigning additional componets related to the mod.
     /// </summary>
     public partial class FindWaterSourcesSystem : GameSystemBase
     {
+
         private TypeHandle __TypeHandle;
         private EntityQuery m_WaterSourcesQuery;
         private EndFrameBarrier m_EndFrameBarrier;
         private ILog m_Log;
+        private PrefabSystem m_PrefabSystem;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FindWaterSourcesSystem"/> class.
@@ -77,6 +84,7 @@ namespace Water_Features.Systems
             JobHandle jobHandle = JobChunkExtensions.Schedule(jobData, m_WaterSourcesQuery, Dependency);
             m_EndFrameBarrier.AddJobHandleForProducer(jobHandle);
             Dependency = jobHandle;
+
             Enabled = false;
         }
 
