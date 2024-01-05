@@ -62,6 +62,7 @@ namespace Water_Features.Systems
                 WaterSourcePrefab sourcePrefabBase = ScriptableObject.CreateInstance<WaterSourcePrefab>();
                 sourcePrefabBase.m_SourceType = sources.Key;
                 sourcePrefabBase.m_Color = Color.red;
+                sourcePrefabBase.active = true;
                 sourcePrefabBase.name = $"{PrefabPrefix}{sources.Key}";
                 UIObject uiObject = sourcePrefabBase.AddComponent<UIObject>();
                 uiObject.m_Group = GetOrCreateNewToolCategory(TabName, "Landscaping", "coui://yy-water-tool/water_features_icon.svg") ?? uiObject.m_Group;
