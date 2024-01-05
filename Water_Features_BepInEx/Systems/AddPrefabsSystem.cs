@@ -6,7 +6,10 @@ namespace Water_Features.Systems
 {
     using Colossal.Entities;
     using Colossal.Logging;
+    using Colossal.Serialization.Entities;
     using Game;
+    using Game.Citizens;
+    using Game.Net;
     using Game.Prefabs;
     using System.Collections.Generic;
     using Unity.Entities;
@@ -20,6 +23,7 @@ namespace Water_Features.Systems
     /// </summary>
     public class AddPrefabsSystem : GameSystemBase
     {
+        private const string PrefabPrefix = "WaterSource ";
         private readonly Dictionary<SourceType, string> m_SourceTypeIcons = new Dictionary<SourceType, string>()
         {
             { SourceType.Creek, "coui://uil/Standard/Creek.svg" },
@@ -57,9 +61,9 @@ namespace Water_Features.Systems
                 WaterSourcePrefab sourcePrefabBase = ScriptableObject.CreateInstance<WaterSourcePrefab>();
                 sourcePrefabBase.m_SourceType = sources.Key;
                 sourcePrefabBase.m_Color = Color.red;
-                sourcePrefabBase.name = $"WaterSource {sources.Key}";
+                sourcePrefabBase.name = $"{PrefabPrefix}{sources.Key}";
                 UIObject uiObject = sourcePrefabBase.AddComponent<UIObject>();
-                uiObject.m_Group = GetOrCreateNewToolCategory("Water Tool", "Landscaping") ?? uiObject.m_Group;
+                uiObject.m_Group = GetOrCreateNewToolCategory("Water Tool", "Landscaping", "coui://yy-water-tool/water_features_icon.svg") ?? uiObject.m_Group;
                 uiObject.m_Priority = 1;
                 uiObject.m_Icon = sources.Value;
                 uiObject.active = true;
@@ -88,7 +92,56 @@ namespace Water_Features.Systems
             Enabled = false;
         }
 
-        private UIAssetCategoryPrefab GetOrCreateNewToolCategory(string name, string menuName)
+        /// <inheritdoc/>
+        protected override void OnGameLoadingComplete(Colossal.Serialization.Entities.Purpose purpose, GameMode mode)
+        {
+            base.OnGameLoadingComplete(purpose, mode);
+
+            if (m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetCategoryData), "Water Tool"), out var waterToolTabPrefab) || waterToolTabPrefab is UIAssetCategoryPrefab)
+            {
+                if (!m_PrefabSystem.TryGetEntity(waterToolTabPrefab, out Entity waterToolTabPrefabEntity))
+                {
+                    return;
+                }
+
+                if (!EntityManager.TryGetComponent(waterToolTabPrefabEntity, out UIAssetCategoryData currentMenu))
+                {
+                    return;
+                }
+
+                if (currentMenu.m_Menu == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetMenuPrefab), "Landscaping"), out PrefabBase prefab1))
+                {
+                    Entity entity = m_PrefabSystem.GetEntity(prefab1);
+                    m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} currentMenu = Entity.Null so set to {entity.Index}.{entity.Version}");
+                    currentMenu.m_Menu = entity;
+                }
+            }
+
+            foreach (KeyValuePair<SourceType, string> sources in m_SourceTypeIcons)
+            {
+                if (m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(WaterSourcePrefab), $"{PrefabPrefix}{sources.Key}"), out var waterSourcePrefab) || waterSourcePrefab is WaterSourcePrefab)
+                {
+                    if (!m_PrefabSystem.TryGetEntity(waterSourcePrefab, out Entity waterSourcePrefabEntity))
+                    {
+                        continue;
+                    }
+
+                    if (!EntityManager.TryGetComponent(waterSourcePrefabEntity, out UIObjectData uIObjectData))
+                    {
+                        continue;
+                    }
+
+                    if (uIObjectData.m_Group == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetMenuPrefab), "Landscaping"), out PrefabBase prefab1))
+                    {
+                        Entity entity = m_PrefabSystem.GetEntity(prefab1);
+                        m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} uIObjectData.m_Group = Entity.Null so set to {entity.Index}.{entity.Version}");
+                        uIObjectData.m_Group = entity;
+                    }
+                }
+            }
+        }
+
+        private UIAssetCategoryPrefab GetOrCreateNewToolCategory(string name, string menuName, string path)
         {
             if (m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetCategoryPrefab), name), out var prefab) || prefab is UIAssetCategoryPrefab)
             {
@@ -106,7 +159,7 @@ namespace Water_Features.Systems
             newCategory.name = name;
             newCategory.m_Menu = menu;
             UIObject uiObjectComponent = newCategory.AddComponent<UIObject>();
-            uiObjectComponent.m_Icon = "coui://yy-water-tool/water_features_icon.svg";
+            uiObjectComponent.m_Icon = path;
             uiObjectComponent.m_Priority = 10;
             uiObjectComponent.active = true;
             uiObjectComponent.m_IsDebugObject = false;
