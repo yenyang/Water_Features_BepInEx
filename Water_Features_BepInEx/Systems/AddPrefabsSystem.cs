@@ -66,18 +66,18 @@ namespace Water_Features.Systems
             foreach (KeyValuePair<SourceType, string> sources in m_SourceTypeIcons)
             {
                 MarkerObjectPrefab sourcePrefabBase = ScriptableObject.CreateInstance<MarkerObjectPrefab>();
-                sourcePrefabBase.components = smallWaterSourceMarkerPrefab.components;
                 sourcePrefabBase.m_Circular = smallWaterSourceMarkerPrefab.m_Circular;
                 sourcePrefabBase.m_Mesh = smallWaterSourceMarkerPrefab.m_Mesh;
                 sourcePrefabBase.prefab = smallWaterSourceMarkerPrefab.prefab;
                 sourcePrefabBase.active = true;
                 sourcePrefabBase.name = $"{PrefabPrefix}{sources.Key}";
-                UIObject uiObject = sourcePrefabBase.AddComponent<UIObject>();
+                UIObject uiObject = ScriptableObject.CreateInstance<UIObject>();
                 uiObject.m_Group = GetOrCreateNewToolCategory(TabName, "Landscaping", "coui://yy-water-tool/water_features_icon.svg") ?? uiObject.m_Group;
                 uiObject.m_Priority = 1;
                 uiObject.m_Icon = sources.Value;
                 uiObject.active = true;
                 uiObject.m_IsDebugObject = false;
+                sourcePrefabBase.AddComponentFrom(uiObject);
                 if (m_PrefabSystem.AddPrefab(sourcePrefabBase))
                 {
                     m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} Added prefab for Water Source {sources.Key}");
@@ -171,11 +171,12 @@ namespace Water_Features.Systems
             UIAssetCategoryPrefab newCategory = ScriptableObject.CreateInstance<UIAssetCategoryPrefab>();
             newCategory.name = name;
             newCategory.m_Menu = menu;
-            UIObject uiObjectComponent = newCategory.AddComponent<UIObject>();
+            UIObject uiObjectComponent = ScriptableObject.CreateInstance<UIObject>();
             uiObjectComponent.m_Icon = path;
             uiObjectComponent.m_Priority = 10;
             uiObjectComponent.active = true;
             uiObjectComponent.m_IsDebugObject = false;
+            newCategory.AddComponentFrom(uiObjectComponent);
 
             if (m_PrefabSystem.AddPrefab(newCategory))
             {
