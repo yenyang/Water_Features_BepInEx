@@ -65,11 +65,8 @@ namespace Water_Features.Systems
             MarkerObjectPrefab smallWaterSourceMarkerPrefab = smallWaterSourcePrefab as MarkerObjectPrefab;
             foreach (KeyValuePair<SourceType, string> sources in m_SourceTypeIcons)
             {
-                MarkerObjectPrefab sourcePrefabBase = ScriptableObject.CreateInstance<MarkerObjectPrefab>();
-                sourcePrefabBase.m_Circular = smallWaterSourceMarkerPrefab.m_Circular;
-                sourcePrefabBase.m_Mesh = smallWaterSourceMarkerPrefab.m_Mesh;
-                sourcePrefabBase.prefab = smallWaterSourceMarkerPrefab.prefab;
-                sourcePrefabBase.active = true;
+                var sourcePrefabBase = GameObject.Instantiate(smallWaterSourceMarkerPrefab);
+
                 sourcePrefabBase.name = $"{PrefabPrefix}{sources.Key}";
                 UIObject uiObject = ScriptableObject.CreateInstance<UIObject>();
                 uiObject.m_Group = GetOrCreateNewToolCategory(TabName, "Landscaping", "coui://yy-water-tool/water_features_icon.svg") ?? uiObject.m_Group;
