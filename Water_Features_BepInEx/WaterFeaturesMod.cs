@@ -11,9 +11,11 @@ namespace Water_Features
     using Game;
     using Game.Modding;
     using Game.SceneFlow;
+    using Game.UI;
     using Water_Features.Settings;
     using Water_Features.Systems;
     using Water_Features.Tools;
+    using Water_Features.Utils;
 
     /// <summary>
     ///  A mod that adds Water Tool, Seasonal Streams, and Experimetnal Waves and Tides.
@@ -85,6 +87,8 @@ namespace Water_Features
             Settings.RegisterInOptionsUI();
             AssetDatabase.global.LoadSettings("Mods_Yenyang_Water_Features", Settings, new WaterFeaturesSettings(this));
             Settings.Contra = false;
+            GameUIResourceHandler uiResourceHandler = GameManager.instance.userInterface.view.uiSystem.resourceHandler as GameUIResourceHandler;
+            uiResourceHandler?.HostLocationsMap.Add("yy-water-tool", new System.Collections.Generic.List<string> { UIFileUtils.AssemblyPath });
             Log.Info("Handling create world");
             Log.Info("ModInstallFolder = " + ModInstallFolder);
             LoadLocales();
@@ -100,6 +104,7 @@ namespace Water_Features
             updateSystem.UpdateAfter<TidesAndWavesSystem>(SystemUpdatePhase.Serialize);
             updateSystem.UpdateAt<SeasonalStreamsSystem>(SystemUpdatePhase.GameSimulation);
             updateSystem.UpdateAfter<SeasonalStreamsSystem>(SystemUpdatePhase.Serialize);
+            updateSystem.UpdateAt<AddPrefabsSystem>(SystemUpdatePhase.PrefabUpdate);
         }
 
         /// <inheritdoc/>

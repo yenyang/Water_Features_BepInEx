@@ -112,6 +112,9 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.Burst">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities Skylines II\Cities2_Data\Managed\Unity.Burst.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Collections">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities Skylines II\Cities2_Data\Managed\Unity.Collections.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -185,8 +188,15 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="UI\ui.js" />
-    <Content Include="UI\YYWT-Water-Tool-Panel.html" />
+    <Content Include="UI\ui.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\water_features_icon.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\YYWT-Water-Tool-Panel.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="StyleCop\stylecop.json" />

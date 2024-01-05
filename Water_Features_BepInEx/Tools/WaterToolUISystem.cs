@@ -183,11 +183,6 @@ namespace Water_Features.Tools
                 m_BoundEventHandles.Add(m_UiView.RegisterForEvent("YYWT-log", (Action<string>)LogFromJS));
                 m_BoundEventHandles.Add(m_UiView.RegisterForEvent("CheckForElement-yy-water-tool-panel", (Action<bool>)ElementCheck));
 
-                foreach (KeyValuePair<string, SourceType> kvp in m_ButtonIDsToSourceType)
-                {
-                    m_BoundEventHandles.Add(m_UiView.RegisterForEvent(kvp.Key, (Action<string>)ChangeSourceType));
-                }
-
                 foreach (KeyValuePair<string, Action> kvp in m_ChangeValueActions)
                 {
                     m_BoundEventHandles.Add(m_UiView.RegisterForEvent(kvp.Key, (Action<string>)ChangeValue));
@@ -233,25 +228,6 @@ namespace Water_Features.Tools
             }
 
             return "false";
-        }
-
-        /// <summary>
-        /// C# event handler for event callback from UI Javascript. Changes selected source type.
-        /// </summary>
-        /// <param name="buttonID">The selected source type id.</param>
-        private void ChangeSourceType(string buttonID)
-        {
-            if (m_ButtonIDsToSourceType.ContainsKey(buttonID))
-            {
-                // This script removes selected from previous selected source type button.
-                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.unselectedSourceType = document.getElementById(\"{m_SourceTypeToButtonIDs[m_SelectedSourceType]}\"); if (yyWaterTool.unselectedSourceType) yyWaterTool.unselectedSourceType.classList.remove(\"selected\");");
-
-                // Records selected source type as an enum;
-                m_SelectedSourceType = m_ButtonIDsToSourceType[buttonID];
-
-                // This script adds selected to selected source type button.
-                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.selectedSourceType = document.getElementById(\"{buttonID}\"); if (yyWaterTool.selectedSourceType) yyWaterTool.selectedSourceType.classList.add(\"selected\");");
-            }
         }
 
         /// <summary>
