@@ -23,6 +23,7 @@ namespace Water_Features.Tools
     using UnityEngine;
     using Water_Features;
     using Water_Features.Components;
+    using Water_Features.Prefabs;
     using Water_Features.Systems;
     using Water_Features.Utils;
 
@@ -59,6 +60,7 @@ namespace Water_Features.Tools
         private TerrainSystem m_TerrainSystem;
         private ILog m_Log;
         private NativeList<Entity> m_HoveredWaterSources;
+        private PrefabBase m_ActivePrefab;
 
         /// <summary>
         /// Gets a value indicating the toolid.
@@ -92,12 +94,23 @@ namespace Water_Features.Tools
         /// <inheritdoc/>
         public override PrefabBase GetPrefab()
         {
+            if (m_ToolSystem.activeTool == this)
+            {
+                return m_ActivePrefab;
+            }
+
             return null;
         }
 
         /// <inheritdoc/>
         public override bool TrySetPrefab(PrefabBase prefab)
         {
+            if (prefab is WaterSourcePrefab)
+            {
+                m_ActivePrefab = prefab;
+                return true;
+            }
+
             return false;
         }
 
