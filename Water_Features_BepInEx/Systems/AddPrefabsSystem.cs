@@ -80,7 +80,6 @@ namespace Water_Features.Systems
                             Entity entity = m_PrefabSystem.GetEntity(prefab1);
                             m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} uIObjectData.m_Group = Entity.Null so set to {entity.Index}.{entity.Version}");
                             uIObjectData.m_Group = entity;
-                            EntityManager.SetComponentData(entity, uIObjectData);
                         }
                     }
                 }
@@ -128,7 +127,6 @@ namespace Water_Features.Systems
                         Entity entity = m_PrefabSystem.GetEntity(prefab1);
                         m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} currentMenu = Entity.Null so set to {entity.Index}.{entity.Version}");
                         currentMenu.m_Menu = entity;
-                        EntityManager.SetComponentData(entity, currentMenu);
                     }
                 }
             }
