@@ -1,0 +1,10 @@
+{
+  "name": "Water_Features",
+  "description": "Water Tool, Seasonal Streams, Experimental Waves and Tides",
+  "version_number": "1.0.0",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "algernon-Unified_Icon_Library-1.0.6"
+  ],
+  "website_url": "https://github.com/yenyang/Water_Features_BepInEx"
+}
