@@ -65,7 +65,14 @@ namespace Water_Features.Systems
                 {
                     m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} Added prefab for Water Source {sources.Key}");
                 }
+
+                if (m_PrefabSystem.TryGetEntity(sourcePrefabBase, out Entity e))
+                {
+                    m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} prefabEntity = {e.Index}.{e.Version}");
+                }
             }
+
+            Enabled = false;
         }
 
         private UIAssetCategoryPrefab GetOrCreateNewToolCategory(string name, string menuName)

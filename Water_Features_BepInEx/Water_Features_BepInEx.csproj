@@ -20,6 +20,9 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyName>Water_Features</AssemblyName>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="cohtml.Net">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities Skylines II\Cities2_Data\Managed\cohtml.Net.dll</HintPath>
@@ -114,6 +117,7 @@
     </Reference>
     <Reference Include="Unity.Burst">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities Skylines II\Cities2_Data\Managed\Unity.Burst.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Collections">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities Skylines II\Cities2_Data\Managed\Unity.Collections.dll</HintPath>

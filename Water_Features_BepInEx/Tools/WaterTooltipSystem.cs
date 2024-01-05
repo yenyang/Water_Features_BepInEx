@@ -61,6 +61,7 @@ namespace Water_Features.Tools
         protected override void OnCreate()
         {
             base.OnCreate();
+            m_Log = WaterFeaturesMod.Instance.Log;
             m_ToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ToolSystem>();
             m_WaterTool = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<CustomWaterToolSystem>();
             m_WaterToolUISystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterToolUISystem>();
