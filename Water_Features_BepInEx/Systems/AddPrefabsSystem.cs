@@ -57,11 +57,19 @@ namespace Water_Features.Systems
         /// <inheritdoc/>
         protected override void OnUpdate()
         {
+            if (!m_PrefabSystem.TryGetPrefab(new PrefabID("MarkerObjectPrefab", "Small Water Source"), out var smallWaterSourcePrefab))
+            {
+                return;
+            }
+
+            MarkerObjectPrefab smallWaterSourceMarkerPrefab = smallWaterSourcePrefab as MarkerObjectPrefab;
             foreach (KeyValuePair<SourceType, string> sources in m_SourceTypeIcons)
             {
-                WaterSourcePrefab sourcePrefabBase = ScriptableObject.CreateInstance<WaterSourcePrefab>();
-                sourcePrefabBase.m_SourceType = sources.Key;
-                sourcePrefabBase.m_Color = Color.red;
+                MarkerObjectPrefab sourcePrefabBase = ScriptableObject.CreateInstance<MarkerObjectPrefab>();
+                sourcePrefabBase.components = smallWaterSourceMarkerPrefab.components;
+                sourcePrefabBase.m_Circular = smallWaterSourceMarkerPrefab.m_Circular;
+                sourcePrefabBase.m_Mesh = smallWaterSourceMarkerPrefab.m_Mesh;
+                sourcePrefabBase.prefab = smallWaterSourceMarkerPrefab.prefab;
                 sourcePrefabBase.active = true;
                 sourcePrefabBase.name = $"{PrefabPrefix}{sources.Key}";
                 UIObject uiObject = sourcePrefabBase.AddComponent<UIObject>();
@@ -123,7 +131,7 @@ namespace Water_Features.Systems
 
             foreach (KeyValuePair<SourceType, string> sources in m_SourceTypeIcons)
             {
-                if (m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(WaterSourcePrefab), $"{PrefabPrefix}{sources.Key}"), out var waterSourcePrefab) || waterSourcePrefab is WaterSourcePrefab)
+                if (m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(MarkerObjectPrefab), $"{PrefabPrefix}{sources.Key}"), out var waterSourcePrefab) || waterSourcePrefab is MarkerObjectPrefab)
                 {
                     if (!m_PrefabSystem.TryGetEntity(waterSourcePrefab, out Entity waterSourcePrefabEntity))
                     {
