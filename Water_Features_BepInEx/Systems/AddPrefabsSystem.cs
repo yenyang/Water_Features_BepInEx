@@ -4,6 +4,7 @@
 
 namespace Water_Features.Systems
 {
+    using Colossal.Entities;
     using Colossal.Logging;
     using Game;
     using Game.Prefabs;
@@ -11,6 +12,7 @@ namespace Water_Features.Systems
     using Unity.Entities;
     using UnityEngine;
     using Water_Features.Prefabs;
+    using static Game.Objects.SubObjectSystem;
     using static Water_Features.Tools.WaterToolUISystem;
 
     /// <summary>
@@ -52,13 +54,14 @@ namespace Water_Features.Systems
         {
             foreach (KeyValuePair<SourceType, string> sources in m_SourceTypeIcons)
             {
-                WaterSourcePrefab sourcePrefabBase = new WaterSourcePrefab();
+                WaterSourcePrefab sourcePrefabBase = ScriptableObject.CreateInstance<WaterSourcePrefab>();
                 sourcePrefabBase.m_SourceType = sources.Key;
                 sourcePrefabBase.m_Color = Color.red;
                 sourcePrefabBase.name = $"WaterSource {sources.Key}";
                 UIObject uiObject = sourcePrefabBase.AddComponent<UIObject>();
                 uiObject.m_Group = GetOrCreateNewToolCategory("Water Tool", "Landscaping") ?? uiObject.m_Group;
                 uiObject.m_Priority = 1;
+                uiObject.m_Icon = sources.Value;
                 uiObject.active = true;
                 uiObject.m_IsDebugObject = false;
                 if (m_PrefabSystem.AddPrefab(sourcePrefabBase))
@@ -69,6 +72,17 @@ namespace Water_Features.Systems
                 if (m_PrefabSystem.TryGetEntity(sourcePrefabBase, out Entity e))
                 {
                     m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} prefabEntity = {e.Index}.{e.Version}");
+
+                    if (EntityManager.TryGetComponent(e, out UIObjectData uIObjectData))
+                    {
+                        if (uIObjectData.m_Group == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetMenuPrefab), "Landscaping"), out PrefabBase prefab1))
+                        {
+                            Entity entity = m_PrefabSystem.GetEntity(prefab1);
+                            m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} uIObjectData.m_Group = Entity.Null so set to {entity.Index}.{entity.Version}");
+                            uIObjectData.m_Group = entity;
+                            EntityManager.SetComponentData(entity, uIObjectData);
+                        }
+                    }
                 }
             }
 
@@ -93,7 +107,7 @@ namespace Water_Features.Systems
             newCategory.name = name;
             newCategory.m_Menu = menu;
             UIObject uiObjectComponent = newCategory.AddComponent<UIObject>();
-            uiObjectComponent.m_Icon = "coui//yy-water-tool/water_features_icon.svg";
+            uiObjectComponent.m_Icon = "coui://yy-water-tool/water_features_icon.svg";
             uiObjectComponent.m_Priority = 10;
             uiObjectComponent.active = true;
             uiObjectComponent.m_IsDebugObject = false;
@@ -103,8 +117,23 @@ namespace Water_Features.Systems
                 m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} Added prefab for Category {name}");
             }
 
-            return newCategory;
+            if (m_PrefabSystem.TryGetEntity(newCategory, out Entity e))
+            {
+                m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} prefabEntity = {e.Index}.{e.Version}");
 
+                if (EntityManager.TryGetComponent(e, out UIAssetCategoryData currentMenu))
+                {
+                    if (currentMenu.m_Menu == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetMenuPrefab), menuName), out PrefabBase prefab1))
+                    {
+                        Entity entity = m_PrefabSystem.GetEntity(prefab1);
+                        m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} currentMenu = Entity.Null so set to {entity.Index}.{entity.Version}");
+                        currentMenu.m_Menu = entity;
+                        EntityManager.SetComponentData(entity, currentMenu);
+                    }
+                }
+            }
+
+            return newCategory;
         }
     }
 }

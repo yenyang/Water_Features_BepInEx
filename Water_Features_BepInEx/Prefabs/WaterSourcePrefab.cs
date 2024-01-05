@@ -5,7 +5,10 @@
 namespace Water_Features.Prefabs
 {
     using System;
+    using System.Collections.Generic;
     using Game.Prefabs;
+    using Game.Simulation;
+    using Unity.Entities;
     using UnityEngine;
     using Water_Features.Tools;
 
@@ -24,5 +27,17 @@ namespace Water_Features.Prefabs
         /// Color for overlay rendering.
         /// </summary>
         public Color m_Color;
+
+        public override void GetPrefabComponents(HashSet<ComponentType> components)
+        {
+            base.GetPrefabComponents(components);
+            components.Add(ComponentType.ReadWrite<Game.Simulation.WaterSourceData>());
+            components.Add(ComponentType.ReadWrite<Game.Objects.Transform>());
+        }
+
+        public override void GetArchetypeComponents(HashSet<ComponentType> components)
+        {
+            base.GetArchetypeComponents(components);
+        }
     }
 }
