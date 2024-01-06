@@ -183,6 +183,7 @@ namespace Water_Features.Tools
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(OnUpdate)}");
+            inputDeps = Dependency;
             __TypeHandle.__Game_Simulation_WaterSourceData_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__Game_Objects_Transform_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__Unity_Entities_Entity_TypeHandle.Update(ref CheckedStateRef);
