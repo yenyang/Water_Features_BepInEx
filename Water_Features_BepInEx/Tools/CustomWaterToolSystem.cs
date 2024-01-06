@@ -251,7 +251,12 @@ namespace Water_Features.Tools
             }
 
             m_Log.Debug("point 2");
-            GetRaycastResult(out m_RaycastPoint);
+            if (!GetRaycastResult(out m_RaycastPoint))
+            {
+                m_Log.Debug("raycast was false");
+                return inputDeps;
+            }
+
             m_WaterTooltipSystem.HitPosition = m_RaycastPoint.m_HitPosition;
             WaterSourceCirclesRenderJob waterSourceCirclesRenderJob = new ()
             {
