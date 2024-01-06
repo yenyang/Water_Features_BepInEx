@@ -120,8 +120,10 @@ namespace Water_Features.Tools
         /// <inheritdoc/>
         public override void InitializeRaycast()
         {
-            base.InitializeRaycast();
             m_ToolRaycastSystem.typeMask = TypeMask.Terrain;
+            m_ToolRaycastSystem.collisionMask = CollisionMask.OnGround;
+            m_ToolRaycastSystem.raycastFlags = RaycastFlags.Outside;
+            base.InitializeRaycast();
         }
 
         /// <inheritdoc/>
@@ -134,6 +136,7 @@ namespace Water_Features.Tools
             m_Log.Info($"[{nameof(CustomWaterToolSystem)}] {nameof(OnCreate)}");
             m_ToolOutputBarrier = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ToolOutputBarrier>();
             m_WaterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
+            m_WaterTooltipSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterTooltipSystem>();
             m_TerrainSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TerrainSystem>();
             m_WaterToolUISystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterToolUISystem>();
             m_WaterSourceArchetype = EntityManager.CreateArchetype(ComponentType.ReadWrite<Game.Simulation.WaterSourceData>(), ComponentType.ReadWrite<Game.Objects.Transform>());
@@ -251,11 +254,7 @@ namespace Water_Features.Tools
             }
 
             m_Log.Debug("point 2");
-            if (!GetRaycastResult(out m_RaycastPoint))
-            {
-                m_Log.Debug("raycast was false");
-                return inputDeps;
-            }
+            GetRaycastResult(out m_RaycastPoint);
 
             m_WaterTooltipSystem.HitPosition = m_RaycastPoint.m_HitPosition;
             WaterSourceCirclesRenderJob waterSourceCirclesRenderJob = new ()
