@@ -138,14 +138,6 @@ if (typeof yyWaterTool.hideTooltip !== 'function') {
     }
 }
 
-yyWaterTool.setupButton("YYWT-creek", "YY_WATER_FEATURES.creek");
-yyWaterTool.setupButton("YYWT-lake", "YY_WATER_FEATURES.lake");
-yyWaterTool.setupButton("YYWT-river", "YY_WATER_FEATURES.river");
-yyWaterTool.setupButton("YYWT-sea", "YY_WATER_FEATURES.sea");
-yyWaterTool.setupButton("YYWT-autofilling-lake", "YY_WATER_FEATURES.autofilling-lake");
-yyWaterTool.setupButton("YYWT-detention-basin", "YY_WATER_FEATURES.detention-basin");
-yyWaterTool.setupButton("YYWT-retention-basin", "YY_WATER_FEATURES.retention-basin");
-
 yyWaterTool.setupButton("YYWT-amount-down-arrow", "YY_WATER_FEATURES.amount-down-arrow");
 yyWaterTool.setupButton("YYWT-amount-up-arrow", "YY_WATER_FEATURES.amount-up-arrow");
 
