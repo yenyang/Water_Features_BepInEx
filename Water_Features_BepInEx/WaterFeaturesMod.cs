@@ -67,6 +67,12 @@ namespace Water_Features
         {
             Instance = this;
             Log = LogManager.GetLogger("Mods_Yenyang_Water_Features", false);
+            Log.Info($"[{nameof(WaterFeaturesMod)}] {nameof(OnLoad)}");
+        }
+
+        /// <inheritdoc/>
+        public void OnCreateWorld(UpdateSystem updateSystem)
+        {
 #if DEBUG
             Log.effectivenessLevel = Colossal.Logging.Level.Debug;
 #endif
@@ -76,12 +82,7 @@ namespace Water_Features
 #if VERBOSE
             Log.effectivenessLevel = Colossal.Logging.Level.Verbose;
 #endif
-            Log.Info($"[{nameof(WaterFeaturesMod)}] {nameof(OnLoad)}");
-        }
 
-        /// <inheritdoc/>
-        public void OnCreateWorld(UpdateSystem updateSystem)
-        {
             Log.Info("Initializing Settings.");
             Settings = new (this);
             Settings.RegisterInOptionsUI();
