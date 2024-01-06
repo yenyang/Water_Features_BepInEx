@@ -120,8 +120,6 @@ namespace Water_Features.Tools
         public override void InitializeRaycast()
         {
             m_ToolRaycastSystem.typeMask = TypeMask.Terrain;
-            m_ToolRaycastSystem.collisionMask = CollisionMask.OnGround;
-            m_ToolRaycastSystem.raycastFlags = RaycastFlags.Outside;
             base.InitializeRaycast();
         }
 

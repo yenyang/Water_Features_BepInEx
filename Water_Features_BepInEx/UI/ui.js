@@ -19,7 +19,7 @@ if (typeof yyWaterTool.setupButton !== 'function') {
             return;
         }
         button.onclick = function () {
-            engine.trigger(this.id);
+            engine.trigger('Change-Value', this.id);
         }
         yyWaterTool.setTooltip(buttonId, toolTipKey);
     }
@@ -138,6 +138,7 @@ if (typeof yyWaterTool.hideTooltip !== 'function') {
     }
 }
 
+yyWaterTool.applyLocalization(document.getElementById("yy-water-tool-panel"));
 yyWaterTool.setupButton("YYWT-amount-down-arrow", "amount-down-arrow");
 yyWaterTool.setupButton("YYWT-amount-up-arrow", "amount-up-arrow");
 

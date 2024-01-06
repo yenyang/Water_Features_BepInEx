@@ -173,19 +173,25 @@ namespace Water_Features.Tools
                 // This script defines the JS functions and setups up typical buttons.
                 UIFileUtils.ExecuteScript(m_UiView, m_InjectedJS);
 
+                // This script sets the radius field to the desired radius;
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
+
+                // This script sets the amount field to the desired amount;
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
+
                 m_BoundEventHandles.Add(m_UiView.RegisterForEvent("YYWT-log", (Action<string>)LogFromJS));
                 m_BoundEventHandles.Add(m_UiView.RegisterForEvent("CheckForElement-yy-water-tool-panel", (Action<bool>)ElementCheck));
 
                 foreach (KeyValuePair<string, Action> kvp in m_ChangeValueActions)
                 {
-                    m_BoundEventHandles.Add(m_UiView.RegisterForEvent(kvp.Key, (Action<string>)ChangeValue));
+                    m_BoundEventHandles.Add(m_UiView.RegisterForEvent("Change-Value", (Action<string>)ChangeValue));
                 }
 
                 m_WaterToolPanelShown = true;
             }
             else
             {
-                // This script checks if anarchy item exists. If it doesn't it triggers anarchy item being recreated.
+                // This script checks if water tool panel exists. If it doesn't it triggers water tool panel item being recreated.
                 UIFileUtils.ExecuteScript(m_UiView, $"if (document.getElementById(\"yy-water-tool-panel\") == null) engine.trigger('CheckForElement-yy-water-tool-panel', false);");
             }
 
@@ -229,6 +235,13 @@ namespace Water_Features.Tools
         /// <param name="buttonID">The id of the button pressed.</param>
         private void ChangeValue(string buttonID)
         {
+            if (buttonID == null)
+            {
+                m_Log.Warn($"{nameof(WaterToolUISystem)}.{nameof(ChangeValue)} buttonID was null.");
+                return;
+            }
+
+            m_Log.Debug($"{nameof(WaterToolUISystem)}.{nameof(ChangeValue)} buttonID = {buttonID}");
             if (m_ChangeValueActions.ContainsKey(buttonID))
             {
                 m_ChangeValueActions[buttonID].Invoke();
@@ -288,7 +301,7 @@ namespace Water_Features.Tools
                 m_Amount += 10;
             }
 
-            // This script sets the amount field to the desired radius;
+            // This script sets the amount field to the desired amount;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
         }
 
@@ -307,7 +320,7 @@ namespace Water_Features.Tools
                 m_Amount -= 100;
             }
 
-            // This script sets the amount field to the desired radius;
+            // This script sets the amount field to the desired amount;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
 
         }

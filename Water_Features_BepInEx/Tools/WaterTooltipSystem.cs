@@ -21,7 +21,6 @@ namespace Water_Features.Tools
         private bool m_RadiusTooSmall = false;
         private bool m_HoveringOverSource = false;
         private ToolSystem m_ToolSystem;
-        private StringTooltip m_Tooltip;
         private CustomWaterToolSystem m_WaterTool;
         private float timeLastWarned;
         private ILog m_Log;
@@ -66,10 +65,6 @@ namespace Water_Features.Tools
             m_ToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ToolSystem>();
             m_WaterTool = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<CustomWaterToolSystem>();
             m_WaterToolUISystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterToolUISystem>();
-            m_Tooltip = new StringTooltip
-            {
-                path = "Tooltip.LABEL[YY.WaterTool]",
-            };
             m_Log.Info($"[{nameof(WaterTooltipSystem)}] {nameof(OnCreate)}");
         }
 
@@ -81,8 +76,6 @@ namespace Water_Features.Tools
                 return;
             }
 
-            m_Tooltip.value = LocalizedString.IdWithFallback("Tooltip.LABEL[YY.WaterTool]", "Water Tool");
-            AddMouseTooltip(m_Tooltip);
             var prefab = m_WaterTool.GetPrefab();
             if (prefab == null || prefab is not WaterSourcePrefab)
             {
