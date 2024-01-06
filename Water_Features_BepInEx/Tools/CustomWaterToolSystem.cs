@@ -119,8 +119,8 @@ namespace Water_Features.Tools
         /// <inheritdoc/>
         public override void InitializeRaycast()
         {
-            m_ToolRaycastSystem.typeMask = TypeMask.Terrain;
             base.InitializeRaycast();
+            m_ToolRaycastSystem.typeMask = TypeMask.Terrain;
         }
 
         /// <inheritdoc/>
