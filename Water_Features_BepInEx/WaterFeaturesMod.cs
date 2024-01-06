@@ -106,6 +106,7 @@ namespace Water_Features
             updateSystem.UpdateAt<SeasonalStreamsSystem>(SystemUpdatePhase.GameSimulation);
             updateSystem.UpdateAfter<SeasonalStreamsSystem>(SystemUpdatePhase.Serialize);
             updateSystem.UpdateAt<AddPrefabsSystem>(SystemUpdatePhase.PrefabUpdate);
+            updateSystem.UpdateAt<WaterToolUISystem>(SystemUpdatePhase.UIUpdate);
         }
 
         /// <inheritdoc/>

@@ -60,7 +60,7 @@ namespace Water_Features.Tools
         private TerrainSystem m_TerrainSystem;
         private ILog m_Log;
         private NativeList<Entity> m_HoveredWaterSources;
-        private PrefabBase m_ActivePrefab;
+        private WaterSourcePrefab m_ActivePrefab;
 
         /// <summary>
         /// Gets a value indicating the toolid.
@@ -94,7 +94,6 @@ namespace Water_Features.Tools
         /// <inheritdoc/>
         public override PrefabBase GetPrefab()
         {
-            m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(GetPrefab)}");
             if (m_ToolSystem.activeTool == this && m_ActivePrefab != null)
             {
                 return m_ActivePrefab;
@@ -109,8 +108,8 @@ namespace Water_Features.Tools
             m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(TrySetPrefab)}");
             if (prefab is WaterSourcePrefab)
             {
-                m_ActivePrefab = prefab;
-                m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(TrySetPrefab)} prefab is WaterSourcePrefab");
+                m_ActivePrefab = prefab as WaterSourcePrefab;
+                m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(TrySetPrefab)} prefab is {prefab.name}.");
                 return true;
             }
 
@@ -185,18 +184,16 @@ namespace Water_Features.Tools
         /// <inheritdoc/>
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(OnUpdate)}");
             inputDeps = Dependency;
             __TypeHandle.__Game_Simulation_WaterSourceData_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__Game_Objects_Transform_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__Unity_Entities_Entity_TypeHandle.Update(ref CheckedStateRef);
-            m_Log.Debug("point 1");
             if (m_ApplyAction.WasPressedThisFrame())
             {
                 GetRaycastResult(out m_RaycastPoint);
                 if (m_RaycastPoint.m_HitPosition.x != 0f || m_RaycastPoint.m_HitPosition.z != 0f)
                 {
-                    if (m_WaterToolUISystem.SelectedSourceType != WaterToolUISystem.SourceType.River)
+                    if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.River)
                     {
                         TryAddWaterSource(ref inputDeps, m_RaycastPoint.m_HitPosition);
                         return inputDeps;
@@ -253,7 +250,6 @@ namespace Water_Features.Tools
                 }
             }
 
-            m_Log.Debug("point 2");
             GetRaycastResult(out m_RaycastPoint);
 
             m_WaterTooltipSystem.HitPosition = m_RaycastPoint.m_HitPosition;
@@ -271,12 +267,11 @@ namespace Water_Features.Tools
             m_TerrainSystem.AddCPUHeightReader(inputDeps);
             m_WaterSystem.AddSurfaceReader(inputDeps);
 
-            m_Log.Debug("point 3");
-            if (LakeLikeSources.Contains(m_WaterToolUISystem.SelectedSourceType))
+            if (LakeLikeSources.Contains(m_ActivePrefab.m_SourceType))
             {
                 float amount = m_WaterToolUISystem.Amount;
                 float radius = m_WaterToolUISystem.Radius;
-                if (m_WaterToolUISystem.SelectedSourceType == WaterToolUISystem.SourceType.RetentionBasin)
+                if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.RetentionBasin)
                 {
                     amount *= 3f; // Needs to be replaced by a UI chosen value;
                 }
@@ -293,7 +288,6 @@ namespace Water_Features.Tools
                 inputDeps = JobHandle.CombineDependencies(jobHandle, inputDeps);
             }
 
-            m_Log.Debug("point 4");
             if (m_HoveredWaterSources.IsEmpty)
             {
                 float radius = m_WaterToolUISystem.Radius;
@@ -320,7 +314,6 @@ namespace Water_Features.Tools
             };
             inputDeps = JobChunkExtensions.Schedule(hoverOverWaterSourceJob, m_WaterSourcesQuery, inputDeps);
 
-            m_Log.Debug("point 4");
             return inputDeps;
         }
 
@@ -343,7 +336,7 @@ namespace Water_Features.Tools
             float pollution = 0; // Alter later if UI for adding pollution. Also check to make sure it's smaller than amount later.
             float amount = m_WaterToolUISystem.Amount;
             float radius = m_WaterToolUISystem.Radius;
-            int constantDepth = (int)m_WaterToolUISystem.SelectedSourceType;
+            int constantDepth = (int)m_ActivePrefab.m_SourceType;
             if (constantDepth >= 4 && constantDepth <= 6)
             {
                 constantDepth = 0;
@@ -364,7 +357,7 @@ namespace Water_Features.Tools
             };
             bool acceptableMultiplier = true;
             bool unacceptableMultiplier = false;
-            if (m_WaterToolUISystem.SelectedSourceType != WaterToolUISystem.SourceType.River && m_WaterToolUISystem.SelectedSourceType != WaterToolUISystem.SourceType.Sea)
+            if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.River && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Sea)
             {
                 int attempts = 0;
                 waterSourceDataComponent.m_Multiplier = 1f;
@@ -394,7 +387,7 @@ namespace Water_Features.Tools
 
             if (acceptableMultiplier)
             {
-                if ((int)m_WaterToolUISystem.SelectedSourceType <= 3)
+                if ((int)m_ActivePrefab.m_SourceType <= 3)
                 {
                     AddWaterSourceJob addWaterSourceJob = new ()
                     {
@@ -407,7 +400,7 @@ namespace Water_Features.Tools
                     m_ToolOutputBarrier.AddJobHandleForProducer(jobHandle);
                     deps = jobHandle;
                 }
-                else if (m_WaterToolUISystem.SelectedSourceType == WaterToolUISystem.SourceType.AutofillingLake)
+                else if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.AutofillingLake)
                 {
                     AddAutoFillingLakeJob addAutoFillingLakeJob = new ()
                     {
@@ -422,7 +415,7 @@ namespace Water_Features.Tools
                     m_ToolOutputBarrier.AddJobHandleForProducer(jobHandle);
                     deps = jobHandle;
                 }
-                else if (m_WaterToolUISystem.SelectedSourceType == WaterToolUISystem.SourceType.DetentionBasin)
+                else if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.DetentionBasin)
                 {
                     waterSourceDataComponent.m_Amount = 0f;
                     AddDetentionBasinJob addDetentionBasinJob = new ()
@@ -437,7 +430,7 @@ namespace Water_Features.Tools
                     m_ToolOutputBarrier.AddJobHandleForProducer(jobHandle);
                     deps = jobHandle;
                 }
-                else if (m_WaterToolUISystem.SelectedSourceType == WaterToolUISystem.SourceType.RetentionBasin)
+                else if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.RetentionBasin)
                 {
                     AddRetentionBasinJob addRetentionBasinJob = new ()
                     {

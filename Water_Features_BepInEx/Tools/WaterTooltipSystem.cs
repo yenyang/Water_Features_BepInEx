@@ -10,6 +10,7 @@ namespace Water_Features.Tools
     using Game.UI.Tooltip;
     using Unity.Entities;
     using UnityEngine;
+    using Water_Features.Prefabs;
 
     /// <summary>
     /// A system for handing the tooltip for custom water tool.
@@ -82,7 +83,15 @@ namespace Water_Features.Tools
 
             m_Tooltip.value = LocalizedString.IdWithFallback("Tooltip.LABEL[YY.WaterTool]", "Water Tool");
             AddMouseTooltip(m_Tooltip);
-            if (m_WaterToolUISystem.SelectedSourceType == WaterToolUISystem.SourceType.River)
+            var prefab = m_WaterTool.GetPrefab();
+            if (prefab == null || prefab is not WaterSourcePrefab)
+            {
+                return;
+            }
+
+            WaterSourcePrefab waterSourcePrefab = prefab as WaterSourcePrefab;
+
+            if (waterSourcePrefab.m_SourceType == WaterToolUISystem.SourceType.River)
             {
                 if (!m_WaterTool.IsPositionNearBorder(m_HitPosition))
                 {

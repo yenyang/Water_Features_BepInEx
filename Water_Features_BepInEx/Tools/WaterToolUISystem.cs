@@ -51,7 +51,6 @@ namespace Water_Features.Tools
         private ILog m_Log;
         private bool m_WaterToolPanelShown;
         private List<BoundEventHandle> m_BoundEventHandles;
-        private SourceType m_SelectedSourceType = SourceType.Creek;
         private float m_Radius = 10f;
         private float m_Amount = 5f;
         private Dictionary<string, Action> m_ChangeValueActions;
@@ -95,14 +94,6 @@ namespace Water_Features.Tools
             /// Pond that fills when its raining and has a minimum water level.
             /// </summary>
             RetentionBasin,
-        }
-
-        /// <summary>
-        /// Gets the selected source type.
-        /// </summary>
-        public SourceType SelectedSourceType
-        {
-            get { return m_SelectedSourceType; }
         }
 
         /// <summary>
@@ -175,6 +166,8 @@ namespace Water_Features.Tools
 
             if (!m_WaterToolPanelShown)
             {
+                UIFileUtils.ExecuteScript(m_UiView, "if (typeof yyWaterTool != 'object') var yyWaterTool = {};");
+
                 UIFileUtils.ExecuteScript(m_UiView, m_WaterToolPanelScript);
 
                 // This script defines the JS functions and setups up typical buttons.
