@@ -8,7 +8,6 @@ namespace Water_Features.Utils
     using System.IO;
     using System.Text;
     using cohtml.Net;
-    using Water_Features;
 
     /// <summary>
     /// Utilities for loading and parsing UI related files (css, html, css).
@@ -28,14 +27,7 @@ namespace Water_Features.Utils
                 // Update cached path if the existing one is invalid.
                 if (string.IsNullOrWhiteSpace(s_assemblyPath))
                 {
-                    // Update cached path if the existing one is invalid.
-                    if (string.IsNullOrWhiteSpace(s_assemblyPath))
-                    {
-                        s_assemblyPath = Path.GetDirectoryName(typeof(WaterFeaturesPlugin).Assembly.Location);
-                    }
-
-                    // Return cached path.
-                    return s_assemblyPath;
+                    s_assemblyPath = Path.GetDirectoryName(typeof(WaterFeaturesPlugin).Assembly.Location);
                 }
 
                 // Return cached path.
@@ -104,14 +96,14 @@ namespace Water_Features.Utils
         /// <param name="fileName">the path to the html file.</param>
         /// <param name="injectionPostfix">Javascript for what to do with the html.</param>
         /// <returns>A string line of HTML and javascript code.</returns>
-        internal static string ReadHTML(string fileName, string injectionPostfix = "document.body.appendChild(divYYTC);")
+        internal static string ReadHTML(string fileName, string injectionPostfix = "document.body.appendChild(yyWaterTool.div);")
         {
             try
             {
                 string html = ReadUIFile(fileName);
                 if (!string.IsNullOrEmpty(html))
                 {
-                    return "var divYYTC = document.createElement('div'); divYYTC.innerHTML = \"" + EscapeToJavaScript(html) + "\"; " + injectionPostfix;
+                    return "yyWaterTool.div = document.createElement('div'); yyWaterTool.div.innerHTML = \"" + EscapeToJavaScript(html) + "\"; " + injectionPostfix;
                 }
             }
             catch (Exception e)
@@ -137,7 +129,7 @@ namespace Water_Features.Utils
                 if (!string.IsNullOrEmpty(html))
                 {
                     // Return JavaScript code with HTML embedded.
-                    return $"var div = document.createElement('div'); div.innerHTML = \"{EscapeToJavaScript(html)}\"; document.body.appendChild(div);";
+                    return $"yyWaterTool.div = document.createElement('div'); yyWaterTool.div.innerHTML = \"{EscapeToJavaScript(html)}\"; document.body.appendChild(yyWaterTool.div);";
                 }
             }
             catch (Exception e)
@@ -193,7 +185,7 @@ namespace Water_Features.Utils
                 if (!string.IsNullOrEmpty(css))
                 {
                     // Return JavaScript code with CSS embedded.
-                    return $"var style = document.createElement('style'); style.type = 'text/css'; style.innerHTML = \"{EscapeToJavaScript(css)}\"; document.head.appendChild(style);";
+                    return $"yyWaterTool.style = document.createElement('style'); yyWaterTool.style.type = 'text/css'; yyWaterTool.div.innerHTML = \"{EscapeToJavaScript(css)}\"; document.head.appendChild(yyWaterTool.style);";
                 }
             }
             catch (Exception e)
@@ -239,7 +231,7 @@ namespace Water_Features.Utils
         {
             // Create output StringBuilder.
             int length = sourceString.Length;
-            StringBuilder stringBuilder = new(length * 2);
+            StringBuilder stringBuilder = new (length * 2);
 
             // Iterate through each char.
             int index = -1;
