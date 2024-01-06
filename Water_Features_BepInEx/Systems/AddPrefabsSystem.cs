@@ -76,21 +76,6 @@ namespace Water_Features.Systems
                 {
                     m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} Added prefab for Water Source {sources.Key}");
                 }
-
-                if (m_PrefabSystem.TryGetEntity(sourcePrefabBase, out Entity e))
-                {
-                    m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} prefabEntity = {e.Index}.{e.Version}");
-
-                    if (EntityManager.TryGetComponent(e, out UIObjectData uIObjectData))
-                    {
-                        if (uIObjectData.m_Group == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetCategoryPrefab), TabName), out PrefabBase prefab1))
-                        {
-                            Entity entity = m_PrefabSystem.GetEntity(prefab1);
-                            m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} uIObjectData.m_Group = Entity.Null so set to {entity.Index}.{entity.Version}");
-                            uIObjectData.m_Group = entity;
-                        }
-                    }
-                }
             }
 
             Enabled = false;
@@ -113,12 +98,19 @@ namespace Water_Features.Systems
                     return;
                 }
 
+                if (!EntityManager.TryGetComponent(waterToolTabPrefabEntity, out UIObjectData objectData))
+                {
+                    return;
+                }
+
                 if (currentMenu.m_Menu == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetMenuPrefab), "Landscaping"), out PrefabBase landscapeTabPrefab))
                 {
                     Entity landscapeTabEntity = m_PrefabSystem.GetEntity(landscapeTabPrefab);
                     m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} currentMenu = Entity.Null so set to {landscapeTabEntity.Index}.{landscapeTabEntity.Version}");
                     currentMenu.m_Menu = landscapeTabEntity;
+                    objectData.m_Priority = 12;
                     EntityManager.SetComponentData(waterToolTabPrefabEntity, currentMenu);
+                    EntityManager.SetComponentData(waterToolTabPrefabEntity, objectData);
                     if (!EntityManager.TryGetBuffer(landscapeTabEntity, false, out DynamicBuffer<UIGroupElement> uiGroupBuffer))
                     {
                         m_Log.Info("Couldn't find buffer");
@@ -194,21 +186,6 @@ namespace Water_Features.Systems
             if (m_PrefabSystem.AddPrefab(newCategory))
             {
                 m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} Added prefab for Category {name}");
-            }
-
-            if (m_PrefabSystem.TryGetEntity(newCategory, out Entity e))
-            {
-                m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} prefabEntity = {e.Index}.{e.Version}");
-
-                if (EntityManager.TryGetComponent(e, out UIAssetCategoryData currentMenu))
-                {
-                    if (currentMenu.m_Menu == Entity.Null && m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetMenuPrefab), menuName), out PrefabBase prefab1))
-                    {
-                        Entity entity = m_PrefabSystem.GetEntity(prefab1);
-                        m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} currentMenu = Entity.Null so set to {entity.Index}.{entity.Version}");
-                        currentMenu.m_Menu = entity;
-                    }
-                }
             }
 
             return newCategory;

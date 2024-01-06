@@ -31,7 +31,6 @@ namespace Water_Features.Prefabs
         /// <inheritdoc/>
         public override void GetPrefabComponents(HashSet<ComponentType> components)
         {
-            WaterFeaturesMod.Instance.Log.Info($"{nameof(WaterSourcePrefab)}.{nameof(GetPrefabComponents)}");
             base.GetPrefabComponents(components);
             components.Add(ComponentType.ReadWrite<Game.Simulation.WaterSourceData>());
             components.Add(ComponentType.ReadWrite<Game.Objects.Transform>());
@@ -40,7 +39,6 @@ namespace Water_Features.Prefabs
         /// <inheritdoc/>
         public override void GetArchetypeComponents(HashSet<ComponentType> components)
         {
-            WaterFeaturesMod.Instance.Log.Info($"{nameof(WaterSourcePrefab)}.{nameof(GetArchetypeComponents)}");
             base.GetArchetypeComponents(components);
         }
     }

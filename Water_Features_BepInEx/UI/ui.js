@@ -138,8 +138,8 @@ if (typeof yyWaterTool.hideTooltip !== 'function') {
     }
 }
 
-yyWaterTool.setupButton("YYWT-amount-down-arrow", "YY_WATER_FEATURES.amount-down-arrow");
-yyWaterTool.setupButton("YYWT-amount-up-arrow", "YY_WATER_FEATURES.amount-up-arrow");
+yyWaterTool.setupButton("YYWT-amount-down-arrow", "amount-down-arrow");
+yyWaterTool.setupButton("YYWT-amount-up-arrow", "amount-up-arrow");
 
-yyWaterTool.setupButton("YYWT-radius-down-arrow", "YY_WATER_FEATURES.radius-down-arrow");
-yyWaterTool.setupButton("YYWT-radius-up-arrow", "YY_WATER_FEATURES.radius-up-arrow");
+yyWaterTool.setupButton("YYWT-radius-down-arrow", "radius-down-arrow");
+yyWaterTool.setupButton("YYWT-radius-up-arrow", "radius-up-arrow");
