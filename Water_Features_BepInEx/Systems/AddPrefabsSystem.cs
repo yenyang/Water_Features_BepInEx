@@ -27,7 +27,7 @@ namespace Water_Features.Systems
             { SourceType.Lake, "coui://yy-water-tool/WaterSourceLake.svg" },
             { SourceType.River, "coui://yy-water-tool/WaterSourceRiver.svg" },
             { SourceType.Sea, "coui://yy-water-tool/WaterSourceSea.svg" },
-            { SourceType.AutofillingLake, "coui://yy-water-tool/Colored/AutomaticFill.svg" },
+            { SourceType.AutofillingLake, "coui://yy-water-tool/WaterSourceAutomaticFill.svg" },
             { SourceType.DetentionBasin, "coui://yy-water-tool/WaterSourceDetentionBasin.svg" },
             { SourceType.RetentionBasin, "coui://yy-water-tool/WaterSourceRetentionBasin.svg" },
         };
