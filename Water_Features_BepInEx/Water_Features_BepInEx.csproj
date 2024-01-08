@@ -195,6 +195,25 @@
     <Content Include="UI\ui.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="UI\WaterSourceAutomaticFill.svg" />
+    <Content Include="UI\WaterSourceCreek.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\WaterSourceDetentionBasin.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\WaterSourceLake.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\WaterSourceRetentionBasin.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\WaterSourceRiver.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\WaterSourceSea.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="UI\water_features_icon.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

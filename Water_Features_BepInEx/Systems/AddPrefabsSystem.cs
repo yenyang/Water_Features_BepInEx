@@ -4,19 +4,14 @@
 
 namespace Water_Features.Systems
 {
+    using System.Collections.Generic;
     using Colossal.Entities;
     using Colossal.Logging;
-    using Colossal.Serialization.Entities;
     using Game;
-    using Game.Citizens;
-    using Game.Net;
     using Game.Prefabs;
-    using Game.Settings;
-    using System.Collections.Generic;
     using Unity.Entities;
     using UnityEngine;
     using Water_Features.Prefabs;
-    using static Game.Objects.SubObjectSystem;
     using static Water_Features.Tools.WaterToolUISystem;
 
     /// <summary>
@@ -28,13 +23,13 @@ namespace Water_Features.Systems
         private const string TabName = "Water Tool";
         private readonly Dictionary<SourceType, string> m_SourceTypeIcons = new Dictionary<SourceType, string>()
         {
-            { SourceType.Creek, "coui://uil/Standard/Creek.svg" },
-            { SourceType.Lake, "coui://uil/Standard/Lake.svg" },
-            { SourceType.River, "coui://uil/Standard/River.svg" },
-            { SourceType.Sea, "coui://uil/Standard/Sea.svg" },
-            { SourceType.AutofillingLake, "coui://uil/Standard/AutomaticFill.svg" },
-            { SourceType.DetentionBasin, "coui://uil/Standard/DetentionBasin.svg" },
-            { SourceType.RetentionBasin, "coui://uil/Standard/RetentionBasin.svg" },
+            { SourceType.Creek, "coui://yy-water-tool/WaterSourceCreek.svg" },
+            { SourceType.Lake, "coui://yy-water-tool/WaterSourceLake.svg" },
+            { SourceType.River, "coui://yy-water-tool/WaterSourceRiver.svg" },
+            { SourceType.Sea, "coui://yy-water-tool/WaterSourceSea.svg" },
+            { SourceType.AutofillingLake, "coui://yy-water-tool/Colored/AutomaticFill.svg" },
+            { SourceType.DetentionBasin, "coui://yy-water-tool/WaterSourceDetentionBasin.svg" },
+            { SourceType.RetentionBasin, "coui://yy-water-tool/WaterSourceRetentionBasin.svg" },
         };
 
         private PrefabSystem m_PrefabSystem;
@@ -67,7 +62,7 @@ namespace Water_Features.Systems
                 sourcePrefabBase.name = $"{PrefabPrefix}{sources.Key}";
                 UIObject uiObject = ScriptableObject.CreateInstance<UIObject>();
                 uiObject.m_Group = GetOrCreateNewToolCategory(TabName, "Landscaping", "coui://yy-water-tool/water_features_icon.svg") ?? uiObject.m_Group;
-                uiObject.m_Priority = 1;
+                uiObject.m_Priority = (int)sources.Key * 10;
                 uiObject.m_Icon = sources.Value;
                 uiObject.active = true;
                 uiObject.m_IsDebugObject = false;
@@ -148,6 +143,7 @@ namespace Water_Features.Systems
 
                         m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} uIObjectData.m_Group = Entity.Null so set to {waterToolTabPrefabEntity.Index}.{waterToolTabPrefabEntity.Version}");
                         uIObjectData.m_Group = waterToolTabPrefabEntity;
+                        uIObjectData.m_Priority = (int)sources.Key * 10;
                         EntityManager.SetComponentData(waterSourcePrefabEntity, uIObjectData);
                         UIGroupElement groupElement = new UIGroupElement()
                         {

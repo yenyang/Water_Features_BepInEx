@@ -54,6 +54,7 @@ namespace Water_Features.Tools
         private float m_Radius = 10f;
         private float m_Amount = 5f;
         private Dictionary<string, Action> m_ChangeValueActions;
+        private bool m_ButtonPressed = false;
 
         /// <summary>
         /// Types of water sources.
@@ -164,6 +165,8 @@ namespace Water_Features.Tools
                 return;
             }
 
+            m_ButtonPressed = false;
+
             if (!m_WaterToolPanelShown)
             {
                 UIFileUtils.ExecuteScript(m_UiView, "if (typeof yyWaterTool != 'object') var yyWaterTool = {};");
@@ -241,11 +244,18 @@ namespace Water_Features.Tools
                 return;
             }
 
+            if (m_ButtonPressed)
+            {
+                return;
+            }
+
             m_Log.Debug($"{nameof(WaterToolUISystem)}.{nameof(ChangeValue)} buttonID = {buttonID}");
             if (m_ChangeValueActions.ContainsKey(buttonID))
             {
                 m_ChangeValueActions[buttonID].Invoke();
             }
+
+            m_ButtonPressed = true;
         }
 
         private void IncreaseRadius()
