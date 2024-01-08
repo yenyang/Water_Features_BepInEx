@@ -21,15 +21,15 @@ namespace Water_Features.Systems
     {
         private const string PrefabPrefix = "WaterSource ";
         private const string TabName = "Water Tool";
-        private readonly Dictionary<SourceType, string> m_SourceTypeIcons = new Dictionary<SourceType, string>()
+        private readonly List<WaterSourcePrefabData> m_SourcePrefabDataList = new List<WaterSourcePrefabData>()
         {
-            { SourceType.Creek, "coui://yy-water-tool/WaterSourceCreek.svg" },
-            { SourceType.Lake, "coui://yy-water-tool/WaterSourceLake.svg" },
-            { SourceType.River, "coui://yy-water-tool/WaterSourceRiver.svg" },
-            { SourceType.Sea, "coui://yy-water-tool/WaterSourceSea.svg" },
-            { SourceType.AutofillingLake, "coui://yy-water-tool/WaterSourceAutomaticFill.svg" },
-            { SourceType.DetentionBasin, "coui://yy-water-tool/WaterSourceDetentionBasin.svg" },
-            { SourceType.RetentionBasin, "coui://yy-water-tool/WaterSourceRetentionBasin.svg" },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.Creek, m_Color = Color.red, m_Icon = "coui://yy-water-tool/WaterSourceCreek.svg", m_AmountLocalKey = "Amount", m_Priority = 10, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.River, m_Color = Color.yellow, m_Icon = "coui://yy-water-tool/WaterSourceRiver.svg", m_AmountLocalKey = "Amount", m_Priority = 20, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.DetentionBasin, m_Color = Color.magenta, m_Icon = "coui://yy-water-tool/WaterSourceDetentionBasin.svg", m_AmountLocalKey = "Depth", m_Priority = 30, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.RetentionBasin, m_Color = Color.grey, m_Icon = "coui://yy-water-tool/WaterSourceRetentionBasin.svg", m_AmountLocalKey = "Max Depth", m_Priority = 40, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.AutofillingLake, m_Color = Color.blue, m_Icon = "coui://yy-water-tool/WaterSourceAutomaticFill.svg", m_AmountLocalKey = "Depth", m_Priority = 50, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.Lake, m_Color = Color.cyan, m_Icon = "coui://yy-water-tool/WaterSourceLake.svg", m_AmountLocalKey = "Depth", m_Priority = 60, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.Sea, m_Color = Color.green, m_Icon = "coui://yy-water-tool/WaterSourceSea.svg", m_AmountLocalKey = "Depth", m_Priority = 70, } },
         };
 
         private PrefabSystem m_PrefabSystem;
@@ -53,23 +53,23 @@ namespace Water_Features.Systems
         /// <inheritdoc/>
         protected override void OnUpdate()
         {
-            foreach (KeyValuePair<SourceType, string> sources in m_SourceTypeIcons)
+            foreach (WaterSourcePrefabData source in m_SourcePrefabDataList)
             {
                 WaterSourcePrefab sourcePrefabBase = ScriptableObject.CreateInstance<WaterSourcePrefab>();
                 sourcePrefabBase.active = true;
-                sourcePrefabBase.m_SourceType = sources.Key;
-                sourcePrefabBase.m_Color = Color.red;
-                sourcePrefabBase.name = $"{PrefabPrefix}{sources.Key}";
+                sourcePrefabBase.m_SourceType = source.m_SourceType;
+                sourcePrefabBase.m_Color = source.m_Color;
+                sourcePrefabBase.name = $"{PrefabPrefix}{source.m_SourceType}";
                 UIObject uiObject = ScriptableObject.CreateInstance<UIObject>();
                 uiObject.m_Group = GetOrCreateNewToolCategory(TabName, "Landscaping", "coui://yy-water-tool/water_features_icon.svg") ?? uiObject.m_Group;
-                uiObject.m_Priority = (int)sources.Key * 10;
-                uiObject.m_Icon = sources.Value;
+                uiObject.m_Priority = source.m_Priority;
+                uiObject.m_Icon = source.m_Icon;
                 uiObject.active = true;
                 uiObject.m_IsDebugObject = false;
                 sourcePrefabBase.AddComponentFrom(uiObject);
                 if (m_PrefabSystem.AddPrefab(sourcePrefabBase))
                 {
-                    m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} Added prefab for Water Source {sources.Key}");
+                    m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnUpdate)} Added prefab for Water Source {source.m_SourceType}");
                 }
             }
 
@@ -119,9 +119,9 @@ namespace Water_Features.Systems
                 }
             }
 
-            foreach (KeyValuePair<SourceType, string> sources in m_SourceTypeIcons)
+            foreach (WaterSourcePrefabData source in m_SourcePrefabDataList)
             {
-                if (m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(WaterSourcePrefab), $"{PrefabPrefix}{sources.Key}"), out var waterSourcePrefab) || waterSourcePrefab is WaterSourcePrefab)
+                if (m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(WaterSourcePrefab), $"{PrefabPrefix}{source.m_SourceType}"), out var waterSourcePrefab) || waterSourcePrefab is WaterSourcePrefab)
                 {
                     if (!m_PrefabSystem.TryGetEntity(waterSourcePrefab, out Entity waterSourcePrefabEntity))
                     {
@@ -143,7 +143,7 @@ namespace Water_Features.Systems
 
                         m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} uIObjectData.m_Group = Entity.Null so set to {waterToolTabPrefabEntity.Index}.{waterToolTabPrefabEntity.Version}");
                         uIObjectData.m_Group = waterToolTabPrefabEntity;
-                        uIObjectData.m_Priority = (int)sources.Key * 10;
+                        uIObjectData.m_Priority = source.m_Priority;
                         EntityManager.SetComponentData(waterSourcePrefabEntity, uIObjectData);
                         UIGroupElement groupElement = new UIGroupElement()
                         {
@@ -174,7 +174,7 @@ namespace Water_Features.Systems
             newCategory.m_Menu = menu;
             UIObject uiObjectComponent = ScriptableObject.CreateInstance<UIObject>();
             uiObjectComponent.m_Icon = path;
-            uiObjectComponent.m_Priority = 12;
+            uiObjectComponent.m_Priority = 21;
             uiObjectComponent.active = true;
             uiObjectComponent.m_IsDebugObject = false;
             newCategory.AddComponentFrom(uiObjectComponent);
@@ -185,6 +185,15 @@ namespace Water_Features.Systems
             }
 
             return newCategory;
+        }
+
+        private struct WaterSourcePrefabData
+        {
+            public SourceType m_SourceType;
+            public Color m_Color;
+            public string m_Icon;
+            public string m_AmountLocalKey;
+            public int m_Priority;
         }
     }
 }

@@ -28,6 +28,11 @@ namespace Water_Features.Prefabs
         /// </summary>
         public Color m_Color;
 
+        /// <summary>
+        /// The local key for this type of water source for the amount row.
+        /// </summary>
+        public string m_AmountLocaleKey;
+
         /// <inheritdoc/>
         public override void GetPrefabComponents(HashSet<ComponentType> components)
         {
