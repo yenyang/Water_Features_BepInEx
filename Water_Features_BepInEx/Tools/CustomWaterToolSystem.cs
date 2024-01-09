@@ -10,6 +10,7 @@ namespace Water_Features.Tools
     using Game.Input;
     using Game.Prefabs;
     using Game.Rendering;
+    using Game.Routes;
     using Game.Simulation;
     using Game.Tools;
     using Unity.Burst.Intrinsics;
@@ -288,11 +289,12 @@ namespace Water_Features.Tools
             if (m_HoveredWaterSources.IsEmpty)
             {
                 float radius = m_WaterToolUISystem.Radius;
-                WaterToolRadiusJob waterToolRadiusJob = new ()
+                WaterToolRadiusJob waterToolRadiusJob = new()
                 {
                     m_OverlayBuffer = m_OverlayRenderSystem.GetBuffer(out JobHandle outJobHandle2),
                     m_Position = m_RaycastPoint.m_HitPosition,
                     m_Radius = radius,
+                    m_SourceType = m_ActivePrefab.m_SourceType,
                 };
                 JobHandle jobHandle = IJobExtensions.Schedule(waterToolRadiusJob, outJobHandle2);
                 m_OverlayRenderSystem.AddBufferWriter(jobHandle);
@@ -603,8 +605,6 @@ namespace Water_Features.Tools
                     UnityEngine.Color insideColor = borderColor;
                     insideColor.a = 0.1f;
                     m_OverlayBuffer.DrawCircle(borderColor, insideColor, currentWaterSourceData.m_Radius / 20f, 0, new float2(0, 1), position, currentWaterSourceData.m_Radius * 2f);
-
-
                 }
             }
 
@@ -631,10 +631,37 @@ namespace Water_Features.Tools
             public OverlayRenderSystem.Buffer m_OverlayBuffer;
             public float3 m_Position;
             public float m_Radius;
+            public WaterToolUISystem.SourceType m_SourceType;
 
             public void Execute()
             {
-                m_OverlayBuffer.DrawCircle(new UnityEngine.Color(0.95f, 0.44f, 0.13f, 1f), default, m_Radius / 20f, 0, new float2(0, 1), m_Position, m_Radius * 2f);
+                UnityEngine.Color borderColor = GetWaterSourceColor();
+                UnityEngine.Color insideColor = borderColor;
+                insideColor.a = 0.1f;
+                m_OverlayBuffer.DrawCircle(borderColor, insideColor, m_Radius / 20f, 0, new float2(0, 1), m_Position, m_Radius * 2f);
+            }
+
+            private UnityEngine.Color GetWaterSourceColor()
+            {
+                switch (m_SourceType)
+                {
+                    case WaterToolUISystem.SourceType.Creek:
+                        return UnityEngine.Color.red;
+                    case WaterToolUISystem.SourceType.Lake:
+                        return UnityEngine.Color.cyan;
+                    case WaterToolUISystem.SourceType.River:
+                        return UnityEngine.Color.yellow;
+                    case WaterToolUISystem.SourceType.Sea:
+                        return UnityEngine.Color.green;
+                    case WaterToolUISystem.SourceType.AutofillingLake:
+                        return UnityEngine.Color.blue;
+                    case WaterToolUISystem.SourceType.DetentionBasin:
+                        return new UnityEngine.Color(0.95f, 0.44f, 0.13f, 1f);
+                    case WaterToolUISystem.SourceType.RetentionBasin:
+                        return UnityEngine.Color.magenta;
+                    default:
+                        return UnityEngine.Color.red;
+                }
             }
         }
 
