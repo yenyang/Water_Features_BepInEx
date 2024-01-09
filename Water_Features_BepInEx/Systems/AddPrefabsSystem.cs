@@ -23,13 +23,13 @@ namespace Water_Features.Systems
         private const string TabName = "Water Tool";
         private readonly List<WaterSourcePrefabData> m_SourcePrefabDataList = new List<WaterSourcePrefabData>()
         {
-            { new WaterSourcePrefabData { m_SourceType = SourceType.Creek, m_Icon = "coui://yy-water-tool/WaterSourceCreek.svg", m_AmountLocalKey = "Flow", m_Priority = 10, m_DefaultRadius = 30f, m_DefaultAmount = 20f, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.Lake, m_Icon = "coui://yy-water-tool/WaterSourceLake.svg", m_AmountLocalKey = "Depth", m_Priority = 60, m_DefaultRadius = 40f, m_DefaultAmount = 30f, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.River, m_Icon = "coui://yy-water-tool/WaterSourceRiver.svg", m_AmountLocalKey = "Depth", m_Priority = 20, m_DefaultRadius = 50f, m_DefaultAmount = 40f, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.Sea, m_Icon = "coui://yy-water-tool/WaterSourceSea.svg", m_AmountLocalKey = "Depth", m_Priority = 70, m_DefaultRadius = 5000f, m_DefaultAmount = 50f, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.DetentionBasin, m_Icon = "coui://yy-water-tool/WaterSourceDetentionBasin.svg", m_AmountLocalKey = "Max Depth", m_Priority = 30, m_DefaultRadius = 40f, m_DefaultAmount = 30f, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.RetentionBasin, m_Icon = "coui://yy-water-tool/WaterSourceRetentionBasin.svg", m_AmountLocalKey = "Max Depth", m_Priority = 40, m_DefaultRadius = 50f, m_DefaultAmount = 10f, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.AutofillingLake, m_Icon = "coui://yy-water-tool/WaterSourceAutomaticFill.svg", m_AmountLocalKey = "Depth", m_Priority = 50, m_DefaultRadius = 40f, m_DefaultAmount = 30f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.Creek, m_Icon = "coui://yy-water-tool/WaterSourceCreek.svg", m_AmountLocalKey = "yyWaterTool.Flow", m_Priority = 10, m_DefaultRadius = 30f, m_DefaultAmount = 20f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.Lake, m_Icon = "coui://yy-water-tool/WaterSourceLake.svg", m_AmountLocalKey = "yyWaterTool.Depth", m_Priority = 60, m_DefaultRadius = 40f, m_DefaultAmount = 30f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.River, m_Icon = "coui://yy-water-tool/WaterSourceRiver.svg", m_AmountLocalKey = "yyWaterTool.Depth", m_Priority = 20, m_DefaultRadius = 50f, m_DefaultAmount = 40f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.Sea, m_Icon = "coui://yy-water-tool/WaterSourceSea.svg", m_AmountLocalKey = "yyWaterTool.Depth", m_Priority = 70, m_DefaultRadius = 5000f, m_DefaultAmount = 50f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.DetentionBasin, m_Icon = "coui://yy-water-tool/WaterSourceDetentionBasin.svg", m_AmountLocalKey = "yyWaterTool.MaxDepth", m_Priority = 30, m_DefaultRadius = 40f, m_DefaultAmount = 30f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.RetentionBasin, m_Icon = "coui://yy-water-tool/WaterSourceRetentionBasin.svg", m_AmountLocalKey = "yyWaterTool.MaxDepth", m_Priority = 40, m_DefaultRadius = 50f, m_DefaultAmount = 10f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.AutofillingLake, m_Icon = "coui://yy-water-tool/WaterSourceAutomaticFill.svg", m_AmountLocalKey = "yyWaterTool.Depth", m_Priority = 50, m_DefaultRadius = 40f, m_DefaultAmount = 30f, } },
         };
 
         private PrefabSystem m_PrefabSystem;

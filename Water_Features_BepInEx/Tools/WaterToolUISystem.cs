@@ -9,11 +9,13 @@ namespace Water_Features.Tools
     using System.IO;
     using cohtml.Net;
     using Colossal.Logging;
+    using Game.Prefabs;
     using Game.SceneFlow;
     using Game.Tools;
     using Game.UI;
     using Unity.Entities;
     using Water_Features;
+    using Water_Features.Prefabs;
     using Water_Features.Utils;
 
     /// <summary>
@@ -122,6 +124,8 @@ namespace Water_Features.Tools
             m_UiView = GameManager.instance.userInterface.view.View;
             ToolSystem toolSystem = m_ToolSystem; // I don't know why vanilla game did this.
             m_ToolSystem.EventToolChanged = (Action<ToolBaseSystem>)Delegate.Combine(toolSystem.EventToolChanged, new Action<ToolBaseSystem>(OnToolChanged));
+            ToolSystem toolSystem2 = m_ToolSystem; // I don't know why vanilla game did this.
+            m_ToolSystem.EventPrefabChanged = (Action<PrefabBase>)Delegate.Combine(toolSystem.EventPrefabChanged, new Action<PrefabBase>(OnPrefabChanged));
 
             m_BoundEventHandles = new ();
 
@@ -332,7 +336,6 @@ namespace Water_Features.Tools
 
             // This script sets the amount field to the desired amount;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
-
         }
 
         /// <summary>
@@ -380,6 +383,16 @@ namespace Water_Features.Tools
             }
 
             Enabled = true;
+        }
+
+        private void OnPrefabChanged(PrefabBase prefabBase)
+        {
+            if (prefabBase is WaterSourcePrefab && m_UiView != null)
+            {
+                WaterSourcePrefab waterSourcePrefab = prefabBase as WaterSourcePrefab;
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amount = document.getElementById(\"YYWT-amount-label\"); yyWaterTool.amount.localeKey = \"{waterSourcePrefab.m_AmountLocaleKey}\"; if (typeof yyWaterTool.applyLocalization == 'function') yyWaterTool.applyLocalization(\"yyWaterTool.amount\");");
+                return;
+            }
         }
     }
 }

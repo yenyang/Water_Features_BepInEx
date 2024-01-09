@@ -130,7 +130,8 @@ namespace Water_Features.Systems
                     Entity currentEntity = entityNativeArray[i];
                     float3 terrainPosition = new (currentTransform.m_Position.x, TerrainUtils.SampleHeight(ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
                     float3 waterPosition = new (currentTransform.m_Position.x, WaterUtils.SampleHeight(ref m_WaterSurfaceData, ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
-                    float waterHeight = waterPosition.y - terrainPosition.y;
+                    float waterHeight = waterPosition.y;
+                    float maxDepth = currentAutofillingLake.m_MaximumWaterHeight - terrainPosition.y;
 
                     if (waterHeight > currentAutofillingLake.m_MaximumWaterHeight)
                     {
@@ -140,7 +141,7 @@ namespace Water_Features.Systems
                     }
                     else if (waterHeight >= 0.95f * currentAutofillingLake.m_MaximumWaterHeight)
                     {
-                        currentWaterSourceData.m_Amount = currentAutofillingLake.m_MaximumWaterHeight * 0.1f;
+                        currentWaterSourceData.m_Amount = maxDepth * 0.1f;
                         if (currentWaterSourceData.m_ConstantDepth != 0) // Creek
                         {
                             currentWaterSourceData.m_ConstantDepth = 0; // Creek

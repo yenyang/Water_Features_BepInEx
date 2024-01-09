@@ -161,9 +161,9 @@ namespace Water_Features.Systems
                     Game.Objects.Transform currentTransform = transformNativeArray[i];
                     RetentionBasin currentRetentionBasin = retentionBasinNativeArray[i];
                     Entity currentEntity = entityNativeArray[i];
-                    float3 terrainPosition = new(currentTransform.m_Position.x, TerrainUtils.SampleHeight(ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
-                    float3 waterPosition = new(currentTransform.m_Position.x, WaterUtils.SampleHeight(ref m_WaterSurfaceData, ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
-                    float waterHeight = waterPosition.y - terrainPosition.y;
+                    float3 terrainPosition = new (currentTransform.m_Position.x, TerrainUtils.SampleHeight(ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
+                    float3 waterPosition = new (currentTransform.m_Position.x, WaterUtils.SampleHeight(ref m_WaterSurfaceData, ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
+                    float waterHeight = waterPosition.y;
                     float temperatureDifferentialAtWaterSource = m_TemperatureDifferential - (terrainPosition.y / 500f);
                     if (currentWaterSourceData.m_ConstantDepth != 0) // Creek
                     {

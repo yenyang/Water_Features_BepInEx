@@ -31,9 +31,6 @@ namespace Water_Features.Tools
     public partial class CustomWaterToolSystem : ToolBaseSystem
     {
         private const float MapExtents = 7200f;
-
-       
-
         private EntityArchetype m_WaterSourceArchetype;
         private EntityArchetype m_AutoFillingLakeArchetype;
         private EntityArchetype m_DetentionBasinArchetype;
@@ -117,6 +114,14 @@ namespace Water_Features.Tools
         }
 
         /// <inheritdoc/>
+        public override void GetAvailableSnapMask(out Snap onMask, out Snap offMask)
+        {
+            base.GetAvailableSnapMask(out onMask, out offMask);
+            onMask |= Snap.ContourLines;
+            offMask |= Snap.ContourLines;
+        }
+
+        /// <inheritdoc/>
         protected override void OnCreate()
         {
             m_Log = WaterFeaturesMod.Instance.Log;
@@ -157,6 +162,8 @@ namespace Water_Features.Tools
 
             base.OnCreate();
         }
+
+
 
         /// <inheritdoc/>
         protected override void OnStartRunning()
@@ -289,7 +296,7 @@ namespace Water_Features.Tools
             if (m_HoveredWaterSources.IsEmpty)
             {
                 float radius = m_WaterToolUISystem.Radius;
-                WaterToolRadiusJob waterToolRadiusJob = new()
+                WaterToolRadiusJob waterToolRadiusJob = new ()
                 {
                     m_OverlayBuffer = m_OverlayRenderSystem.GetBuffer(out JobHandle outJobHandle2),
                     m_Position = m_RaycastPoint.m_HitPosition,
