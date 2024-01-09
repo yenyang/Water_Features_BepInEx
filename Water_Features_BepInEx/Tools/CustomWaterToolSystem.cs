@@ -4,11 +4,8 @@
 
 namespace Water_Features.Tools
 {
-    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Colossal.Logging;
-    using Colossal.Serialization.Entities;
-    using Game;
     using Game.Common;
     using Game.Input;
     using Game.Prefabs;
@@ -34,13 +31,7 @@ namespace Water_Features.Tools
     {
         private const float MapExtents = 7200f;
 
-        private readonly List<WaterToolUISystem.SourceType> LakeLikeSources = new ()
-        {
-            { WaterToolUISystem.SourceType.Lake },
-            { WaterToolUISystem.SourceType.AutofillingLake },
-            { WaterToolUISystem.SourceType.DetentionBasin },
-            { WaterToolUISystem.SourceType.RetentionBasin },
-        };
+       
 
         private EntityArchetype m_WaterSourceArchetype;
         private EntityArchetype m_AutoFillingLakeArchetype;
@@ -121,6 +112,7 @@ namespace Water_Features.Tools
         {
             base.InitializeRaycast();
             m_ToolRaycastSystem.typeMask = TypeMask.Terrain;
+            m_ToolRaycastSystem.raycastFlags |= RaycastFlags.Outside;
         }
 
         /// <inheritdoc/>
@@ -160,6 +152,8 @@ namespace Water_Features.Tools
                 },
             });
             RequireForUpdate(m_WaterSourcesQuery);
+
+
             base.OnCreate();
         }
 
@@ -186,6 +180,8 @@ namespace Water_Features.Tools
             __TypeHandle.__Game_Simulation_WaterSourceData_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__Game_Objects_Transform_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__Unity_Entities_Entity_TypeHandle.Update(ref CheckedStateRef);
+            __TypeHandle.__DetentionBasin_Lookup.Update(ref CheckedStateRef);
+            __TypeHandle.__RententionBasin_Lookup.Update(ref CheckedStateRef);
             if (m_ApplyAction.WasPressedThisFrame())
             {
                 GetRaycastResult(out m_RaycastPoint);
@@ -259,13 +255,16 @@ namespace Water_Features.Tools
                 m_TerrainHeightData = m_TerrainSystem.GetHeightData(false),
                 m_WaterSurfaceData = m_WaterSystem.GetSurfaceData(out JobHandle waterSurfaceDataJob),
                 m_MapExtents = MapExtents,
+                m_DetentionBasinLookup = __TypeHandle.__DetentionBasin_Lookup,
+                m_RetentionBasinLookup = __TypeHandle.__RententionBasin_Lookup,
+                m_EntityType = __TypeHandle.__Unity_Entities_Entity_TypeHandle,
             };
             inputDeps = JobChunkExtensions.Schedule(waterSourceCirclesRenderJob, m_WaterSourcesQuery, JobHandle.CombineDependencies(inputDeps, outJobHandle, waterSurfaceDataJob));
             m_OverlayRenderSystem.AddBufferWriter(inputDeps);
             m_TerrainSystem.AddCPUHeightReader(inputDeps);
             m_WaterSystem.AddSurfaceReader(inputDeps);
 
-            if (LakeLikeSources.Contains(m_ActivePrefab.m_SourceType))
+            if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek)
             {
                 float amount = m_WaterToolUISystem.Amount;
                 float radius = m_WaterToolUISystem.Radius;
@@ -333,6 +332,11 @@ namespace Water_Features.Tools
         {
             float pollution = 0; // Alter later if UI for adding pollution. Also check to make sure it's smaller than amount later.
             float amount = m_WaterToolUISystem.Amount;
+            if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek)
+            {
+                amount += position.y;
+            }
+
             float radius = m_WaterToolUISystem.Radius;
             int constantDepth = (int)m_ActivePrefab.m_SourceType;
             if (constantDepth >= 4 && constantDepth <= 6)
@@ -558,14 +562,21 @@ namespace Water_Features.Tools
             public ComponentTypeHandle<Game.Objects.Transform> m_TransformType;
             [ReadOnly]
             public ComponentTypeHandle<Game.Simulation.WaterSourceData> m_SourceType;
+            [ReadOnly]
+            public EntityTypeHandle m_EntityType;
             public TerrainHeightData m_TerrainHeightData;
             public WaterSurfaceData m_WaterSurfaceData;
             public float m_MapExtents;
+            [ReadOnly]
+            public ComponentLookup<RetentionBasin> m_RetentionBasinLookup;
+            [ReadOnly]
+            public ComponentLookup<DetentionBasin> m_DetentionBasinLookup;
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
                 NativeArray<Game.Simulation.WaterSourceData> waterSourceDataNativeArray = chunk.GetNativeArray(ref m_SourceType);
                 NativeArray<Game.Objects.Transform> transformNativeArray = chunk.GetNativeArray(ref m_TransformType);
+                NativeArray<Entity> entityNativeArray = chunk.GetNativeArray(m_EntityType);
                 for (int i = 0; i < chunk.Count; i++)
                 {
                     Game.Simulation.WaterSourceData currentWaterSourceData = waterSourceDataNativeArray[i];
@@ -578,17 +589,39 @@ namespace Water_Features.Tools
                         position = waterPosition;
                     }
 
-                    float radius = WaterSourceUtils.GetRadius(currentTransform.m_Position, currentWaterSourceData.m_Radius, m_MapExtents);
-                    if (radius > currentWaterSourceData.m_Radius)
+                    UnityEngine.Color borderColor = GetWaterSourceColor(currentWaterSourceData.m_ConstantDepth);
+
+                    if (m_RetentionBasinLookup.HasComponent(entityNativeArray[i]))
                     {
-                        m_OverlayBuffer.DrawCircle(new UnityEngine.Color(0.95f, 0.44f, 0.13f, 1f), default, currentWaterSourceData.m_Radius / 20f, 0, new float2(0, 1), position, currentWaterSourceData.m_Radius * 2f);
-                        m_OverlayBuffer.DrawCircle(UnityEngine.Color.yellow, default, radius / 20f, 0, new float2(0, 1), position, radius * 2.05f);
+                        borderColor = UnityEngine.Color.magenta;
                     }
-                    else
+                    else if (m_DetentionBasinLookup.HasComponent(entityNativeArray[i]))
                     {
-                        m_OverlayBuffer.DrawCircle(UnityEngine.Color.yellow, default, radius / 20f, 0, new float2(0, 1), position, radius * 2f);
-                        m_OverlayBuffer.DrawCircle(new UnityEngine.Color(0.95f, 0.44f, 0.13f, 1f), default, currentWaterSourceData.m_Radius / 20f, 0, new float2(0, 1), position, currentWaterSourceData.m_Radius * 2.05f);
+                        borderColor = new UnityEngine.Color(0.95f, 0.44f, 0.13f, 1f);
                     }
+
+                    UnityEngine.Color insideColor = borderColor;
+                    insideColor.a = 0.1f;
+                    m_OverlayBuffer.DrawCircle(borderColor, insideColor, currentWaterSourceData.m_Radius / 20f, 0, new float2(0, 1), position, currentWaterSourceData.m_Radius * 2f);
+
+
+                }
+            }
+
+            private UnityEngine.Color GetWaterSourceColor(int constantDepth)
+            {
+                switch (constantDepth)
+                {
+                    case 0:
+                        return UnityEngine.Color.red;
+                    case 1:
+                        return UnityEngine.Color.cyan;
+                    case 2:
+                        return UnityEngine.Color.yellow;
+                    case 3:
+                        return UnityEngine.Color.green;
+                    default:
+                        return UnityEngine.Color.red;
                 }
             }
         }
@@ -634,6 +667,7 @@ namespace Water_Features.Tools
                 NativeArray<Entity> entityNativeArray = chunk.GetNativeArray(m_EntityType);
                 NativeArray<Game.Simulation.WaterSourceData> waterSourceDataNativeArray = chunk.GetNativeArray(ref m_SourceType);
                 NativeArray<Game.Objects.Transform> transformNativeArray = chunk.GetNativeArray(ref m_TransformType);
+
                 for (int i = 0; i < chunk.Count; i++)
                 {
                     Entity currentEntity = entityNativeArray[i];
@@ -657,6 +691,10 @@ namespace Water_Features.Tools
             public EntityTypeHandle __Unity_Entities_Entity_TypeHandle;
             [ReadOnly]
             public ComponentTypeHandle<Game.Objects.Transform> __Game_Objects_Transform_RO_ComponentTypeHandle;
+            [ReadOnly]
+            public ComponentLookup<RetentionBasin> __RententionBasin_Lookup;
+            [ReadOnly]
+            public ComponentLookup<DetentionBasin> __DetentionBasin_Lookup;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void AssignHandles(ref SystemState state)
@@ -664,6 +702,8 @@ namespace Water_Features.Tools
                 __Unity_Entities_Entity_TypeHandle = state.GetEntityTypeHandle();
                 __Game_Simulation_WaterSourceData_RO_ComponentTypeHandle = state.GetComponentTypeHandle<Game.Simulation.WaterSourceData>();
                 __Game_Objects_Transform_RO_ComponentTypeHandle = state.GetComponentTypeHandle<Game.Objects.Transform>();
+                __DetentionBasin_Lookup = state.GetComponentLookup<DetentionBasin>();
+                __RententionBasin_Lookup = state.GetComponentLookup<RetentionBasin>();
             }
         }
     }

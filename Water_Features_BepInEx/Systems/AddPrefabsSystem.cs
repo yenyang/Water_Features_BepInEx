@@ -23,13 +23,13 @@ namespace Water_Features.Systems
         private const string TabName = "Water Tool";
         private readonly List<WaterSourcePrefabData> m_SourcePrefabDataList = new List<WaterSourcePrefabData>()
         {
-            { new WaterSourcePrefabData { m_SourceType = SourceType.Creek, m_Color = Color.red, m_Icon = "coui://yy-water-tool/WaterSourceCreek.svg", m_AmountLocalKey = "Amount", m_Priority = 10, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.River, m_Color = Color.yellow, m_Icon = "coui://yy-water-tool/WaterSourceRiver.svg", m_AmountLocalKey = "Amount", m_Priority = 20, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.DetentionBasin, m_Color = Color.magenta, m_Icon = "coui://yy-water-tool/WaterSourceDetentionBasin.svg", m_AmountLocalKey = "Depth", m_Priority = 30, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.RetentionBasin, m_Color = Color.grey, m_Icon = "coui://yy-water-tool/WaterSourceRetentionBasin.svg", m_AmountLocalKey = "Max Depth", m_Priority = 40, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.AutofillingLake, m_Color = Color.blue, m_Icon = "coui://yy-water-tool/WaterSourceAutomaticFill.svg", m_AmountLocalKey = "Depth", m_Priority = 50, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.Lake, m_Color = Color.cyan, m_Icon = "coui://yy-water-tool/WaterSourceLake.svg", m_AmountLocalKey = "Depth", m_Priority = 60, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.Sea, m_Color = Color.green, m_Icon = "coui://yy-water-tool/WaterSourceSea.svg", m_AmountLocalKey = "Depth", m_Priority = 70, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.Creek, m_Icon = "coui://yy-water-tool/WaterSourceCreek.svg", m_AmountLocalKey = "Flow", m_Priority = 10, m_DefaultRadius = 30f, m_DefaultAmount = 20f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.Lake, m_Icon = "coui://yy-water-tool/WaterSourceLake.svg", m_AmountLocalKey = "Depth", m_Priority = 60, m_DefaultRadius = 40f, m_DefaultAmount = 30f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.River, m_Icon = "coui://yy-water-tool/WaterSourceRiver.svg", m_AmountLocalKey = "Depth", m_Priority = 20, m_DefaultRadius = 50f, m_DefaultAmount = 40f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.Sea, m_Icon = "coui://yy-water-tool/WaterSourceSea.svg", m_AmountLocalKey = "Depth", m_Priority = 70, m_DefaultRadius = 5000f, m_DefaultAmount = 50f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.DetentionBasin, m_Icon = "coui://yy-water-tool/WaterSourceDetentionBasin.svg", m_AmountLocalKey = "Max Depth", m_Priority = 30, m_DefaultRadius = 40f, m_DefaultAmount = 30f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.RetentionBasin, m_Icon = "coui://yy-water-tool/WaterSourceRetentionBasin.svg", m_AmountLocalKey = "Max Depth", m_Priority = 40, m_DefaultRadius = 50f, m_DefaultAmount = 10f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.AutofillingLake, m_Icon = "coui://yy-water-tool/WaterSourceAutomaticFill.svg", m_AmountLocalKey = "Depth", m_Priority = 50, m_DefaultRadius = 40f, m_DefaultAmount = 30f, } },
         };
 
         private PrefabSystem m_PrefabSystem;
@@ -58,7 +58,8 @@ namespace Water_Features.Systems
                 WaterSourcePrefab sourcePrefabBase = ScriptableObject.CreateInstance<WaterSourcePrefab>();
                 sourcePrefabBase.active = true;
                 sourcePrefabBase.m_SourceType = source.m_SourceType;
-                sourcePrefabBase.m_Color = source.m_Color;
+                sourcePrefabBase.m_DefaultRadius = source.m_DefaultRadius;
+                sourcePrefabBase.m_DefaultAmount = source.m_DefaultAmount;
                 sourcePrefabBase.name = $"{PrefabPrefix}{source.m_SourceType}";
                 UIObject uiObject = ScriptableObject.CreateInstance<UIObject>();
                 uiObject.m_Group = GetOrCreateNewToolCategory(TabName, "Landscaping", "coui://yy-water-tool/water_features_icon.svg") ?? uiObject.m_Group;
@@ -80,6 +81,8 @@ namespace Water_Features.Systems
         protected override void OnGameLoadingComplete(Colossal.Serialization.Entities.Purpose purpose, GameMode mode)
         {
             base.OnGameLoadingComplete(purpose, mode);
+
+            // For some reason these components are not assigned automatically from the ones in the prefab so I am manually assigning them to the prefab entities.
 
             if (m_PrefabSystem.TryGetPrefab(new PrefabID(nameof(UIAssetCategoryPrefab), TabName), out var waterToolTabPrefab) || waterToolTabPrefab is UIAssetCategoryPrefab)
             {
@@ -103,12 +106,13 @@ namespace Water_Features.Systems
                     Entity landscapeTabEntity = m_PrefabSystem.GetEntity(landscapeTabPrefab);
                     m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} currentMenu = Entity.Null so set to {landscapeTabEntity.Index}.{landscapeTabEntity.Version}");
                     currentMenu.m_Menu = landscapeTabEntity;
-                    objectData.m_Priority = 12;
+                    objectData.m_Priority = 21;
                     EntityManager.SetComponentData(waterToolTabPrefabEntity, currentMenu);
                     EntityManager.SetComponentData(waterToolTabPrefabEntity, objectData);
                     if (!EntityManager.TryGetBuffer(landscapeTabEntity, false, out DynamicBuffer<UIGroupElement> uiGroupBuffer))
                     {
-                        m_Log.Info("Couldn't find buffer");
+                        m_Log.Warn("Couldn't find UIGroupElement buffer in landscapeTabEntity.");
+                        return;
                     }
 
                     UIGroupElement groupElement = new UIGroupElement()
@@ -138,7 +142,8 @@ namespace Water_Features.Systems
                         Entity waterToolTabPrefabEntity = m_PrefabSystem.GetEntity(prefab1);
                         if (!EntityManager.TryGetBuffer(waterToolTabPrefabEntity, false, out DynamicBuffer<UIGroupElement> uiGroupBuffer))
                         {
-                            m_Log.Info("Couldn't find buffer");
+                            m_Log.Warn($"Couldn't find UIGroupElement buffer in waterToolTabPrefabEntity for {source.m_SourceType}");
+                            continue;
                         }
 
                         m_Log.Info($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} uIObjectData.m_Group = Entity.Null so set to {waterToolTabPrefabEntity.Index}.{waterToolTabPrefabEntity.Version}");
@@ -190,10 +195,11 @@ namespace Water_Features.Systems
         private struct WaterSourcePrefabData
         {
             public SourceType m_SourceType;
-            public Color m_Color;
             public string m_Icon;
             public string m_AmountLocalKey;
             public int m_Priority;
+            public float m_DefaultRadius;
+            public float m_DefaultAmount;
         }
     }
 }
