@@ -57,6 +57,7 @@ namespace Water_Features.Tools
         private List<BoundEventHandle> m_BoundEventHandles;
         private float m_Radius = 10f;
         private float m_Amount = 5f;
+        private float m_MinDepth = 10f;
         private Dictionary<string, Action> m_ChangeValueActions;
         private bool m_ButtonPressed = false;
 
@@ -137,11 +138,10 @@ namespace Water_Features.Tools
                 m_AmountItemScript = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "YYWT-Amount-Item.html"), "if (document.getElementById(\"YYWT-amount-item\") == null) { yyWaterTool.div.className = \"item_bZY\"; yyWaterTool.div.id = \"YYWT-amount-item\"; yyWaterTool.entities = document.getElementsByClassName(\"tool-options-panel_Se6\"); if (yyWaterTool.entities[0] != null) { yyWaterTool.entities[0].insertAdjacentElement('afterbegin', yyWaterTool.div); } }");
                 m_RadiusItemScript = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "YYWT-Radius-Item.html"), "if (document.getElementById(\"YYWT-radius-item\") == null) { yyWaterTool.div.className = \"item_bZY\"; yyWaterTool.div.id = \"YYWT-radius-item\"; yyWaterTool.amountItem = document.getElementById(\"YYWT-amount-item\"); if (yyWaterTool.amountItem != null) { yyWaterTool.amountItem.insertAdjacentElement('afterend', yyWaterTool.div); } }");
                 m_MinDepthItemScript = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "YYWT-Min-Depth-Item.html"), "if (document.getElementById(\"YYWT-min-depth-item\") == null) { yyWaterTool.div.className = \"item_bZY\"; yyWaterTool.div.id = \"YYWT-min-depth-item\"; yyWaterTool.amountItem = document.getElementById(\"YYWT-amount-item\"); if (yyWaterTool.amountItem != null) { yyWaterTool.amountItem.insertAdjacentElement('afterend', yyWaterTool.div); } }");
-
             }
             else
             {
-                m_Log.Info($"{nameof(WaterToolUISystem)}.{nameof(OnCreate)} m_UiView == null");
+                m_Log.Warn($"{nameof(WaterToolUISystem)}.{nameof(OnCreate)} m_UiView == null");
             }
 
             m_ChangeValueActions = new Dictionary<string, Action>()
@@ -150,6 +150,8 @@ namespace Water_Features.Tools
                 { "YYWT-amount-up-arrow", (Action)IncreaseAmount },
                 { "YYWT-radius-down-arrow", (Action)DecreaseRadius },
                 { "YYWT-radius-up-arrow", (Action)IncreaseRadius },
+                { "YYWT-min-depth-down-arrow", (Action)DecreaseMinDepth },
+                { "YYWT-min-depth-up-arrow", (Action)IncreaseMinDepth },
             };
 
             base.OnCreate();
@@ -180,9 +182,6 @@ namespace Water_Features.Tools
             {
                 UIFileUtils.ExecuteScript(m_UiView, "if (typeof yyWaterTool != 'object') var yyWaterTool = {};");
 
-                m_Log.Debug(m_AmountItemScript);
-                m_Log.Debug(m_RadiusItemScript);
-
                 UIFileUtils.ExecuteScript(m_UiView, m_AmountItemScript);
 
                 UIFileUtils.ExecuteScript(m_UiView, m_RadiusItemScript);
@@ -198,6 +197,16 @@ namespace Water_Features.Tools
                     UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amount = document.getElementById(\"YYWT-amount-label\"); if (yyWaterTool.amount) {{ yyWaterTool.amount.localeKey = \"{waterSourcePrefab.m_AmountLocaleKey}\"; yyWaterTool.amount.innerHTML = engine.translate(yyWaterTool.amount.localeKey); }}");
                     m_Radius = waterSourcePrefab.m_DefaultRadius;
                     m_Amount = waterSourcePrefab.m_DefaultAmount;
+
+                    if (waterSourcePrefab.m_SourceType == SourceType.RetentionBasin)
+                    {
+                        UIFileUtils.ExecuteScript(m_UiView, m_MinDepthItemScript);
+
+                        m_MinDepth = 10f;
+
+                        // This script setsup the up and down buttons for min depth and applies localization to the row.
+                        UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.applyLocalization(document.getElementById(\"YYWT-min-depth-item\")); yyWaterTool.setupButton(\"YYWT-min-depth-down-arrow\", \"min-depth-down-arrow\"); yyWaterTool.setupButton(\"YYWT-min-depth-up-arrow\", \"min-depth-up-arrow\");");
+                    }
                 }
 
                 // This script sets the radius field to the desired radius;
@@ -320,6 +329,52 @@ namespace Water_Features.Tools
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
         }
 
+        private void IncreaseMinDepth()
+        {
+            if (m_MinDepth >= 500 && m_MinDepth < 1000)
+            {
+                m_MinDepth += 100;
+            }
+            else if (m_MinDepth >= 100 && m_MinDepth < 500)
+            {
+                m_MinDepth += 50;
+            }
+            else if (m_MinDepth < 1000)
+            {
+                m_MinDepth += 10;
+            }
+
+            // This script sets the radius field to the desired radius;
+            UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.minDepthField = document.getElementById(\"YYWT-min-depth-field\"); if (yyWaterTool.minDepthField) yyWaterTool.minDepthField.innerHTML = \"{m_MinDepth} m\";");
+        }
+
+        private void DecreaseMinDepth()
+        {
+            if (m_MinDepth <= 100 && m_MinDepth > 10)
+            {
+                m_MinDepth -= 10;
+            }
+            else if (m_MinDepth <= 500 && m_MinDepth > 100)
+            {
+                m_MinDepth -= 50;
+            }
+            else if (m_MinDepth > 500)
+            {
+                m_MinDepth -= 100;
+            }
+
+            if (m_MinDepth > m_Amount)
+            {
+                m_Amount = m_MinDepth;
+
+                // This script sets the min depth field to the desired min depth;
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
+            }
+
+            // This script sets the radius field to the desired radius;
+            UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.minDepthField = document.getElementById(\"YYWT-min-depth-field\"); if (yyWaterTool.minDepthField) yyWaterTool.minDepthField.innerHTML = \"{m_MinDepth} m\";");
+        }
+
         private void IncreaseAmount()
         {
             if (m_Amount >= 500 && m_Amount < 1000)
@@ -333,6 +388,14 @@ namespace Water_Features.Tools
             else if (m_Amount < 1000)
             {
                 m_Amount += 10;
+            }
+
+            if (m_Amount < m_MinDepth)
+            {
+                m_MinDepth = m_Amount;
+
+                // This script sets the min depth field to the desired min depth;
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.minDepthField = document.getElementById(\"YYWT-min-depth-field\"); if (yyWaterTool.minDepthField) yyWaterTool.minDepthField.innerHTML = \"{m_MinDepth} m\";");
             }
 
             // This script sets the amount field to the desired amount;
@@ -433,6 +496,17 @@ namespace Water_Features.Tools
 
                 // This script sets the amount field to the desired amount;
                 UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
+
+                if (waterSourcePrefab.m_SourceType == SourceType.RetentionBasin)
+                {
+                    m_WaterToolPanelShown = false;
+                }
+                else
+                {
+                    // This script destroys the min depth item if it exists.
+                    UIFileUtils.ExecuteScript(m_UiView, DestroyElementByID("YYWT-min-depth-item"));
+                }
+
                 return;
             }
         }
