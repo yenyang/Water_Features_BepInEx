@@ -136,6 +136,7 @@ namespace Water_Features.Systems
                     if (waterHeight > currentAutofillingLake.m_MaximumWaterHeight)
                     {
                         currentWaterSourceData.m_ConstantDepth = (int)WaterToolUISystem.SourceType.Lake;
+                        currentWaterSourceData.m_Amount = currentAutofillingLake.m_MaximumWaterHeight;
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                         buffer.RemoveComponent<AutofillingLake>(currentEntity);
                     }

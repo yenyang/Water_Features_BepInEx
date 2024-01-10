@@ -49,7 +49,7 @@ namespace Water_Features.Tools
         private ToolSystem m_ToolSystem;
         private string m_InjectedJS = string.Empty;
         private string m_WaterToolPanelScript = string.Empty;
-        private CustomWaterToolSystem m_ExtendedWaterToolSystem;
+        private CustomWaterToolSystem m_CustomWaterToolSystem;
         private ILog m_Log;
         private bool m_WaterToolPanelShown;
         private List<BoundEventHandle> m_BoundEventHandles;
@@ -120,12 +120,12 @@ namespace Water_Features.Tools
         {
             m_Log = WaterFeaturesMod.Instance.Log;
             m_ToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ToolSystem>();
-            m_ExtendedWaterToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<CustomWaterToolSystem>();
+            m_CustomWaterToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<CustomWaterToolSystem>();
             m_UiView = GameManager.instance.userInterface.view.View;
             ToolSystem toolSystem = m_ToolSystem; // I don't know why vanilla game did this.
             m_ToolSystem.EventToolChanged = (Action<ToolBaseSystem>)Delegate.Combine(toolSystem.EventToolChanged, new Action<ToolBaseSystem>(OnToolChanged));
             ToolSystem toolSystem2 = m_ToolSystem; // I don't know why vanilla game did this.
-            m_ToolSystem.EventPrefabChanged = (Action<PrefabBase>)Delegate.Combine(toolSystem.EventPrefabChanged, new Action<PrefabBase>(OnPrefabChanged));
+            m_ToolSystem.EventPrefabChanged = (Action<PrefabBase>)Delegate.Combine(toolSystem2.EventPrefabChanged, new Action<PrefabBase>(OnPrefabChanged));
 
             m_BoundEventHandles = new ();
 
@@ -133,6 +133,8 @@ namespace Water_Features.Tools
             {
                 m_InjectedJS = UIFileUtils.ReadJS(Path.Combine(UIFileUtils.AssemblyPath, "ui.js"));
                 m_WaterToolPanelScript = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "YYWT-Water-Tool-Panel.html"), "if (document.getElementById(\"yy-water-tool-panel\") == null) { yyWaterTool.div.className = \"tool-options-panel_Se6\"; yyWaterTool.div.id = \"yy-water-tool-panel\"; yyWaterTool.ToolColumns = document.getElementsByClassName(\"tool-side-column_l9i\"); if (yyWaterTool.ToolColumns[0] != null) yyWaterTool.ToolColumns[0].appendChild(yyWaterTool.div);}");
+                m_AnarchyItemScript = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "YYA-anarchy-tool-row.html"), "if (document.getElementById(\"YYA-anarchy-item\") == null) { yyAnarchy.div.className = \"item_bZY\"; yyAnarchy.div.id = \"YYA-anarchy-item\"; yyAnarchy.entities = document.getElementsByClassName(\"tool-options-panel_Se6\"); if (yyAnarchy.entities[0] != null) { yyAnarchy.entities[0].insertAdjacentElement('afterbegin', yyAnarchy.div); yyAnarchy.setupAnarchyItem(); } }");
+
             }
             else
             {
@@ -158,7 +160,7 @@ namespace Water_Features.Tools
                 return;
             }
 
-            if (m_ToolSystem.activeTool != m_ExtendedWaterToolSystem)
+            if (m_ToolSystem.activeTool != m_CustomWaterToolSystem)
             {
                 if (m_WaterToolPanelShown)
                 {
@@ -179,6 +181,16 @@ namespace Water_Features.Tools
 
                 // This script defines the JS functions and setups up typical buttons.
                 UIFileUtils.ExecuteScript(m_UiView, m_InjectedJS);
+
+                if (m_CustomWaterToolSystem.GetPrefab() != null)
+                {
+                    WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
+
+                    // This script changes and translates the Amount label according to the active prefab.
+                    UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amount = document.getElementById(\"YYWT-amount-label\"); if (yyWaterTool.amount) {{ yyWaterTool.amount.localeKey = \"{waterSourcePrefab.m_AmountLocaleKey}\"; yyWaterTool.amount.innerHTML = engine.translate(yyWaterTool.amount.localeKey); }}");
+                    m_Radius = waterSourcePrefab.m_DefaultRadius;
+                    m_Amount = waterSourcePrefab.m_DefaultAmount;
+                }
 
                 // This script sets the radius field to the desired radius;
                 UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
@@ -371,7 +383,7 @@ namespace Water_Features.Tools
 
         private void OnToolChanged(ToolBaseSystem tool)
         {
-            if (tool != m_ExtendedWaterToolSystem)
+            if (tool != m_CustomWaterToolSystem)
             {
                 if (m_WaterToolPanelShown)
                 {
@@ -387,10 +399,26 @@ namespace Water_Features.Tools
 
         private void OnPrefabChanged(PrefabBase prefabBase)
         {
+            m_Log.Debug($"{nameof(WaterToolUISystem)}.{nameof(OnPrefabChanged)}");
             if (prefabBase is WaterSourcePrefab && m_UiView != null)
             {
+                m_Log.Debug($"{nameof(WaterToolUISystem)}.{nameof(OnPrefabChanged)} prefab is water source.");
                 WaterSourcePrefab waterSourcePrefab = prefabBase as WaterSourcePrefab;
-                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amount = document.getElementById(\"YYWT-amount-label\"); yyWaterTool.amount.localeKey = \"{waterSourcePrefab.m_AmountLocaleKey}\"; if (typeof yyWaterTool.applyLocalization == 'function') yyWaterTool.applyLocalization(\"yyWaterTool.amount\");");
+
+                // This script sets up the yyWaterTool object if it is not defined.
+                UIFileUtils.ExecuteScript(m_UiView, "if (typeof yyWaterTool != 'object') var yyWaterTool = {};");
+
+                // This script changes and translates the Amount label according to the active prefab.
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amount = document.getElementById(\"YYWT-amount-label\"); if (yyWaterTool.amount) {{ yyWaterTool.amount.localeKey = \"{waterSourcePrefab.m_AmountLocaleKey}\"; yyWaterTool.amount.innerHTML = engine.translate(yyWaterTool.amount.localeKey); }}");
+
+                m_Radius = waterSourcePrefab.m_DefaultRadius;
+                m_Amount = waterSourcePrefab.m_DefaultAmount;
+
+                // This script sets the radius field to the desired radius;
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
+
+                // This script sets the amount field to the desired amount;
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
                 return;
             }
         }

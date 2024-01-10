@@ -5,6 +5,7 @@
 namespace Water_Features.Tools
 {
     using System.Runtime.CompilerServices;
+    using cohtml.Net;
     using Colossal.Logging;
     using Game.Common;
     using Game.Input;
@@ -99,6 +100,7 @@ namespace Water_Features.Tools
             {
                 m_ActivePrefab = prefab as WaterSourcePrefab;
                 m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(TrySetPrefab)} prefab is {prefab.name}.");
+                m_ToolSystem.EventPrefabChanged?.Invoke(prefab);
                 return true;
             }
 
@@ -341,7 +343,7 @@ namespace Water_Features.Tools
         {
             float pollution = 0; // Alter later if UI for adding pollution. Also check to make sure it's smaller than amount later.
             float amount = m_WaterToolUISystem.Amount;
-            if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek)
+            if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.AutofillingLake)
             {
                 amount += position.y;
             }
@@ -415,7 +417,7 @@ namespace Water_Features.Tools
                 {
                     AddAutoFillingLakeJob addAutoFillingLakeJob = new ()
                     {
-                        autoFillingLakeData = new AutofillingLake() { m_MaximumWaterHeight = amount },
+                        autoFillingLakeData = new AutofillingLake() { m_MaximumWaterHeight = amount + position.y },
                         entityArchetype = m_AutoFillingLakeArchetype,
                         buffer = m_ToolOutputBarrier.CreateCommandBuffer(),
                         transform = transformComponent,

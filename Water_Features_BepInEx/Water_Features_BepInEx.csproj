@@ -217,6 +217,15 @@
     <Content Include="UI\water_features_icon.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="UI\YYWT-Min-Depth-Item.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\YYWT-Radius-Item.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\YYWT-Amount-Item.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="UI\YYWT-Water-Tool-Panel.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

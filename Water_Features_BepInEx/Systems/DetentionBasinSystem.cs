@@ -149,7 +149,7 @@ namespace Water_Features.Systems
                 NativeArray<Game.Objects.Transform> transformNativeArray = chunk.GetNativeArray(ref m_TransformType);
                 NativeArray<DetentionBasin> detentionBasinNativeArray = chunk.GetNativeArray(ref m_DetentionBasinType);
                 NativeArray<Entity> entityNativeArray = chunk.GetNativeArray(m_EntityType);
-                float maxHeightToRunoffCoefficient = 0.1f;
+                float maxDepthToRunoffCoefficient = 0.1f;
                 for (int i = 0; i < chunk.Count; i++)
                 {
                     Game.Simulation.WaterSourceData currentWaterSourceData = waterSourceDataNativeArray[i];
@@ -159,6 +159,7 @@ namespace Water_Features.Systems
                     float3 terrainPosition = new (currentTransform.m_Position.x, TerrainUtils.SampleHeight(ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
                     float3 waterPosition = new (currentTransform.m_Position.x, WaterUtils.SampleHeight(ref m_WaterSurfaceData, ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
                     float waterHeight = waterPosition.y;
+                    float maximumDepth = currentDetentionBasin.m_MaximumWaterHeight - terrainPosition.y;
                     float temperatureDifferentialAtWaterSource = m_TemperatureDifferential - (terrainPosition.y / 500f);
                     if (currentWaterSourceData.m_ConstantDepth != 0) // Creek
                     {
@@ -167,7 +168,7 @@ namespace Water_Features.Systems
 
                     if (m_Precipiation > 0f && m_Snowing)
                     {
-                        currentDetentionBasin.m_SnowAccumulation += m_Precipiation * currentDetentionBasin.m_MaximumWaterHeight * maxHeightToRunoffCoefficient;
+                        currentDetentionBasin.m_SnowAccumulation += m_Precipiation * maximumDepth * maxDepthToRunoffCoefficient;
                         buffer.SetComponent(currentEntity, currentDetentionBasin);
                     }
 
@@ -180,11 +181,11 @@ namespace Water_Features.Systems
                     {
                         if (Mathf.Approximately(currentDetentionBasin.m_SnowAccumulation, 0f) && temperatureDifferentialAtWaterSource > 0f)
                         {
-                            currentWaterSourceData.m_Amount = m_Precipiation * currentDetentionBasin.m_MaximumWaterHeight * maxHeightToRunoffCoefficient;
+                            currentWaterSourceData.m_Amount = m_Precipiation * maximumDepth * maxDepthToRunoffCoefficient;
                         }
                         else
                         {
-                            currentWaterSourceData.m_Amount = (m_Precipiation * currentDetentionBasin.m_MaximumWaterHeight * maxHeightToRunoffCoefficient) + TryMeltSnow(ref currentDetentionBasin, temperatureDifferentialAtWaterSource);
+                            currentWaterSourceData.m_Amount = (m_Precipiation * maximumDepth * maxDepthToRunoffCoefficient) + TryMeltSnow(ref currentDetentionBasin, temperatureDifferentialAtWaterSource);
                             buffer.SetComponent(currentEntity, currentDetentionBasin);
                         }
 

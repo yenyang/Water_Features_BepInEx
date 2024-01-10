@@ -154,7 +154,7 @@ namespace Water_Features.Systems
                 NativeArray<Game.Objects.Transform> transformNativeArray = chunk.GetNativeArray(ref m_TransformType);
                 NativeArray<RetentionBasin> retentionBasinNativeArray = chunk.GetNativeArray(ref m_RetentionBasinType);
                 NativeArray<Entity> entityNativeArray = chunk.GetNativeArray(m_EntityType);
-                float maxHeightToRunoffCoefficient = 0.1f;
+                float maxDepthToRunoffCoefficient = 0.1f;
                 for (int i = 0; i < chunk.Count; i++)
                 {
                     Game.Simulation.WaterSourceData currentWaterSourceData = waterSourceDataNativeArray[i];
@@ -164,16 +164,19 @@ namespace Water_Features.Systems
                     float3 terrainPosition = new (currentTransform.m_Position.x, TerrainUtils.SampleHeight(ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
                     float3 waterPosition = new (currentTransform.m_Position.x, WaterUtils.SampleHeight(ref m_WaterSurfaceData, ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
                     float waterHeight = waterPosition.y;
+                    float maxDepth = currentRetentionBasin.m_MaximumWaterHeight - terrainPosition.y;
                     float temperatureDifferentialAtWaterSource = m_TemperatureDifferential - (terrainPosition.y / 500f);
                     if (currentWaterSourceData.m_ConstantDepth != 0) // Creek
                     {
                         currentWaterSourceData.m_ConstantDepth = 0; // Creek
                     }
+
                     if (m_Precipiation > 0f && m_Snowing)
                     {
-                        currentRetentionBasin.m_SnowAccumulation += m_Precipiation * currentRetentionBasin.m_MaximumWaterHeight * maxHeightToRunoffCoefficient;
+                        currentRetentionBasin.m_SnowAccumulation += m_Precipiation * maxDepth * maxDepthToRunoffCoefficient;
                         buffer.SetComponent(currentEntity, currentRetentionBasin);
                     }
+
                     if (waterHeight > currentRetentionBasin.m_MaximumWaterHeight && currentWaterSourceData.m_Amount > 0f)
                     {
                         currentWaterSourceData.m_Amount = 0f;
@@ -181,18 +184,18 @@ namespace Water_Features.Systems
                     }
                     else if (waterHeight < 0.95 * currentRetentionBasin.m_MinimumWaterHeight && currentRetentionBasin.m_MinimumWaterHeight < currentRetentionBasin.m_MaximumWaterHeight)
                     {
-                        currentWaterSourceData.m_Amount = currentRetentionBasin.m_MinimumWaterHeight * maxHeightToRunoffCoefficient;
+                        currentWaterSourceData.m_Amount = (currentRetentionBasin.m_MinimumWaterHeight - terrainPosition.y) * maxDepthToRunoffCoefficient;
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                     }
                     else if (m_Precipiation > 0f && !m_Snowing)
                     {
                         if (Mathf.Approximately(currentRetentionBasin.m_SnowAccumulation, 0f) && temperatureDifferentialAtWaterSource > 0f)
                         {
-                            currentWaterSourceData.m_Amount = m_Precipiation * currentRetentionBasin.m_MaximumWaterHeight * maxHeightToRunoffCoefficient;
+                            currentWaterSourceData.m_Amount = m_Precipiation * maxDepth * maxDepthToRunoffCoefficient;
                         }
                         else
                         {
-                            currentWaterSourceData.m_Amount = (m_Precipiation * currentRetentionBasin.m_MaximumWaterHeight * maxHeightToRunoffCoefficient) + TryMeltSnow(ref currentRetentionBasin, temperatureDifferentialAtWaterSource);
+                            currentWaterSourceData.m_Amount = (m_Precipiation * maxDepth * maxDepthToRunoffCoefficient) + TryMeltSnow(ref currentRetentionBasin, temperatureDifferentialAtWaterSource);
                             buffer.SetComponent(currentEntity, currentRetentionBasin);
                         }
                         if (waterHeight > 0.95f * currentRetentionBasin.m_MaximumWaterHeight)
