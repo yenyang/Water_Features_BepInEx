@@ -180,6 +180,9 @@ namespace Water_Features.Tools
             {
                 UIFileUtils.ExecuteScript(m_UiView, "if (typeof yyWaterTool != 'object') var yyWaterTool = {};");
 
+                m_Log.Debug(m_AmountItemScript);
+                m_Log.Debug(m_RadiusItemScript);
+
                 UIFileUtils.ExecuteScript(m_UiView, m_AmountItemScript);
 
                 UIFileUtils.ExecuteScript(m_UiView, m_RadiusItemScript);
