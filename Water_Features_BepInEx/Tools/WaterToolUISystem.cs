@@ -48,7 +48,9 @@ namespace Water_Features.Tools
         private View m_UiView;
         private ToolSystem m_ToolSystem;
         private string m_InjectedJS = string.Empty;
-        private string m_WaterToolPanelScript = string.Empty;
+        private string m_AmountItemScript = string.Empty;
+        private string m_RadiusItemScript = string.Empty;
+        private string m_MinDepthItemScript = string.Empty;
         private CustomWaterToolSystem m_CustomWaterToolSystem;
         private ILog m_Log;
         private bool m_WaterToolPanelShown;
@@ -132,8 +134,9 @@ namespace Water_Features.Tools
             if (m_UiView != null)
             {
                 m_InjectedJS = UIFileUtils.ReadJS(Path.Combine(UIFileUtils.AssemblyPath, "ui.js"));
-                m_WaterToolPanelScript = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "YYWT-Water-Tool-Panel.html"), "if (document.getElementById(\"yy-water-tool-panel\") == null) { yyWaterTool.div.className = \"tool-options-panel_Se6\"; yyWaterTool.div.id = \"yy-water-tool-panel\"; yyWaterTool.ToolColumns = document.getElementsByClassName(\"tool-side-column_l9i\"); if (yyWaterTool.ToolColumns[0] != null) yyWaterTool.ToolColumns[0].appendChild(yyWaterTool.div);}");
-                m_AnarchyItemScript = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "YYA-anarchy-tool-row.html"), "if (document.getElementById(\"YYA-anarchy-item\") == null) { yyAnarchy.div.className = \"item_bZY\"; yyAnarchy.div.id = \"YYA-anarchy-item\"; yyAnarchy.entities = document.getElementsByClassName(\"tool-options-panel_Se6\"); if (yyAnarchy.entities[0] != null) { yyAnarchy.entities[0].insertAdjacentElement('afterbegin', yyAnarchy.div); yyAnarchy.setupAnarchyItem(); } }");
+                m_AmountItemScript = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "YYWT-Amount-Item.html"), "if (document.getElementById(\"YYWT-amount-item\") == null) { yyWaterTool.div.className = \"item_bZY\"; yyWaterTool.div.id = \"YYWT-amount-item\"; yyWaterTool.entities = document.getElementsByClassName(\"tool-options-panel_Se6\"); if (yyWaterTool.entities[0] != null) { yyWaterTool.entities[0].insertAdjacentElement('afterbegin', yyWaterTool.div);");
+                m_RadiusItemScript = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "YYWT-Radius-Item.html"), "if (document.getElementById(\"YYWT-radius-item\") == null) { yyWaterTool.div.className = \"item_bZY\"; yyWaterTool.div.id = \"YYWT-radius-item\"; yyWaterTool.amountItem = document.getElementById(\"YYWT-amount-item\"); if (yyWaterTool.amountItem != null) { yyWaterTool.amountItem.insertAdjacentElement('afterend', yyWaterTool.div); } }");
+                m_MinDepthItemScript = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "YYWT-Min-Depth-Item.html"), "if (document.getElementById(\"YYWT-min-depth-item\") == null) { yyWaterTool.div.className = \"item_bZY\"; yyWaterTool.div.id = \"YYWT-min-depth-item\"; yyWaterTool.amountItem = document.getElementById(\"YYWT-amount-item\"); if (yyWaterTool.amountItem != null) { yyWaterTool.amountItem.insertAdjacentElement('afterend', yyWaterTool.div); } }");
 
             }
             else
@@ -177,7 +180,9 @@ namespace Water_Features.Tools
             {
                 UIFileUtils.ExecuteScript(m_UiView, "if (typeof yyWaterTool != 'object') var yyWaterTool = {};");
 
-                UIFileUtils.ExecuteScript(m_UiView, m_WaterToolPanelScript);
+                UIFileUtils.ExecuteScript(m_UiView, m_AmountItemScript);
+
+                UIFileUtils.ExecuteScript(m_UiView, m_RadiusItemScript);
 
                 // This script defines the JS functions and setups up typical buttons.
                 UIFileUtils.ExecuteScript(m_UiView, m_InjectedJS);
@@ -199,7 +204,7 @@ namespace Water_Features.Tools
                 UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
 
                 m_BoundEventHandles.Add(m_UiView.RegisterForEvent("YYWT-log", (Action<string>)LogFromJS));
-                m_BoundEventHandles.Add(m_UiView.RegisterForEvent("CheckForElement-yy-water-tool-panel", (Action<bool>)ElementCheck));
+                m_BoundEventHandles.Add(m_UiView.RegisterForEvent("CheckForElement-YYWT-amount-item", (Action<bool>)ElementCheck));
 
                 foreach (KeyValuePair<string, Action> kvp in m_ChangeValueActions)
                 {
@@ -211,7 +216,7 @@ namespace Water_Features.Tools
             else
             {
                 // This script checks if water tool panel exists. If it doesn't it triggers water tool panel item being recreated.
-                UIFileUtils.ExecuteScript(m_UiView, $"if (document.getElementById(\"yy-water-tool-panel\") == null) engine.trigger('CheckForElement-yy-water-tool-panel', false);");
+                UIFileUtils.ExecuteScript(m_UiView, $"if (document.getElementById(\"YYWT-amount-item\") == null) engine.trigger('CheckForElement-YYWT-amount-item', false);");
             }
 
             base.OnUpdate();
@@ -351,7 +356,7 @@ namespace Water_Features.Tools
         }
 
         /// <summary>
-        /// C# event handler for event callback from UI JavaScript. If element YYA-anarchy-item is found then set value to true.
+        /// C# event handler for event callback from UI JavaScript. If element YYWT-amount-item is found then set value to true.
         /// </summary>
         /// <param name="flag">A bool for whether to element was found.</param>
         private void ElementCheck(bool flag) => m_WaterToolPanelShown = flag;
@@ -366,8 +371,14 @@ namespace Water_Features.Tools
                 return;
             }
 
-            // This script destroys the anarchy item if it exists.
-            UIFileUtils.ExecuteScript(m_UiView, DestroyElementByID("yy-water-tool-panel"));
+            // This script destroys the amount item if it exists.
+            UIFileUtils.ExecuteScript(m_UiView, DestroyElementByID("YYWT-amount-item"));
+
+            // This script destroys the radius item if it exists.
+            UIFileUtils.ExecuteScript(m_UiView, DestroyElementByID("YYWT-radius-item"));
+
+            // This script destroys the min depth item if it exists.
+            UIFileUtils.ExecuteScript(m_UiView, DestroyElementByID("YYWT-min-depth-item"));
 
             // This unregisters the events.
             foreach (BoundEventHandle eventHandle in m_BoundEventHandles)

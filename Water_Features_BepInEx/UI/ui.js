@@ -138,7 +138,8 @@ if (typeof yyWaterTool.hideTooltip !== 'function') {
     }
 }
 
-yyWaterTool.applyLocalization(document.getElementById("yy-water-tool-panel"));
+yyWaterTool.applyLocalization(document.getElementById("YYWT-amount-item"));
+yyWaterTool.applyLocalization(document.getElementById("YYWT-radius-item"));
 yyWaterTool.setupButton("YYWT-amount-down-arrow", "amount-down-arrow");
 yyWaterTool.setupButton("YYWT-amount-up-arrow", "amount-up-arrow");
 
