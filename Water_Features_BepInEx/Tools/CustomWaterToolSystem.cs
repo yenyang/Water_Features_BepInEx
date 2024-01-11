@@ -98,8 +98,16 @@ namespace Water_Features.Tools
             m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(TrySetPrefab)}");
             if (prefab is WaterSourcePrefab)
             {
-                m_ActivePrefab = prefab as WaterSourcePrefab;
                 m_Log.Debug($"{nameof(CustomWaterToolSystem)}.{nameof(TrySetPrefab)} prefab is {prefab.name}.");
+                if (m_ActivePrefab != null)
+                {
+                    if ((prefab as WaterSourcePrefab) == m_ActivePrefab)
+                    {
+                        return true;
+                    }
+                }
+
+                m_ActivePrefab = prefab as WaterSourcePrefab;
                 m_ToolSystem.EventPrefabChanged?.Invoke(prefab);
                 return true;
             }

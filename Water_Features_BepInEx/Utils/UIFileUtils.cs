@@ -110,6 +110,7 @@ namespace Water_Features.Utils
             {
                 WaterFeaturesMod.Instance.Log.Error(e, $" exception reading HTML file {fileName}");
             }
+
             return null;
         }
 

@@ -22,6 +22,7 @@ if (typeof yyWaterTool.setupButton !== 'function') {
             engine.trigger('Change-Value', this.id);
         }
         yyWaterTool.setTooltip(buttonId, toolTipKey);
+
     }
 }
 
@@ -145,3 +146,6 @@ yyWaterTool.setupButton("YYWT-amount-up-arrow", "amount-up-arrow");
 
 yyWaterTool.setupButton("YYWT-radius-down-arrow", "radius-down-arrow");
 yyWaterTool.setupButton("YYWT-radius-up-arrow", "radius-up-arrow");
+
+yyWaterTool.setupButton("YYWT-amount-rate-of-change", "amount-rate-of-change");
+yyWaterTool.setupButton("YYWT-radius-rate-of-change", "radius-rate-of-change");

@@ -13,7 +13,9 @@ namespace Water_Features.Tools
     using Game.SceneFlow;
     using Game.Tools;
     using Game.UI;
+    using Game.UI.InGame;
     using Unity.Entities;
+    using UnityEngine;
     using Water_Features;
     using Water_Features.Prefabs;
     using Water_Features.Utils;
@@ -60,6 +62,10 @@ namespace Water_Features.Tools
         private float m_MinDepth = 10f;
         private Dictionary<string, Action> m_ChangeValueActions;
         private bool m_ButtonPressed = false;
+        private float m_AmountRateOfChange = 1f;
+        private float m_RadiusRateOfChange = 1f;
+        private float m_MinDepthRateOfChange = 1f;
+        private bool m_ResetValues = true;
 
         /// <summary>
         /// Types of water sources.
@@ -152,6 +158,9 @@ namespace Water_Features.Tools
                 { "YYWT-radius-up-arrow", (Action)IncreaseRadius },
                 { "YYWT-min-depth-down-arrow", (Action)DecreaseMinDepth },
                 { "YYWT-min-depth-up-arrow", (Action)IncreaseMinDepth },
+                { "YYWT-amount-rate-of-change", (Action)AmountRateOfChangePressed },
+                { "YYWT-radius-rate-of-change", (Action)RadiusRateOfChangePressed },
+                { "YYWT-min-depth-rate-of-change", (Action)MinDepthRateOfChangePressed },
             };
 
             base.OnCreate();
@@ -195,18 +204,29 @@ namespace Water_Features.Tools
 
                     // This script changes and translates the Amount label according to the active prefab.
                     UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amount = document.getElementById(\"YYWT-amount-label\"); if (yyWaterTool.amount) {{ yyWaterTool.amount.localeKey = \"{waterSourcePrefab.m_AmountLocaleKey}\"; yyWaterTool.amount.innerHTML = engine.translate(yyWaterTool.amount.localeKey); }}");
-                    m_Radius = waterSourcePrefab.m_DefaultRadius;
-                    m_Amount = waterSourcePrefab.m_DefaultAmount;
+
+                    if (m_ResetValues)
+                    {
+                        m_Radius = waterSourcePrefab.m_DefaultRadius;
+                        m_Amount = waterSourcePrefab.m_DefaultAmount;
+                    }
 
                     if (waterSourcePrefab.m_SourceType == SourceType.RetentionBasin)
                     {
                         UIFileUtils.ExecuteScript(m_UiView, m_MinDepthItemScript);
 
-                        m_MinDepth = 10f;
+                        if (m_ResetValues)
+                        {
+                            m_MinDepth = 10f;
+                        }
 
                         // This script setsup the up and down buttons for min depth and applies localization to the row.
-                        UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.applyLocalization(document.getElementById(\"YYWT-min-depth-item\")); yyWaterTool.setupButton(\"YYWT-min-depth-down-arrow\", \"min-depth-down-arrow\"); yyWaterTool.setupButton(\"YYWT-min-depth-up-arrow\", \"min-depth-up-arrow\");");
+                        UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.applyLocalization(document.getElementById(\"YYWT-min-depth-item\")); yyWaterTool.setupButton(\"YYWT-min-depth-down-arrow\", \"min-depth-down-arrow\"); yyWaterTool.setupButton(\"YYWT-min-depth-up-arrow\", \"min-depth-up-arrow\");  yyWaterTool.setupButton(\"YYWT-min-depth-rate-of-change\", \"min-depth-rate-of-change\");");
+
+                        SetRateIcon(m_MinDepthRateOfChange, "min-depth");
                     }
+
+                    m_ResetValues = false;
                 }
 
                 // This script sets the radius field to the desired radius;
@@ -214,6 +234,9 @@ namespace Water_Features.Tools
 
                 // This script sets the amount field to the desired amount;
                 UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
+
+                SetRateIcon(m_RadiusRateOfChange, "radius");
+                SetRateIcon(m_AmountRateOfChange, "amount");
 
                 m_BoundEventHandles.Add(m_UiView.RegisterForEvent("YYWT-log", (Action<string>)LogFromJS));
                 m_BoundEventHandles.Add(m_UiView.RegisterForEvent("CheckForElement-YYWT-amount-item", (Action<bool>)ElementCheck));
@@ -293,18 +316,28 @@ namespace Water_Features.Tools
 
         private void IncreaseRadius()
         {
-            if (m_Radius >= 500 && m_Radius < 1000)
+            if (m_Radius >= 1000 && m_Radius < 10000)
             {
-                m_Radius += 100;
+                m_Radius += 500 * m_RadiusRateOfChange;
+            }
+            else if (m_Radius >= 500 && m_Radius < 1000)
+            {
+                m_Radius += 100 * m_RadiusRateOfChange;
             }
             else if (m_Radius >= 100 && m_Radius < 500)
             {
-                m_Radius += 50;
+                m_Radius += 50 * m_RadiusRateOfChange;
             }
-            else if (m_Radius < 1000)
+            else if (m_Radius >= 10 && m_Radius < 100)
             {
-                m_Radius += 10;
+                m_Radius += 10 * m_RadiusRateOfChange;
             }
+            else if (m_Radius < 10000)
+            {
+                m_Radius += 1 * m_RadiusRateOfChange;
+            }
+
+            m_Radius = Mathf.Clamp(m_Radius, 5f, 10000f);
 
             // This script sets the radius field to the desired radius;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
@@ -312,18 +345,28 @@ namespace Water_Features.Tools
 
         private void DecreaseRadius()
         {
-            if (m_Radius <= 100 && m_Radius > 10)
+            if (m_Radius <= 10 && m_Radius > 5)
             {
-                m_Radius -= 10;
+                m_Radius -= 1 * m_RadiusRateOfChange;
+            }
+            else if (m_Radius <= 100 && m_Radius > 10)
+            {
+                m_Radius -= 10 * m_RadiusRateOfChange;
             }
             else if (m_Radius <= 500 && m_Radius > 100)
             {
-                m_Radius -= 50;
+                m_Radius -= 50 * m_RadiusRateOfChange;
             }
-            else if (m_Radius > 500)
+            else if (m_Radius <= 1000 && m_Radius > 500)
             {
-                m_Radius -= 100;
+                m_Radius -= 100 * m_RadiusRateOfChange;
             }
+            else if (m_Radius > 1000)
+            {
+                m_Radius -= 500 * m_RadiusRateOfChange;
+            }
+
+            m_Radius = Mathf.Clamp(m_Radius, 5f, 10000f);
 
             // This script sets the radius field to the desired radius;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
@@ -333,35 +376,22 @@ namespace Water_Features.Tools
         {
             if (m_MinDepth >= 500 && m_MinDepth < 1000)
             {
-                m_MinDepth += 100;
+                m_MinDepth += 100 * m_MinDepthRateOfChange;
             }
             else if (m_MinDepth >= 100 && m_MinDepth < 500)
             {
-                m_MinDepth += 50;
+                m_MinDepth += 50 * m_MinDepthRateOfChange;
+            }
+            else if (m_MinDepth < 100 && m_MinDepth >= 10)
+            {
+                m_MinDepth += 10 * m_MinDepthRateOfChange;
             }
             else if (m_MinDepth < 1000)
             {
-                m_MinDepth += 10;
+                m_MinDepth += 1 * m_MinDepthRateOfChange;
             }
 
-            // This script sets the radius field to the desired radius;
-            UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.minDepthField = document.getElementById(\"YYWT-min-depth-field\"); if (yyWaterTool.minDepthField) yyWaterTool.minDepthField.innerHTML = \"{m_MinDepth} m\";");
-        }
-
-        private void DecreaseMinDepth()
-        {
-            if (m_MinDepth <= 100 && m_MinDepth > 10)
-            {
-                m_MinDepth -= 10;
-            }
-            else if (m_MinDepth <= 500 && m_MinDepth > 100)
-            {
-                m_MinDepth -= 50;
-            }
-            else if (m_MinDepth > 500)
-            {
-                m_MinDepth -= 100;
-            }
+            m_MinDepth = Mathf.Clamp(m_MinDepth, 0.125f, 1000f);
 
             if (m_MinDepth > m_Amount)
             {
@@ -371,6 +401,33 @@ namespace Water_Features.Tools
                 UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
             }
 
+
+
+            // This script sets the radius field to the desired radius;
+            UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.minDepthField = document.getElementById(\"YYWT-min-depth-field\"); if (yyWaterTool.minDepthField) yyWaterTool.minDepthField.innerHTML = \"{m_MinDepth} m\";");
+        }
+
+        private void DecreaseMinDepth()
+        {
+            if (m_MinDepth <= 10 && m_MinDepth > 0.125f)
+            {
+                m_MinDepth -= 1 * m_MinDepthRateOfChange;
+            }
+            else if (m_MinDepth <= 100 && m_MinDepth > 10)
+            {
+                m_MinDepth -= 10 * m_MinDepthRateOfChange;
+            }
+            else if (m_MinDepth <= 500 && m_MinDepth > 100)
+            {
+                m_MinDepth -= 50 * m_MinDepthRateOfChange;
+            }
+            else if (m_MinDepth > 500)
+            {
+                m_MinDepth -= 100 * m_MinDepthRateOfChange;
+            }
+
+            m_MinDepth = Mathf.Clamp(m_MinDepth, 0.125f, 1000f);
+
             // This script sets the radius field to the desired radius;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.minDepthField = document.getElementById(\"YYWT-min-depth-field\"); if (yyWaterTool.minDepthField) yyWaterTool.minDepthField.innerHTML = \"{m_MinDepth} m\";");
         }
@@ -379,16 +436,47 @@ namespace Water_Features.Tools
         {
             if (m_Amount >= 500 && m_Amount < 1000)
             {
-                m_Amount += 100;
+                m_Amount += 100 * m_AmountRateOfChange;
             }
             else if (m_Amount >= 100 && m_Amount < 500)
             {
-                m_Amount += 50;
+                m_Amount += 50 * m_AmountRateOfChange;
+            }
+            else if (m_Amount < 100 && m_Amount >= 10)
+            {
+                m_Amount += 10 * m_AmountRateOfChange;
             }
             else if (m_Amount < 1000)
             {
-                m_Amount += 10;
+                m_Amount += 1 * m_AmountRateOfChange;
             }
+
+            m_Amount = Mathf.Clamp(m_Amount, 0.125f, 1000f);
+
+            // This script sets the amount field to the desired amount;
+            UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
+        }
+
+        private void DecreaseAmount()
+        {
+            if (m_Amount <= 10 && m_Amount > 0.125f)
+            {
+                m_Amount -= 1 * m_AmountRateOfChange;
+            }
+            else if (m_Amount <= 100 && m_Amount > 10)
+            {
+                m_Amount -= 10 * m_AmountRateOfChange;
+            }
+            else if (m_Amount <= 500 && m_Amount > 100)
+            {
+                m_Amount -= 50 * m_AmountRateOfChange;
+            }
+            else if (m_Amount > 500)
+            {
+                m_Amount -= 100 * m_AmountRateOfChange;
+            }
+
+            m_Amount = Mathf.Clamp(m_Amount, 0.125f, 1000f);
 
             if (m_Amount < m_MinDepth)
             {
@@ -402,27 +490,82 @@ namespace Water_Features.Tools
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
         }
 
-        private void DecreaseAmount()
+        private void RadiusRateOfChangePressed()
         {
-            if (m_Amount <= 100 && m_Amount > 10)
+            m_RadiusRateOfChange /= 2f;
+            if (m_RadiusRateOfChange < 0.125f)
             {
-                m_Amount -= 10;
-            }
-            else if (m_Amount <= 500 && m_Amount > 100)
-            {
-                m_Amount -= 50;
-            }
-            else if (m_Amount > 500)
-            {
-                m_Amount -= 100;
+                m_RadiusRateOfChange = 1.0f;
             }
 
-            // This script sets the amount field to the desired amount;
-            UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
+            SetRateIcon(m_RadiusRateOfChange, "radius");
         }
 
+        private void AmountRateOfChangePressed()
+        {
+            m_AmountRateOfChange /= 2f;
+            if (m_AmountRateOfChange < 0.125f)
+            {
+                m_AmountRateOfChange = 1.0f;
+            }
+
+            SetRateIcon(m_AmountRateOfChange, "amount");
+        }
+
+        private void MinDepthRateOfChangePressed()
+        {
+            m_MinDepthRateOfChange /= 2f;
+            if (m_MinDepthRateOfChange < 0.125f)
+            {
+                m_MinDepthRateOfChange = 1.0f;
+            }
+
+            SetRateIcon(m_MinDepthRateOfChange, "min-depth");
+        }
+
+        private void SetRateIcon(float field, string id)
+        {
+            if (field == 1f)
+            {
+                // This script changes the fill color of one of the rate of change indicators.
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.rateOfChange = document.getElementById(\"YYWT-{id}-roc-1\"); if (yyWaterTool.rateOfChange) yyWaterTool.rateOfChange.setAttribute(\"fill\",\"#1e83aa\");");
+
+                // This script changes the fill color of one of the rate of change indicators.
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.rateOfChange = document.getElementById(\"YYWT-{id}-roc-0pt5\"); if (yyWaterTool.rateOfChange) yyWaterTool.rateOfChange.setAttribute(\"fill\",\"#1e83aa\");");
+
+                // This script changes the fill color of one of the rate of change indicators.
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.rateOfChange = document.getElementById(\"YYWT-{id}-roc-0pt25\"); if (yyWaterTool.rateOfChange) yyWaterTool.rateOfChange.setAttribute(\"fill\",\"#1e83aa\");");
+            }
+            else if (field == 0.5f)
+            {
+                // This script changes the fill color of one of the rate of change indicators.
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.rateOfChange = document.getElementById(\"YYWT-{id}-roc-1\"); if (yyWaterTool.rateOfChange) yyWaterTool.rateOfChange.setAttribute(\"fill\",\"#424242\");");
+            }
+            else if (field == 0.25f)
+            {
+                // This script changes the fill color of one of the rate of change indicators.
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.rateOfChange = document.getElementById(\"YYWT-{id}-roc-1\"); if (yyWaterTool.rateOfChange) yyWaterTool.rateOfChange.setAttribute(\"fill\",\"#424242\");");
+
+                // This script changes the fill color of one of the rate of change indicators.
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.rateOfChange = document.getElementById(\"YYWT-{id}-roc-0pt5\"); if (yyWaterTool.rateOfChange) yyWaterTool.rateOfChange.setAttribute(\"fill\",\"#424242\");");
+            }
+            else
+            {
+                // This script changes the fill color of one of the rate of change indicators.
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.rateOfChange = document.getElementById(\"YYWT-{id}-roc-1\"); if (yyWaterTool.rateOfChange) yyWaterTool.rateOfChange.setAttribute(\"fill\",\"#424242\");");
+
+                // This script changes the fill color of one of the rate of change indicators.
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.rateOfChange = document.getElementById(\"YYWT-{id}-roc-0pt5\"); if (yyWaterTool.rateOfChange) yyWaterTool.rateOfChange.setAttribute(\"fill\",\"#424242\");");
+
+                // This script changes the fill color of one of the rate of change indicators.
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.rateOfChange = document.getElementById(\"YYWT-{id}-roc-0pt25\"); if (yyWaterTool.rateOfChange) yyWaterTool.rateOfChange.setAttribute(\"fill\",\"#424242\");");
+            }
+        }
+
+
+
         /// <summary>
-        /// C# event handler for event callback from UI JavaScript. If element YYWT-amount-item is found then set value to true.
+        /// C# event handler for event callback from UI JavaScript. If element YYWT-amount-item is found then set value to flag.
         /// </summary>
         /// <param name="flag">A bool for whether to element was found.</param>
         private void ElementCheck(bool flag) => m_WaterToolPanelShown = flag;
@@ -506,6 +649,8 @@ namespace Water_Features.Tools
                     // This script destroys the min depth item if it exists.
                     UIFileUtils.ExecuteScript(m_UiView, DestroyElementByID("YYWT-min-depth-item"));
                 }
+
+                m_ResetValues = true;
 
                 return;
             }
