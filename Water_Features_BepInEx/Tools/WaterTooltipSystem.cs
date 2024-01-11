@@ -19,9 +19,8 @@ namespace Water_Features.Tools
     {
         private Vector3 m_HitPosition = new ();
         private bool m_RadiusTooSmall = false;
-        private bool m_HoveringOverSource = false;
         private ToolSystem m_ToolSystem;
-        private CustomWaterToolSystem m_WaterTool;
+        private CustomWaterToolSystem m_CustomWaterTool;
         private float timeLastWarned;
         private ILog m_Log;
         private WaterToolUISystem m_WaterToolUISystem;
@@ -49,21 +48,13 @@ namespace Water_Features.Tools
             set { m_RadiusTooSmall = value; }
         }
 
-        /// <summary>
-        /// Sets a value indicating whether the cursor is hovering over a water source.
-        /// </summary>
-        public bool HoveringOverSource
-        {
-            set { m_HoveringOverSource = value; }
-        }
-
         /// <inheritdoc/>
         protected override void OnCreate()
         {
             base.OnCreate();
             m_Log = WaterFeaturesMod.Instance.Log;
             m_ToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ToolSystem>();
-            m_WaterTool = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<CustomWaterToolSystem>();
+            m_CustomWaterTool = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<CustomWaterToolSystem>();
             m_WaterToolUISystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterToolUISystem>();
             m_Log.Info($"[{nameof(WaterTooltipSystem)}] {nameof(OnCreate)}");
         }
@@ -71,12 +62,12 @@ namespace Water_Features.Tools
         /// <inheritdoc/>
         protected override void OnUpdate()
         {
-            if (m_ToolSystem.activeTool != m_WaterTool)
+            if (m_ToolSystem.activeTool != m_CustomWaterTool)
             {
                 return;
             }
 
-            var prefab = m_WaterTool.GetPrefab();
+            var prefab = m_CustomWaterTool.GetPrefab();
             if (prefab == null || prefab is not WaterSourcePrefab)
             {
                 return;
@@ -86,7 +77,7 @@ namespace Water_Features.Tools
 
             if (waterSourcePrefab.m_SourceType == WaterToolUISystem.SourceType.River)
             {
-                if (!m_WaterTool.IsPositionNearBorder(m_HitPosition))
+                if (!m_CustomWaterTool.IsPositionNearBorder(m_HitPosition))
                 {
                     StringTooltip mustBePlacedNearMapBorderTooltip = new ()
                     {
@@ -109,7 +100,7 @@ namespace Water_Features.Tools
                 timeLastWarned = UnityEngine.Time.time;
             }
 
-            if (m_HoveringOverSource)
+            if (m_CustomWaterTool.CanDeleteWaterSource())
             {
                 StringTooltip removeWaterSourceTooltip = new ()
                 {

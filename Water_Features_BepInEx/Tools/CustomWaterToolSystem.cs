@@ -7,6 +7,7 @@ namespace Water_Features.Tools
     using System.Runtime.CompilerServices;
     using cohtml.Net;
     using Colossal.Logging;
+    using Game.Citizens;
     using Game.Common;
     using Game.Input;
     using Game.Prefabs;
@@ -70,6 +71,19 @@ namespace Water_Features.Tools
                 return true;
             }
 
+            return false;
+        }
+
+        /// <summary>
+        /// If there is an interactable portion of a water source under the cursor then it returns true.
+        /// </summary>
+        /// <returns>True if a water source can be deleted. False if not.</returns>
+        public bool CanDeleteWaterSource()
+        {
+            if (m_HoveredWaterSources.Length > 0)
+            {
+                return true;
+            }
             return false;
         }
 
@@ -150,6 +164,7 @@ namespace Water_Features.Tools
             m_WaterTooltipSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterTooltipSystem>();
             m_TerrainSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TerrainSystem>();
             m_WaterToolUISystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterToolUISystem>();
+            m_FindWaterSourcesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<FindWaterSourcesSystem>();
             m_WaterSourceArchetype = EntityManager.CreateArchetype(ComponentType.ReadWrite<Game.Simulation.WaterSourceData>(), ComponentType.ReadWrite<Game.Objects.Transform>());
             m_AutoFillingLakeArchetype = EntityManager.CreateArchetype(ComponentType.ReadWrite<Game.Simulation.WaterSourceData>(), ComponentType.ReadWrite<Game.Objects.Transform>(), ComponentType.ReadWrite<AutofillingLake>());
             m_DetentionBasinArchetype = EntityManager.CreateArchetype(ComponentType.ReadWrite<Game.Simulation.WaterSourceData>(), ComponentType.ReadWrite<Game.Objects.Transform>(), ComponentType.ReadWrite<DetentionBasin>());
@@ -248,7 +263,6 @@ namespace Water_Features.Tools
 
                         float terrainHeight = TerrainUtils.SampleHeight(ref terrainHeightData, borderPosition);
                         TryAddWaterSource(ref inputDeps, new float3(borderPosition.x, terrainHeight, borderPosition.z));
-                        m_FindWaterSourcesSystem.Enabled = true;
                         return inputDeps;
                     }
                 }
@@ -314,12 +328,14 @@ namespace Water_Features.Tools
             if (m_HoveredWaterSources.IsEmpty)
             {
                 float radius = m_WaterToolUISystem.Radius;
+                float terrainHeight = TerrainUtils.SampleHeight(ref terrainHeightData, m_RaycastPoint.m_HitPosition);
                 WaterToolRadiusJob waterToolRadiusJob = new ()
                 {
                     m_OverlayBuffer = m_OverlayRenderSystem.GetBuffer(out JobHandle outJobHandle2),
-                    m_Position = m_RaycastPoint.m_HitPosition,
+                    m_Position = new float3(m_RaycastPoint.m_HitPosition.x, terrainHeight, m_RaycastPoint.m_HitPosition.z),
                     m_Radius = radius,
                     m_SourceType = m_ActivePrefab.m_SourceType,
+                    m_MapExtents = MapExtents,
                 };
                 JobHandle jobHandle = IJobExtensions.Schedule(waterToolRadiusJob, outJobHandle2);
                 m_OverlayRenderSystem.AddBufferWriter(jobHandle);
@@ -478,6 +494,8 @@ namespace Water_Features.Tools
             {
                 m_Log.Warn("{WaterToolUpdate.TryAddWaterSource} After 1000 attempts couldn't produce acceptable water source!");
             }
+
+            m_FindWaterSourcesSystem.Enabled = true;
         }
 
         private struct RemoveWaterSourcesJob : IJobChunk
@@ -630,7 +648,6 @@ namespace Water_Features.Tools
                     UnityEngine.Color insideColor = borderColor;
                     insideColor.a = 0.1f;
 
-                    // m_OverlayBuffer.DrawCircle(borderColor, insideColor, currentWaterSourceData.m_Radius / 20f, 0, new float2(0, 1), position, currentWaterSourceData.m_Radius * 2f);
                     float radius = WaterSourceUtils.GetRadius(currentTransform.m_Position, currentWaterSourceData.m_Radius, m_MapExtents);
                     if (radius > currentWaterSourceData.m_Radius)
                     {
@@ -642,7 +659,6 @@ namespace Water_Features.Tools
                         m_OverlayBuffer.DrawCircle(borderColor, insideColor, radius / 20f, 0, new float2(0, 1), position, radius * 2f);
                         m_OverlayBuffer.DrawCircle(borderColor, default, currentWaterSourceData.m_Radius / 20f, 0, new float2(0, 1), position, currentWaterSourceData.m_Radius * 2.05f);
                     }
-
                 }
             }
 
@@ -670,13 +686,25 @@ namespace Water_Features.Tools
             public float3 m_Position;
             public float m_Radius;
             public WaterToolUISystem.SourceType m_SourceType;
+            public float m_MapExtents;
 
             public void Execute()
             {
                 UnityEngine.Color borderColor = GetWaterSourceColor();
                 UnityEngine.Color insideColor = borderColor;
                 insideColor.a = 0.1f;
-                m_OverlayBuffer.DrawCircle(borderColor, insideColor, m_Radius / 20f, 0, new float2(0, 1), m_Position, m_Radius * 2f);
+
+                float radius = WaterSourceUtils.GetRadius(m_Position, m_Radius, m_MapExtents);
+                if (radius > m_Radius)
+                {
+                    m_OverlayBuffer.DrawCircle(borderColor, insideColor, m_Radius / 20f, 0, new float2(0, 1), m_Position, m_Radius * 2f);
+                    m_OverlayBuffer.DrawCircle(borderColor, default, radius / 20f, 0, new float2(0, 1), m_Position, radius * 2.05f);
+                }
+                else
+                {
+                    m_OverlayBuffer.DrawCircle(borderColor, insideColor, radius / 20f, 0, new float2(0, 1), m_Position, radius * 2f);
+                    m_OverlayBuffer.DrawCircle(borderColor, default, m_Radius / 20f, 0, new float2(0, 1), m_Position, m_Radius * 2.05f);
+                }
             }
 
             private UnityEngine.Color GetWaterSourceColor()

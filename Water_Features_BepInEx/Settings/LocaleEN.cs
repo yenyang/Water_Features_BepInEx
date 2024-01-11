@@ -114,6 +114,9 @@ namespace Water_Features.Settings
                 { "Assets.DESCRIPTION[WaterSource DetentionBasin]", "Custom modded water source that rises with precipitation and snowmelt and slowly drains when the weather is dry. They have a maximum water surface elevation but no minimum water surface elevation. You may need to adjust the global evaporation rate in the settings for desirable infiltration of the pond water." },
                 { "Assets.NAME[WaterSource RetentionBasin]", "Retention Basin" },
                 { "Assets.DESCRIPTION[WaterSource RetentionBasin]", "Custom modded water source that rises with precipitation and snowmelt and slowly drains when the weather is dry. They have a maximum water surface elevation and a minimum water surface elevation. You may need to adjust the global evaporation rate in the settings for desirable infiltration of the pond water." },
+                { "Tooltip.LABEL[YY.WT.PlaceNearBorder]", "Rivers must be placed near map border." },
+                { "Tooltip.LABEL[YY.WT.RadiusTooSmall]", "The radius is too small and has been automically increased." },
+                { "Tooltip.LABEL[YY.WT.RemoveWaterSource]", "Right click to remove water source." },
             };
         }
 
