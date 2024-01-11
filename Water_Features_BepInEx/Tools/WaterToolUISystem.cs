@@ -13,7 +13,6 @@ namespace Water_Features.Tools
     using Game.SceneFlow;
     using Game.Tools;
     using Game.UI;
-    using Game.UI.InGame;
     using Unity.Entities;
     using UnityEngine;
     using Water_Features;
@@ -198,6 +197,8 @@ namespace Water_Features.Tools
                 // This script defines the JS functions and setups up typical buttons.
                 UIFileUtils.ExecuteScript(m_UiView, m_InjectedJS);
 
+                string unit = " m";
+
                 if (m_CustomWaterToolSystem.GetPrefab() != null)
                 {
                     WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
@@ -211,6 +212,11 @@ namespace Water_Features.Tools
                         m_Amount = waterSourcePrefab.m_DefaultAmount;
                     }
 
+                    if (waterSourcePrefab.m_SourceType == SourceType.Creek)
+                    {
+                        unit = string.Empty;
+                    }
+
                     if (waterSourcePrefab.m_SourceType == SourceType.RetentionBasin)
                     {
                         UIFileUtils.ExecuteScript(m_UiView, m_MinDepthItemScript);
@@ -220,7 +226,10 @@ namespace Water_Features.Tools
                             m_MinDepth = 10f;
                         }
 
-                        // This script setsup the up and down buttons for min depth and applies localization to the row.
+                        // This script sets the min depth field to the desired min depth;
+                        UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.minDepthField = document.getElementById(\"YYWT-min-depth-field\"); if (yyWaterTool.minDepthField) yyWaterTool.minDepthField.innerHTML = \"{m_MinDepth} m\";");
+
+                        // This script sets up the up and down buttons for min depth and applies localization to the row.
                         UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.applyLocalization(document.getElementById(\"YYWT-min-depth-item\")); yyWaterTool.setupButton(\"YYWT-min-depth-down-arrow\", \"min-depth-down-arrow\"); yyWaterTool.setupButton(\"YYWT-min-depth-up-arrow\", \"min-depth-up-arrow\");  yyWaterTool.setupButton(\"YYWT-min-depth-rate-of-change\", \"min-depth-rate-of-change\");");
 
                         SetRateIcon(m_MinDepthRateOfChange, "min-depth");
@@ -233,7 +242,7 @@ namespace Water_Features.Tools
                 UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
 
                 // This script sets the amount field to the desired amount;
-                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}{unit}\";");
 
                 SetRateIcon(m_RadiusRateOfChange, "radius");
                 SetRateIcon(m_AmountRateOfChange, "amount");
@@ -397,13 +406,22 @@ namespace Water_Features.Tools
             {
                 m_Amount = m_MinDepth;
 
-                // This script sets the min depth field to the desired min depth;
-                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
+                string unit = " m";
+
+                if (m_CustomWaterToolSystem.GetPrefab() != null)
+                {
+                    WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
+                    if (waterSourcePrefab.m_SourceType == SourceType.Creek)
+                    {
+                        unit = string.Empty;
+                    }
+                }
+
+                // This script sets the amount field to the desired amount.
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}{unit}\";");
             }
 
-
-
-            // This script sets the radius field to the desired radius;
+            // This script sets the min depth field to the desired min depth;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.minDepthField = document.getElementById(\"YYWT-min-depth-field\"); if (yyWaterTool.minDepthField) yyWaterTool.minDepthField.innerHTML = \"{m_MinDepth} m\";");
         }
 
@@ -453,8 +471,19 @@ namespace Water_Features.Tools
 
             m_Amount = Mathf.Clamp(m_Amount, 0.125f, 1000f);
 
+            string unit = " m";
+
+            if (m_CustomWaterToolSystem.GetPrefab() != null)
+            {
+                WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
+                if (waterSourcePrefab.m_SourceType == SourceType.Creek)
+                {
+                    unit = string.Empty;
+                }
+            }
+
             // This script sets the amount field to the desired amount;
-            UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
+            UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}{unit}\";");
         }
 
         private void DecreaseAmount()
@@ -486,8 +515,19 @@ namespace Water_Features.Tools
                 UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.minDepthField = document.getElementById(\"YYWT-min-depth-field\"); if (yyWaterTool.minDepthField) yyWaterTool.minDepthField.innerHTML = \"{m_MinDepth} m\";");
             }
 
+            string unit = " m";
+
+            if (m_CustomWaterToolSystem.GetPrefab() != null)
+            {
+                WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
+                if (waterSourcePrefab.m_SourceType == SourceType.Creek)
+                {
+                    unit = string.Empty;
+                }
+            }
+
             // This script sets the amount field to the desired amount;
-            UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
+            UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}{unit}\";");
         }
 
         private void RadiusRateOfChangePressed()
@@ -637,8 +677,14 @@ namespace Water_Features.Tools
                 // This script sets the radius field to the desired radius;
                 UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
 
+                string unit = " m";
+                if (waterSourcePrefab.m_SourceType == SourceType.Creek)
+                {
+                    unit = string.Empty;
+                }
+
                 // This script sets the amount field to the desired amount;
-                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}\";");
+                UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount}{unit}\";");
 
                 if (waterSourcePrefab.m_SourceType == SourceType.RetentionBasin)
                 {

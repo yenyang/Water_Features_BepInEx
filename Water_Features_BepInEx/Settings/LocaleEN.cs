@@ -97,7 +97,7 @@ namespace Water_Features.Settings
                 { "YY_WATER_FEATURES.radius-rate-of-change", "Radius Rate of Change" },
                 { "YY_WATER_FEATURES_DESCRIPTION.radius-rate-of-change", "Changes the rate in which the increase and decrease buttons work for Radius." },
                 { "YY_WATER_FEATURES.min-depth-rate-of-change", "Minimum Depth Rate of Change" },
-                { "YY_WATER_FEATURES_DESCRIPTION.min-depth-of-change", "Changes the rate in which the increase and decrease buttons work for minimum depth." },
+                { "YY_WATER_FEATURES_DESCRIPTION.min-depth-rate-of-change", "Changes the rate in which the increase and decrease buttons work for minimum depth." },
                 { "SUBSERVICES.NAME[WATER TOOL]", "Water Tool" },
                 { "Assets.SUB_SERVICE_DESCRIPTION[Water Tool]", "Water tool allows you to add and remove water sources from your map." },
                 { "Assets.NAME[WaterSource Creek]", "Constant Rate Water Source" },
