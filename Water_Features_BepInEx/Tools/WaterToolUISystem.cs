@@ -20,7 +20,7 @@ namespace Water_Features.Tools
     using Water_Features.Utils;
 
     /// <summary>
-    /// UI system for Object Tool while using tree prefabs.
+    /// UI system for Custom Water Tool
     /// </summary>
     public partial class WaterToolUISystem : UISystemBase
     {
@@ -123,6 +123,14 @@ namespace Water_Features.Tools
             get { return m_Amount; }
         }
 
+        /// <summary>
+        /// Gets the min depth.
+        /// </summary>
+        public float MinDepth
+        {
+            get { return m_MinDepth; }
+        }
+
         /// <inheritdoc/>
         protected override void OnCreate()
         {
@@ -194,7 +202,7 @@ namespace Water_Features.Tools
 
                 UIFileUtils.ExecuteScript(m_UiView, m_RadiusItemScript);
 
-                // This script defines the JS functions and setups up typical buttons.
+                // This script defines the JS functions and sets up typical buttons.
                 UIFileUtils.ExecuteScript(m_UiView, m_InjectedJS);
 
                 string unit = " m";
