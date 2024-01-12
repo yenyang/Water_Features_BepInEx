@@ -27,12 +27,25 @@ namespace Water_Features.Systems
         private TimeSystem m_TimeSystem;
         private EntityQuery m_WaterSourceQuery;
         private ILog m_Log;
+        private Entity m_DummySeaWaterSource = Entity.Null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TidesAndWavesSystem"/> class.
         /// </summary>
         public TidesAndWavesSystem()
         {
+        }
+
+        /// <summary>
+        /// The dummy sea water source should not be saved so this allows it to be removed before saving.
+        /// </summary>
+        public void ResetDummySeaWaterSource()
+        {
+            if (m_DummySeaWaterSource != Entity.Null)
+            {
+                EntityManager.DestroyEntity(m_DummySeaWaterSource);
+                m_DummySeaWaterSource = Entity.Null;
+            }
         }
 
         /// <inheritdoc/>
@@ -42,7 +55,7 @@ namespace Water_Features.Systems
             m_Log = WaterFeaturesMod.Instance.Log;
             m_TimeSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TimeSystem>();
             m_EndFrameBarrier = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<EndFrameBarrier>();
-            m_WaterSourceQuery = GetEntityQuery(new EntityQueryDesc[] 
+            m_WaterSourceQuery = GetEntityQuery(new EntityQueryDesc[]
             {
                 new EntityQueryDesc
                 {
@@ -66,9 +79,49 @@ namespace Water_Features.Systems
         /// <inheritdoc/>
         protected override void OnUpdate()
         {
+            if (WaterFeaturesMod.Settings.WaveHeight == 0f && WaterFeaturesMod.Settings.TideHeight == 0f)
+            {
+                return;
+            }
+
             __TypeHandle.__Game_Simulation_WaterSourceData_RW_ComponentTypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__Unity_Entities_Entity_TypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__TidesAndWavesData_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
+
+            if (m_DummySeaWaterSource == Entity.Null)
+            {
+                float seaLevel = float.MaxValue;
+                NativeArray<TidesAndWavesData> seaWaterSources = m_WaterSourceQuery.ToComponentDataArray<TidesAndWavesData>(Allocator.Temp);
+                foreach (TidesAndWavesData seaData in seaWaterSources)
+                {
+                    if (seaLevel > seaData.m_OriginalAmount)
+                    {
+                        seaLevel = seaData.m_OriginalAmount;
+                    }
+                }
+
+                WaterSourceData waterSourceData = new WaterSourceData()
+                {
+                    m_Amount = seaLevel,
+                    m_ConstantDepth = 3,
+                    m_Multiplier = 30f,
+                    m_Polluted = 0f,
+                    m_Radius = 0f,
+                };
+
+                Game.Objects.Transform transform = new Game.Objects.Transform()
+                {
+                    m_Position = default,
+                    m_Rotation = default,
+                };
+
+                m_DummySeaWaterSource = EntityManager.CreateEntity();
+                EntityManager.AddComponent(m_DummySeaWaterSource, ComponentType.ReadWrite<WaterSourceData>());
+                EntityManager.SetComponentData(m_DummySeaWaterSource, waterSourceData);
+                EntityManager.AddComponent(m_DummySeaWaterSource, ComponentType.ReadWrite<Game.Objects.Transform>());
+                EntityManager.SetComponentData(m_DummySeaWaterSource, transform);
+            }
+
             AlterSeaWaterSourcesJob alterSeaWaterSourcesJob = new ()
             {
                 m_EntityType = __TypeHandle.__Unity_Entities_Entity_TypeHandle,

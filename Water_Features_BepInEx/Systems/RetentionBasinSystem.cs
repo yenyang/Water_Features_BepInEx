@@ -164,6 +164,8 @@ namespace Water_Features.Systems
                     float3 terrainPosition = new (currentTransform.m_Position.x, TerrainUtils.SampleHeight(ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
                     float3 waterPosition = new (currentTransform.m_Position.x, WaterUtils.SampleHeight(ref m_WaterSurfaceData, ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
                     float waterHeight = waterPosition.y;
+                    float waterDepth = waterPosition.y - terrainPosition.y;
+                    float minDepth = currentRetentionBasin.m_MinimumWaterHeight - terrainPosition.y;
                     float maxDepth = currentRetentionBasin.m_MaximumWaterHeight - terrainPosition.y;
                     float temperatureDifferentialAtWaterSource = m_TemperatureDifferential - (terrainPosition.y / 500f);
                     if (currentWaterSourceData.m_ConstantDepth != 0) // Creek
@@ -177,14 +179,14 @@ namespace Water_Features.Systems
                         buffer.SetComponent(currentEntity, currentRetentionBasin);
                     }
 
-                    if (waterHeight > currentRetentionBasin.m_MaximumWaterHeight && currentWaterSourceData.m_Amount > 0f)
+                    if (waterHeight > currentRetentionBasin.m_MaximumWaterHeight && currentWaterSourceData.m_Amount >= 0f)
                     {
                         currentWaterSourceData.m_Amount = 0f;
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                     }
-                    else if (waterHeight < 0.95 * currentRetentionBasin.m_MinimumWaterHeight && currentRetentionBasin.m_MinimumWaterHeight < currentRetentionBasin.m_MaximumWaterHeight)
+                    else if (waterDepth < 0.95 * minDepth && currentRetentionBasin.m_MinimumWaterHeight < currentRetentionBasin.m_MaximumWaterHeight)
                     {
-                        currentWaterSourceData.m_Amount = (currentRetentionBasin.m_MinimumWaterHeight - terrainPosition.y) * maxDepthToRunoffCoefficient;
+                        currentWaterSourceData.m_Amount = minDepth * maxDepthToRunoffCoefficient;
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                     }
                     else if (m_Precipiation > 0f && !m_Snowing)
@@ -198,10 +200,12 @@ namespace Water_Features.Systems
                             currentWaterSourceData.m_Amount = (m_Precipiation * maxDepth * maxDepthToRunoffCoefficient) + TryMeltSnow(ref currentRetentionBasin, temperatureDifferentialAtWaterSource);
                             buffer.SetComponent(currentEntity, currentRetentionBasin);
                         }
+
                         if (waterHeight > 0.95f * currentRetentionBasin.m_MaximumWaterHeight)
                         {
                             currentWaterSourceData.m_Amount = Mathf.Min(currentWaterSourceData.m_Amount, currentRetentionBasin.m_MaximumWaterHeight * .1f);
                         }
+
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                     }
                     else

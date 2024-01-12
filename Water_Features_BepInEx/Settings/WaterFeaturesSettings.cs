@@ -11,24 +11,24 @@ namespace Water_Features.Settings
     using Water_Features.Systems;
 
     /// <summary>
-    /// The mod settings for the Anarchy Mod.
+    /// The mod settings for the Water Features Mod.
     /// </summary>
     [FileLocation("Mods_Yenyang_Water_Features")]
     [SettingsUITabOrder(KWaterToolTab, KSeasonalStreamTab, KWavesAndTidesTab)]
     public class WaterFeaturesSettings : ModSetting
     {
         /// <summary>
-        /// A tab for Forest Fire Settings.
+        /// A tab for water tool Settings.
         /// </summary>
         public const string KWaterToolTab = "Water Tool";
 
         /// <summary>
-        /// A tab for Forest Fire Settings.
+        /// A tab for seasonal streams Settings.
         /// </summary>
         public const string KSeasonalStreamTab = "Seasonal Streams";
 
         /// <summary>
-        /// A tab for Forest Fire Settings.
+        /// A tab for waves and tides Settings.
         /// </summary>
         public const string KWavesAndTidesTab = "Waves and Tides";
 
@@ -37,7 +37,7 @@ namespace Water_Features.Settings
         /// <summary>
         /// Initializes a new instance of the <see cref="WaterFeaturesSettings"/> class.
         /// </summary>
-        /// <param name="mod">DisasterControllerMod.</param>
+        /// <param name="mod">Water Features mod.</param>
         public WaterFeaturesSettings(IMod mod)
             : base(mod)
         {
@@ -61,18 +61,6 @@ namespace Water_Features.Settings
             /// </summary>
             Semidiurnal = 24,
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the options to show pollution.
-        /// </summary>
-        [SettingsUISection(KWaterToolTab)]
-        public bool ShowPollution { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the option to show entity information in a tooltip.
-        /// </summary>
-        [SettingsUISection(KWaterToolTab)]
-        public bool ShowEntityInfo { get; set; }
 
         /// <summary>
         /// Gets or sets the evaporatin rate for the whole map.
@@ -220,8 +208,6 @@ namespace Water_Features.Settings
         /// </summary>
         public void ResetWaterToolSettings()
         {
-            ShowPollution = false;
-            ShowEntityInfo = false;
             EvaporationRate = 0.0001f;
         }
 
@@ -254,8 +240,6 @@ namespace Water_Features.Settings
         public override void SetDefaults()
         {
             Contra = true;
-            ShowPollution = false;
-            ShowEntityInfo = false;
             EvaporationRate = 0.0001f;
             CreekSpringWater = 0f;
             CreekMeanPrecipitationWeight = 0.75f;

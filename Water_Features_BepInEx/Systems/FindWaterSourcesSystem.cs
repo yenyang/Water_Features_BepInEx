@@ -26,7 +26,6 @@ namespace Water_Features.Systems
     /// </summary>
     public partial class FindWaterSourcesSystem : GameSystemBase
     {
-
         private TypeHandle __TypeHandle;
         private EntityQuery m_WaterSourcesQuery;
         private EndFrameBarrier m_EndFrameBarrier;
@@ -140,7 +139,7 @@ namespace Water_Features.Systems
                         buffer.AddComponent<SeasonalStreamsData>(currentEntity);
                         buffer.SetComponent(currentEntity, waterSourceRecordComponent);
                     }
-                    else if (currentWaterSourceData.m_ConstantDepth == 3 && currentWaterSourceData.m_Amount > 0f)
+                    else if (currentWaterSourceData.m_ConstantDepth == 3 && currentWaterSourceData.m_Amount > 0f && currentWaterSourceData.m_Radius > 0f)
                     {
                         buffer.AddComponent<TidesAndWavesData>(currentEntity);
                         TidesAndWavesData wavesAndTidesData = new ()
