@@ -14,23 +14,39 @@ namespace Water_Features.Settings
     /// The mod settings for the Water Features Mod.
     /// </summary>
     [FileLocation("Mods_Yenyang_Water_Features")]
-    [SettingsUITabOrder(KWaterToolTab, KSeasonalStreamTab, KWavesAndTidesTab)]
+    [SettingsUISection(General, Experimental)]
+    [SettingsUIShowGroupName(SeasonalStreams, EvaporationRateGroup, WavesAndTides)]
     public class WaterFeaturesSettings : ModSetting
     {
         /// <summary>
-        /// A tab for water tool Settings.
+        /// This is for settings not flagged as experimental.
         /// </summary>
-        public const string KWaterToolTab = "Water Tool";
+        public const string General = "General";
 
         /// <summary>
-        /// A tab for seasonal streams Settings.
+        /// This is for experimental settings that should be used with caution.
         /// </summary>
-        public const string KSeasonalStreamTab = "Seasonal Streams";
+        public const string Experimental = "Experimental";
 
         /// <summary>
-        /// A tab for waves and tides Settings.
+        /// This is for settings that affect the UI for the mod.
         /// </summary>
-        public const string KWavesAndTidesTab = "Waves and Tides";
+        public const string SeasonalStreams = "Seasonal Streams";
+
+        /// <summary>
+        /// This is for options related to unique buildings.
+        /// </summary>
+        public const string EvaporationRateGroup = "Evaporation Rate";
+
+        /// <summary>
+        /// This is for options related to prop culling.
+        /// </summary>
+        public const string WavesAndTides = "Waves and Tides";
+
+        /// <summary>
+        /// This is for the reset button(s).
+        /// </summary>
+        public const string Reset = "Reset";
 
         private ChangeWaterSystemValues m_ChangeWaterSystemValues;
 
@@ -65,7 +81,7 @@ namespace Water_Features.Settings
         /// <summary>
         /// Gets or sets the evaporatin rate for the whole map.
         /// </summary>
-        [SettingsUISection(KWaterToolTab)]
+        [SettingsUISection(General, EvaporationRateGroup)]
         [SettingsUISlider(min = 0.1f, max = 1f, step = 0.1f, unit = "percentageSingleFraction", scalarMultiplier = 1000f)]
         public float EvaporationRate { get; set; }
 
@@ -74,6 +90,7 @@ namespace Water_Features.Settings
         /// </summary>
         [SettingsUIButton]
         [SettingsUIConfirmation]
+        [SettingsUISection(General, EvaporationRateGroup)]
         public bool WaterCleanUpCycleButton
         {
             set { m_ChangeWaterSystemValues.ApplyNewEvaporationRate = true; }
@@ -86,37 +103,23 @@ namespace Water_Features.Settings
         public bool Contra { get; set; }
 
         /// <summary>
-        /// Sets a value indicating whether: a button for Resetting the settings for the Mod.
-        /// </summary>
-        [SettingsUIButton]
-        [SettingsUIConfirmation]
-        [SettingsUISection(KWaterToolTab)]
-        public bool ResetWaterToolSettingsButton
-        {
-            set
-            {
-                ResetWaterToolSettings();
-            }
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether to simulate snow melt with creeks.
         /// </summary>
-        [SettingsUISection(KSeasonalStreamTab)]
+        [SettingsUISection(General, SeasonalStreams)]
         public bool SimulateSnowMelt { get; set; }
 
         /// <summary>
         /// Gets or sets a value with a slider indicating the multiplier for water always emitted from a creek.
         /// </summary>
         [SettingsUISlider(min = 0f, max = 100f, step = 5f, unit = "percentageSingleFraction", scalarMultiplier = 100f)]
-        [SettingsUISection(KSeasonalStreamTab)]
+        [SettingsUISection(General, SeasonalStreams)]
         public float CreekSpringWater { get; set; }
 
         /// <summary>
         /// Gets or sets a value with a slider indicating the multiplier for water seaonally emitted from a creek.
         /// </summary>
         [SettingsUISlider(min = 0f, max = 100f, step = 5f, unit = "percentageSingleFraction", scalarMultiplier = 100f)]
-        [SettingsUISection(KSeasonalStreamTab)]
+        [SettingsUISection(General, SeasonalStreams)]
         public float CreekMeanPrecipitationWeight { get; set; }
 
 
@@ -124,13 +127,13 @@ namespace Water_Features.Settings
         /// Gets or sets a value with a slider indicating the multiplier for water emitted from a creek due to rain.
         /// </summary>
         [SettingsUISlider(min = 0f, max = 100f, step = 5f, unit = "percentageSingleFraction", scalarMultiplier = 100f)]
-        [SettingsUISection(KSeasonalStreamTab)]
+        [SettingsUISection(General, SeasonalStreams)]
         public float CreekCurrentPrecipitationWeight { get; set; }
 
         /// <summary>
         /// Gets or sets a value with a slider indicating the minimum multiplier to apply to creeks.
         /// </summary>
-        [SettingsUISection(KSeasonalStreamTab)]
+        [SettingsUISection(General, SeasonalStreams)]
         [SettingsUISlider(min = 0f, max = 1f, step = 0.1f, unit = "floatSingleFraction")]
         public float MinimumMultiplier { get; set; }
 
@@ -138,7 +141,7 @@ namespace Water_Features.Settings
         /// Gets or sets a value with a slider indicating the maximum multiplier to apply to creeks.
         /// </summary>
         [SettingsUISlider(min = 1f, max = 10f, step = 0.1f, unit = "floatSingleFraction")]
-        [SettingsUISection(KSeasonalStreamTab)]
+        [SettingsUISection(General, SeasonalStreams)]
         public float MaximumMultiplier { get; set; }
 
         /// <summary>
@@ -146,46 +149,46 @@ namespace Water_Features.Settings
         /// </summary>
         [SettingsUIButton]
         [SettingsUIConfirmation]
-        [SettingsUISection(KSeasonalStreamTab)]
-        public bool ResetSeasonalStreamsSettingsButton
+        [SettingsUISection(General, Reset)]
+        public bool ResetGeneralSettingsButton
         {
             set
             {
-                ResetSeasonalStreamsSettings();
+                ResetGeneralSettings();
             }
         }
 
         /// <summary>
         /// Gets or sets a value with a slider indicating the height of waves generated.
         /// </summary>
-        [SettingsUISection(KWavesAndTidesTab)]
+        [SettingsUISection(Experimental, WavesAndTides)]
         [SettingsUISlider(min = 0f, max = 50f, step = 1f, unit = "integer")]
         public float WaveHeight { get; set; }
 
         /// <summary>
         /// Gets or sets a value with a slider indicating the frequency of waves generated.
         /// </summary>
-        [SettingsUISection(KWavesAndTidesTab)]
+        [SettingsUISection(Experimental, WavesAndTides)]
         [SettingsUISlider(min = 10f, max = 250f, step = 10f)]
         public float WaveFrequency { get; set; }
 
         /// <summary>
         /// Gets or sets a value with a slider indicating the height of tides generated.
         /// </summary>
-        [SettingsUISection(KWavesAndTidesTab)]
+        [SettingsUISection(Experimental, WavesAndTides)]
         [SettingsUISlider(min = 0f, max = 50f, step = 1f, unit = "integer")]
         public float TideHeight { get; set; }
 
         /// <summary>
         /// Gets or sets an enum value indicating the tide classification.
         /// </summary>
-        [SettingsUISection(KWavesAndTidesTab)]
+        [SettingsUISection(Experimental, WavesAndTides)]
         public TideClassificationYYTAW TideClassification { get; set; }
 
         /// <summary>
         /// Gets or sets a value with a slider indicating the damping factor of the water system.
         /// </summary>
-        [SettingsUISection(KWavesAndTidesTab)]
+        [SettingsUISection(Experimental, WavesAndTides)]
         [SettingsUISlider(min = 99f, max = 100f, step = 0.1f, unit = "percentageSingleFraction", scalarMultiplier = 100f)]
         public float Damping { get; set; }
 
@@ -194,7 +197,7 @@ namespace Water_Features.Settings
         /// </summary>
         [SettingsUIButton]
         [SettingsUIConfirmation]
-        [SettingsUISection(KWavesAndTidesTab)]
+        [SettingsUISection(Experimental, WavesAndTides)]
         public bool ResetWavesAndTidesSettingsButton
         {
             set
@@ -204,18 +207,11 @@ namespace Water_Features.Settings
         }
 
         /// <summary>
-        /// Resets only the water tool settings tab.
+        /// Resets only the general settings tab.
         /// </summary>
-        public void ResetWaterToolSettings()
+        public void ResetGeneralSettings()
         {
             EvaporationRate = 0.0001f;
-        }
-
-        /// <summary>
-        /// Resets only the seasonal streams settings tab.
-        /// </summary>
-        public void ResetSeasonalStreamsSettings()
-        {
             CreekSpringWater = 0f;
             CreekMeanPrecipitationWeight = 0.75f;
             CreekCurrentPrecipitationWeight = 0.75f;
