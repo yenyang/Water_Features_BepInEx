@@ -23,7 +23,7 @@ The tool is accessed in the landscaping menu with a tab with a water drop and ic
 Left click to place a water source, Right click to remove one.
 Small radius water sources will have some extra clickable space for removing them.
 Large radius water sources will have a small filled circle for removing them.
-Most water sources are placed with an assigned depth which means that you cannot place the water source on a landmass.
+Most water sources are placed with an assigned depth which means that you should place them at the intended bottom of the water feature.
 For now you cannot remove water sources from utility structures.
 
 ### Seasonal Streams - Optional
@@ -31,6 +31,7 @@ Seasonal streams takes Constant Rate Water Source (i.e. creeks), and ties them t
 For example, if your map features a dry summer, then these water sources will decrease during the summer. 
 Seasonal streams by it-self should not cause flooding since it treats the map's default water source amount as a maximum unless you change it. 
 All aspects are optional and adjustable in the mod's settings.
+To turn this off, set Constant Rate from Water Sources to 100% and Maximum Multiplier to 1.
 
 ### Waves and Tides - Optional and Experimental
 This feature is dependent on map design. Maps with a sea water source and a single shoreline work best. 
@@ -39,7 +40,7 @@ Waves exacerbate the magnitude of the water surface. Tides are similar but happe
 Option to change the global damping value.
 
 ### Saving
-The mod always resets all water sources including the custom ones in a manner that can be loaded safely without the mod, so that the mod can be removed at any time.
+Before saving, the mod always resets all water sources including the custom ones in a manner that can be loaded safely without the mod, so that the mod can be removed at any time.
 
 ### Additional Features in the Settings
 Adjust the global evaporation rate which can be helpful with Detention and Retention basins.
@@ -60,4 +61,5 @@ I will respond on the code modding channels on **Cities: Skylines Modding Discor
 * Sully - Testing, Feedback, and Promotional Material.
 * Algernon, Alpha Gaming - Help with UI, Cooperative Development & Code Sharing
 * T.D.W., Klyte45, krzychu124, & Quboid - Cooperative Development & Code Sharing
+* ST-Apps - Help with UI & Code Sharing
 * Dante - Testing, Feedback

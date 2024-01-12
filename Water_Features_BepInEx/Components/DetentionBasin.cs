@@ -10,9 +10,10 @@ namespace Water_Features.Components
     /// <summary>
     /// A custom component for Detention Basins.
     /// </summary>
-    public struct DetentionBasin : IComponentData, IQueryTypeParameter, ISerializable {
+    public struct DetentionBasin : IComponentData, IQueryTypeParameter, ISerializable
+    {
         /// <summary>
-        /// The maximum height that the water will raise to.
+        /// The maximum water surface elevation that the water will raise to.
         /// </summary>
         public float m_MaximumWaterHeight;
 

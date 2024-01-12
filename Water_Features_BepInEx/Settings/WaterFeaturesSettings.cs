@@ -16,6 +16,7 @@ namespace Water_Features.Settings
     [FileLocation("Mods_Yenyang_Water_Features")]
     [SettingsUISection(General, Experimental)]
     [SettingsUIShowGroupName(SeasonalStreams, EvaporationRateGroup, WavesAndTides)]
+    [SettingsUIGroupOrder(SeasonalStreams, EvaporationRateGroup, WavesAndTides)]
     public class WaterFeaturesSettings : ModSetting
     {
         /// <summary>
@@ -145,7 +146,7 @@ namespace Water_Features.Settings
         public float MaximumMultiplier { get; set; }
 
         /// <summary>
-        /// Sets a value indicating whether: a button for Resetting the settings for the Mod.
+        /// Sets a value indicating whether: a button for Resetting the settings for the general tab.
         /// </summary>
         [SettingsUIButton]
         [SettingsUIConfirmation]
@@ -193,7 +194,7 @@ namespace Water_Features.Settings
         public float Damping { get; set; }
 
         /// <summary>
-        /// Sets a value indicating whether: a button for Resetting the settings for the Mod.
+        /// Sets a value indicating whether: a button for Resetting the settings for the Waves and tides.
         /// </summary>
         [SettingsUIButton]
         [SettingsUIConfirmation]

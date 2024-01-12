@@ -6,10 +6,9 @@ namespace Water_Features.Settings
 {
     using System.Collections.Generic;
     using Colossal;
-    using Colossal.IO.AssetDatabase.Internal;
 
     /// <summary>
-    /// Localization for <see cref="DisasterControllerMod"/> in English.
+    /// Localization for <see cref="WaterFeaturesMod"/> in English.
     /// </summary>
     public class LocaleEN : IDictionarySource
     {
@@ -39,13 +38,13 @@ namespace Water_Features.Settings
                 { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.EvaporationRate)), "Evaporation Rate" },
                 { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.EvaporationRate)), "Actual evaporation rate is 1000x smaller but this gives you control over the rate. This is global and you may want to rebalance and increase flows of water sources after increasing it." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.SimulateSnowMelt)), "Simulate Snow Melt" },
-                { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.SimulateSnowMelt)), "Simulate snow accumulation and snow melt. Snow melt is not currently tied to snow visuals." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.CreekSpringWater)), "Creek Spring Water" },
-                { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.CreekSpringWater)), "Constant flow rate from Creeks unaffected by season or weather." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.CreekMeanPrecipitationWeight)), "Creek Seasonality" },
-                { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.CreekMeanPrecipitationWeight)), "Creek flowrates will increase by this percentage during the season with the highest mean seasonal precipitation. Other seasons will be proportional." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.CreekCurrentPrecipitationWeight)), "Creek Stormwater Effects" },
-                { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.CreekCurrentPrecipitationWeight)), "Creek flowrates will increase by this percentage when current precipitation (rain) is at a maximum. Less precipitation is proportional." },
+                { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.SimulateSnowMelt)), "Simulate snow accumulation and snow melt. Snow melt is not currently tied to snow visuals. This affects Constant Rate Water Sources, Detention and Retention basins." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.CreekSpringWater)), "Constant Rate from Water Sources" },
+                { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.CreekSpringWater)), "Constant flow rate from Constant Rate Water Source (i.e. creek, brook, stream, spring) unaffected by season or weather." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.CreekMeanPrecipitationWeight)), "Seasonality" },
+                { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.CreekMeanPrecipitationWeight)), "Constant Rate Water Source (i.e. creek, brook, stream, spring) flowrates will increase by this percentage during the season with the highest mean seasonal precipitation. Other seasons will be proportional." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.CreekCurrentPrecipitationWeight)), "Stormwater Effects" },
+                { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.CreekCurrentPrecipitationWeight)), "Constant Rate Water Source (i.e. creek, brook, stream, spring) flowrates will increase by this percentage when current precipitation (rain) is at a maximum. Less precipitation is proportional." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.MinimumMultiplier)), "Minimum Multiplier" },
                 { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.MinimumMultiplier)), "Minimum multiplier applied to stream flowrates." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.MaximumMultiplier)), "Maximum Multiplier" },

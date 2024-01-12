@@ -8,7 +8,6 @@ namespace Water_Features.Prefabs
     using System.Collections.Generic;
     using Game.Prefabs;
     using Unity.Entities;
-    using UnityEngine;
     using Water_Features.Tools;
 
     /// <summary>
@@ -23,7 +22,7 @@ namespace Water_Features.Prefabs
         public WaterToolUISystem.SourceType m_SourceType;
 
         /// <summary>
-        /// The local key for this type of water source for the amount row.
+        /// The locale key for this type of water source for the amount row.
         /// </summary>
         public string m_AmountLocaleKey;
 

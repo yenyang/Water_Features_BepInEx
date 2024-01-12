@@ -41,7 +41,8 @@ namespace Water_Features.Systems
             base.OnCreate();
             m_Log = WaterFeaturesMod.Instance.Log;
             m_TidesAndWavesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TidesAndWavesSystem>();
-            m_SeasonalStreamsDataQuery = GetEntityQuery(new EntityQueryDesc[] {
+            m_SeasonalStreamsDataQuery = GetEntityQuery(new EntityQueryDesc[]
+            {
                 new EntityQueryDesc
                 {
                     All = new ComponentType[]
@@ -56,7 +57,8 @@ namespace Water_Features.Systems
                     },
                 },
             });
-            m_TidesAndWavesDataQuery = GetEntityQuery(new EntityQueryDesc[] {
+            m_TidesAndWavesDataQuery = GetEntityQuery(new EntityQueryDesc[]
+            {
                 new EntityQueryDesc
                 {
                     All = new ComponentType[]
@@ -71,7 +73,8 @@ namespace Water_Features.Systems
                     },
                 },
             });
-            m_AutofillingLakeQuery = GetEntityQuery(new EntityQueryDesc[] {
+            m_AutofillingLakeQuery = GetEntityQuery(new EntityQueryDesc[]
+            {
                 new EntityQueryDesc
                 {
                     All = new ComponentType[]
@@ -86,7 +89,8 @@ namespace Water_Features.Systems
                     },
                 },
             });
-            m_RetentionBasinQuery = GetEntityQuery(new EntityQueryDesc[] {
+            m_RetentionBasinQuery = GetEntityQuery(new EntityQueryDesc[]
+            {
                 new EntityQueryDesc
                 {
                     All = new ComponentType[]
@@ -101,7 +105,8 @@ namespace Water_Features.Systems
                     },
                 },
             });
-            m_DetentionBasinQuery = GetEntityQuery(new EntityQueryDesc[] {
+            m_DetentionBasinQuery = GetEntityQuery(new EntityQueryDesc[]
+            {
                 new EntityQueryDesc
                 {
                     All = new ComponentType[]
@@ -196,6 +201,9 @@ namespace Water_Features.Systems
             }
         }
 
+        /// <summary>
+        /// This job sets the amounts for seasonal stream water sources back to original amount.
+        /// </summary>
         private struct BeforeSerializeSeasonalStreamsJob : IJobChunk
         {
             public ComponentTypeHandle<Game.Simulation.WaterSourceData> m_SourceType;
@@ -215,6 +223,9 @@ namespace Water_Features.Systems
             }
         }
 
+        /// <summary>
+        /// This job sets the amounts for sea water sources back to original amount.
+        /// </summary>
         private struct BeforeSerializeTidesAndWavesJob : IJobChunk
         {
             public ComponentTypeHandle<Game.Simulation.WaterSourceData> m_SourceType;
@@ -234,6 +245,9 @@ namespace Water_Features.Systems
             }
         }
 
+        /// <summary>
+        /// This job makes an automatic filling lake into a vanilla lake.
+        /// </summary>
         private struct BeforeSerializeAutofillingLakeJob : IJobChunk
         {
             public ComponentTypeHandle<Game.Simulation.WaterSourceData> m_SourceType;
@@ -254,6 +268,9 @@ namespace Water_Features.Systems
             }
         }
 
+        /// <summary>
+        /// This job makes all detention basins into lakes at the maximum water surface elevation.
+        /// </summary>
         private struct BeforeSerializeDetentionBasinJob : IJobChunk
         {
             public ComponentTypeHandle<Game.Simulation.WaterSourceData> m_SourceType;
@@ -274,6 +291,9 @@ namespace Water_Features.Systems
             }
         }
 
+        /// <summary>
+        /// This job makes all retention basins into lakes at the maximum water surface elevation.
+        /// </summary>
         private struct BeforeSerializeRetentionBasinJob : IJobChunk
         {
             public ComponentTypeHandle<Game.Simulation.WaterSourceData> m_SourceType;
