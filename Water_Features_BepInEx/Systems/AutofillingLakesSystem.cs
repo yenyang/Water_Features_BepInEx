@@ -108,7 +108,7 @@ namespace Water_Features.Systems
         /// <summary>
         /// This job checks the water level of the automatic filling lake.
         /// At first the autofilling lake is a creek water source that is filling up the lake with water.
-        /// When it reaches 90% full then the amount is throttled.
+        /// When it reaches 75% full then the amount is throttled.
         /// When it reaches 100% full or higher the water source is converted to a lake.
         /// The component for automatic filling is then removed.
         /// </summary>
@@ -150,8 +150,8 @@ namespace Water_Features.Systems
                         buffer.RemoveComponent<AutofillingLake>(currentEntity);
                     }
 
-                    // When it reaches 95% full then the amount is throttled.
-                    else if (waterDepth >= 0.95f * maxDepth)
+                    // When it reaches 75% full then the amount is throttled.
+                    else if (waterDepth >= 0.75f * maxDepth)
                     {
                         currentWaterSourceData.m_ConstantDepth = 0; // Creek
                         currentWaterSourceData.m_Amount = maxDepth * 0.1f;
@@ -167,7 +167,7 @@ namespace Water_Features.Systems
                     else if (currentWaterSourceData.m_ConstantDepth != 0) // Creek
                     {
                         currentWaterSourceData.m_ConstantDepth = 0; // Creek
-                        currentWaterSourceData.m_Amount = maxDepth;
+                        currentWaterSourceData.m_Amount = maxDepth * 0.4f;
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                     }
 

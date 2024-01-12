@@ -438,6 +438,7 @@ namespace Water_Features.Tools
                 }
                 else if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.AutofillingLake)
                 {
+                    waterSourceDataComponent.m_Amount *= 0.4f;
                     AddAutoFillingLakeJob addAutoFillingLakeJob = new ()
                     {
                         autoFillingLakeData = new AutofillingLake() { m_MaximumWaterHeight = amount + position.y },
