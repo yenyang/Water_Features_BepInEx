@@ -214,6 +214,7 @@ namespace Water_Features.Tools
             __TypeHandle.__Unity_Entities_Entity_TypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__DetentionBasin_Lookup.Update(ref CheckedStateRef);
             __TypeHandle.__RententionBasin_Lookup.Update(ref CheckedStateRef);
+            __TypeHandle.__AutofillingLake_Lookup.Update(ref CheckedStateRef);
 
             TerrainHeightData terrainHeightData = m_TerrainSystem.GetHeightData();
 
@@ -228,6 +229,7 @@ namespace Water_Features.Tools
                 m_DetentionBasinLookup = __TypeHandle.__DetentionBasin_Lookup,
                 m_RetentionBasinLookup = __TypeHandle.__RententionBasin_Lookup,
                 m_EntityType = __TypeHandle.__Unity_Entities_Entity_TypeHandle,
+                m_AutofillingLakeLookup = __TypeHandle.__AutofillingLake_Lookup,
             };
             inputDeps = JobChunkExtensions.Schedule(waterSourceCirclesRenderJob, m_WaterSourcesQuery, JobHandle.CombineDependencies(inputDeps, outJobHandle, waterSurfaceDataJob));
             m_OverlayRenderSystem.AddBufferWriter(inputDeps);
@@ -609,6 +611,8 @@ namespace Water_Features.Tools
             public ComponentLookup<RetentionBasin> m_RetentionBasinLookup;
             [ReadOnly]
             public ComponentLookup<DetentionBasin> m_DetentionBasinLookup;
+            [ReadOnly]
+            public ComponentLookup<AutofillingLake> m_AutofillingLakeLookup;
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
@@ -636,6 +640,10 @@ namespace Water_Features.Tools
                     else if (m_DetentionBasinLookup.HasComponent(entityNativeArray[i]))
                     {
                         borderColor = new UnityEngine.Color(0.95f, 0.44f, 0.13f, 1f);
+                    }
+                    else if (m_AutofillingLakeLookup.HasComponent(entityNativeArray[i]))
+                    {
+                        borderColor = new UnityEngine.Color(0.422f, 0.242f, 0.152f);
                     }
 
                     UnityEngine.Color insideColor = borderColor;
@@ -713,7 +721,7 @@ namespace Water_Features.Tools
                     case WaterToolUISystem.SourceType.Sea:
                         return UnityEngine.Color.green;
                     case WaterToolUISystem.SourceType.AutofillingLake:
-                        return UnityEngine.Color.blue;
+                        return new UnityEngine.Color(0.422f, 0.242f, 0.152f);
                     case WaterToolUISystem.SourceType.DetentionBasin:
                         return new UnityEngine.Color(0.95f, 0.44f, 0.13f, 1f);
                     case WaterToolUISystem.SourceType.RetentionBasin:
@@ -781,6 +789,8 @@ namespace Water_Features.Tools
             public ComponentLookup<RetentionBasin> __RententionBasin_Lookup;
             [ReadOnly]
             public ComponentLookup<DetentionBasin> __DetentionBasin_Lookup;
+            [ReadOnly]
+            public ComponentLookup<AutofillingLake> __AutofillingLake_Lookup;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void AssignHandles(ref SystemState state)
@@ -790,6 +800,7 @@ namespace Water_Features.Tools
                 __Game_Objects_Transform_RO_ComponentTypeHandle = state.GetComponentTypeHandle<Game.Objects.Transform>();
                 __DetentionBasin_Lookup = state.GetComponentLookup<DetentionBasin>();
                 __RententionBasin_Lookup = state.GetComponentLookup<RetentionBasin>();
+                __AutofillingLake_Lookup = state.GetComponentLookup<AutofillingLake>();
             }
         }
     }

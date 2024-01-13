@@ -195,9 +195,7 @@
     <Content Include="UI\ui.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="UI\WaterSourceAutomaticFill.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="UI\WaterSourceAutomaticFill.svg" />
     <Content Include="UI\WaterSourceCreek.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
