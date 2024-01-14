@@ -11,12 +11,14 @@ namespace Water_Features.Tools
     using Colossal.Logging;
     using Game.Prefabs;
     using Game.SceneFlow;
+    using Game.Simulation;
     using Game.Tools;
     using Game.UI;
     using Unity.Entities;
     using UnityEngine;
     using Water_Features;
     using Water_Features.Prefabs;
+    using Water_Features.Settings;
     using Water_Features.Utils;
 
     /// <summary>
@@ -53,6 +55,7 @@ namespace Water_Features.Tools
         private string m_RadiusItemScript = string.Empty;
         private string m_MinDepthItemScript = string.Empty;
         private CustomWaterToolSystem m_CustomWaterToolSystem;
+        private TerrainSystem m_TerrainSystem;
         private ILog m_Log;
         private bool m_WaterToolPanelShown;
         private List<BoundEventHandle> m_BoundEventHandles;
@@ -66,6 +69,7 @@ namespace Water_Features.Tools
         private float m_MinDepthRateOfChange = 1f;
         private bool m_ResetValues = true;
         private bool m_FirstTimeInjectingJS = true;
+        private bool m_AmountIsElevation = false;
 
         /// <summary>
         /// Types of water sources.
@@ -132,12 +136,40 @@ namespace Water_Features.Tools
             get { return m_MinDepth; }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the amount is an elevation.
+        /// </summary>
+        public bool AmountIsAnElevation
+        {
+            get { return m_AmountIsElevation; }
+        }
+
+        /// <summary>
+        /// Sets the amount value equal to elevation parameter. And sets the label for that row to Elevation.
+        /// </summary>
+        /// <param name="elevation">The y coordinate from the raycast hit position.</param>
+        public void SetElevation(float elevation)
+        {
+            m_Amount = Mathf.Round(elevation * 10f) / 10f;
+            m_AmountIsElevation = true;
+            string localeKey = "YY_WATER_FEATURES.Elevation";
+
+            UIFileUtils.ExecuteScript(m_UiView, "if (typeof yyWaterTool != 'object') var yyWaterTool = {};");
+
+            // This script changes and translates the Amount label according to the active prefab.
+            UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amount = document.getElementById(\"YYWT-amount-label\"); if (yyWaterTool.amount) {{ yyWaterTool.amount.localeKey = \"{localeKey}\"; yyWaterTool.amount.innerHTML = engine.translate(yyWaterTool.amount.localeKey); }}");
+
+            // This script sets the amount field to the desired amount;
+            UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount} m\";");
+        }
+
         /// <inheritdoc/>
         protected override void OnCreate()
         {
             m_Log = WaterFeaturesMod.Instance.Log;
             m_ToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ToolSystem>();
             m_CustomWaterToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<CustomWaterToolSystem>();
+            m_TerrainSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TerrainSystem>();
             m_UiView = GameManager.instance.userInterface.view.View;
             ToolSystem toolSystem = m_ToolSystem; // I don't know why vanilla game did this.
             m_ToolSystem.EventToolChanged = (Action<ToolBaseSystem>)Delegate.Combine(toolSystem.EventToolChanged, new Action<ToolBaseSystem>(OnToolChanged));
@@ -226,13 +258,21 @@ namespace Water_Features.Tools
                 {
                     WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
 
+                    string localeKey = waterSourcePrefab.m_AmountLocaleKey;
+
+                    if (m_AmountIsElevation)
+                    {
+                        localeKey = "YY_WATER_FEATURES.Elevation";
+                    }
+
                     // This script changes and translates the Amount label according to the active prefab.
-                    UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amount = document.getElementById(\"YYWT-amount-label\"); if (yyWaterTool.amount) {{ yyWaterTool.amount.localeKey = \"{waterSourcePrefab.m_AmountLocaleKey}\"; yyWaterTool.amount.innerHTML = engine.translate(yyWaterTool.amount.localeKey); }}");
+                    UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amount = document.getElementById(\"YYWT-amount-label\"); if (yyWaterTool.amount) {{ yyWaterTool.amount.localeKey = \"{localeKey}\"; yyWaterTool.amount.innerHTML = engine.translate(yyWaterTool.amount.localeKey); }}");
 
                     if (m_ResetValues)
                     {
                         m_Radius = waterSourcePrefab.m_DefaultRadius;
                         m_Amount = waterSourcePrefab.m_DefaultAmount;
+                        m_AmountIsElevation = false;
                     }
 
                     if (waterSourcePrefab.m_SourceType == SourceType.Creek)
@@ -369,7 +409,18 @@ namespace Water_Features.Tools
                 m_Radius += 1 * m_RadiusRateOfChange;
             }
 
-            m_Radius = Mathf.Clamp(m_Radius, 5f, 10000f);
+            float minRadius = 5f;
+            /*
+            if (m_CustomWaterToolSystem.GetPrefab() != null)
+            {
+                WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
+                if (waterSourcePrefab.m_SourceType == SourceType.River || waterSourcePrefab.m_SourceType == SourceType.Sea)
+                {
+                    minRadius = 30f;
+                }
+            }*/
+
+            m_Radius = Mathf.Clamp(m_Radius, minRadius, 10000f);
 
             // This script sets the radius field to the desired radius;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
@@ -398,7 +449,18 @@ namespace Water_Features.Tools
                 m_Radius -= 500 * m_RadiusRateOfChange;
             }
 
-            m_Radius = Mathf.Clamp(m_Radius, 5f, 10000f);
+            float minRadius = 5f;
+            /*
+            if (m_CustomWaterToolSystem.GetPrefab() != null)
+            {
+                WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
+                if (waterSourcePrefab.m_SourceType == SourceType.River || waterSourcePrefab.m_SourceType == SourceType.Sea)
+                {
+                    minRadius = 30f;
+                }
+            }*/
+
+            m_Radius = Mathf.Clamp(m_Radius, minRadius, 10000f);
 
             // This script sets the radius field to the desired radius;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
@@ -420,7 +482,14 @@ namespace Water_Features.Tools
             }
             else if (m_MinDepth < 1000)
             {
-                m_MinDepth += 1 * m_MinDepthRateOfChange;
+                if (m_MinDepthRateOfChange == 1f && m_MinDepth == 0.125f)
+                {
+                    m_MinDepth = 1f;
+                }
+                else
+                {
+                    m_MinDepth += 1 * m_MinDepthRateOfChange;
+                }
             }
 
             m_MinDepth = Mathf.Clamp(m_MinDepth, 0.125f, 1000f);
@@ -475,24 +544,40 @@ namespace Water_Features.Tools
 
         private void IncreaseAmount()
         {
-            if (m_Amount >= 500 && m_Amount < 1000)
+            if (!m_AmountIsElevation)
             {
-                m_Amount += 100 * m_AmountRateOfChange;
+                if (m_Amount >= 500 && m_Amount < 1000)
+                {
+                    m_Amount += 100 * m_AmountRateOfChange;
+                }
+                else if (m_Amount >= 100 && m_Amount < 500)
+                {
+                    m_Amount += 50 * m_AmountRateOfChange;
+                }
+                else if (m_Amount < 100 && m_Amount >= 10)
+                {
+                    m_Amount += 10 * m_AmountRateOfChange;
+                }
+                else if (m_Amount < 1000)
+                {
+                    if (m_AmountRateOfChange == 1f && m_Amount == 0.125f)
+                    {
+                        m_Amount = 1f;
+                    }
+                    else
+                    {
+                        m_Amount += 1 * m_AmountRateOfChange;
+                    }
+                }
+
+                m_Amount = Mathf.Clamp(m_Amount, 0.125f, 1000f);
             }
-            else if (m_Amount >= 100 && m_Amount < 500)
-            {
-                m_Amount += 50 * m_AmountRateOfChange;
-            }
-            else if (m_Amount < 100 && m_Amount >= 10)
+            else
             {
                 m_Amount += 10 * m_AmountRateOfChange;
+                m_Amount = Mathf.Round(m_Amount * 10f) / 10f;
+                m_Amount = Mathf.Clamp(m_Amount, m_TerrainSystem.GetTerrainBounds().min.y, m_TerrainSystem.GetTerrainBounds().max.y);
             }
-            else if (m_Amount < 1000)
-            {
-                m_Amount += 1 * m_AmountRateOfChange;
-            }
-
-            m_Amount = Mathf.Clamp(m_Amount, 0.125f, 1000f);
 
             string unit = " m";
 
@@ -511,24 +596,33 @@ namespace Water_Features.Tools
 
         private void DecreaseAmount()
         {
-            if (m_Amount <= 10 && m_Amount > 0.125f)
+            if (!m_AmountIsElevation)
             {
-                m_Amount -= 1 * m_AmountRateOfChange;
+                if (m_Amount <= 10 && m_Amount > 0.125f)
+                {
+                    m_Amount -= 1 * m_AmountRateOfChange;
+                }
+                else if (m_Amount <= 100 && m_Amount > 10)
+                {
+                    m_Amount -= 10 * m_AmountRateOfChange;
+                }
+                else if (m_Amount <= 500 && m_Amount > 100)
+                {
+                    m_Amount -= 50 * m_AmountRateOfChange;
+                }
+                else if (m_Amount > 500)
+                {
+                    m_Amount -= 100 * m_AmountRateOfChange;
+                }
+
+                m_Amount = Mathf.Clamp(m_Amount, 0.125f, 1000f);
             }
-            else if (m_Amount <= 100 && m_Amount > 10)
+            else
             {
                 m_Amount -= 10 * m_AmountRateOfChange;
+                m_Amount = Mathf.Round(m_Amount * 10f) / 10f;
+                m_Amount = Mathf.Clamp(m_Amount, m_TerrainSystem.GetTerrainBounds().min.y, m_TerrainSystem.GetTerrainBounds().max.y);
             }
-            else if (m_Amount <= 500 && m_Amount > 100)
-            {
-                m_Amount -= 50 * m_AmountRateOfChange;
-            }
-            else if (m_Amount > 500)
-            {
-                m_Amount -= 100 * m_AmountRateOfChange;
-            }
-
-            m_Amount = Mathf.Clamp(m_Amount, 0.125f, 1000f);
 
             if (m_Amount < m_MinDepth)
             {
@@ -696,6 +790,7 @@ namespace Water_Features.Tools
 
                 m_Radius = waterSourcePrefab.m_DefaultRadius;
                 m_Amount = waterSourcePrefab.m_DefaultAmount;
+                m_AmountIsElevation = false;
 
                 // This script sets the radius field to the desired radius;
                 UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");

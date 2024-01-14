@@ -7,6 +7,7 @@ namespace Water_Features.Tools
     using System.Runtime.CompilerServices;
     using cohtml.Net;
     using Colossal.Logging;
+    using Game.Audio.Radio;
     using Game.Citizens;
     using Game.Common;
     using Game.Input;
@@ -25,14 +26,13 @@ namespace Water_Features.Tools
     using Water_Features.Components;
     using Water_Features.Prefabs;
     using Water_Features.Systems;
-    using Water_Features.Utils;
 
     /// <summary>
     /// A custom water tool system for creating or modifying water sources.
     /// </summary>
     public partial class CustomWaterToolSystem : ToolBaseSystem
     {
-        private const float MapExtents = 7200f;
+        private const float MapExtents = 7168f;
         private EntityArchetype m_WaterSourceArchetype;
         private EntityArchetype m_AutoFillingLakeArchetype;
         private EntityArchetype m_DetentionBasinArchetype;
@@ -62,11 +62,32 @@ namespace Water_Features.Tools
         /// A method for determining if a position is close to the border.
         /// </summary>
         /// <param name="pos">Position to be checked.</param>
+        /// <param name="radius">Tolerance for acceptable position.</param>
+        /// <param name="clamp">Should the radius be clamped to between 25f and 150f.</param>
         /// <returns>True if within proximity of border.</returns>
-        public bool IsPositionNearBorder(Vector3 pos)
+        public bool IsPositionNearBorder(float3 pos, float radius, bool clamp)
         {
-            float tolerance = 100f;
-            if (pos.x > MapExtents - tolerance || pos.x < (-1 * MapExtents) + tolerance || pos.z > MapExtents - tolerance || pos.z < (-1 * MapExtents) + tolerance)
+            if (clamp)
+            {
+                radius = Mathf.Clamp(radius, 25f, 150f);
+            }
+
+            if (Mathf.Abs(MapExtents - Mathf.Abs(pos.x)) < radius || Mathf.Abs(MapExtents - Mathf.Abs(pos.z)) < radius)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// A method for determining if a position is within the border.
+        /// </summary>
+        /// <param name="pos">Position to be checked.</param>
+        /// <returns>True if within the border. False if not.</returns>
+        public bool IsPositionWithinBorder(float3 pos)
+        {
+            if (Mathf.Max(Mathf.Abs(pos.x), Mathf.Abs(pos.z)) < MapExtents)
             {
                 return true;
             }
@@ -84,6 +105,7 @@ namespace Water_Features.Tools
             {
                 return true;
             }
+
             return false;
         }
 
@@ -134,6 +156,7 @@ namespace Water_Features.Tools
         {
             base.InitializeRaycast();
             m_ToolRaycastSystem.typeMask = TypeMask.Terrain | TypeMask.Water;
+            m_ToolRaycastSystem.raycastFlags = RaycastFlags.Outside;
         }
 
         /// <inheritdoc/>
@@ -182,12 +205,8 @@ namespace Water_Features.Tools
                 },
             });
             RequireForUpdate(m_WaterSourcesQuery);
-
-
             base.OnCreate();
         }
-
-
 
         /// <inheritdoc/>
         protected override void OnStartRunning()
@@ -245,13 +264,13 @@ namespace Water_Features.Tools
 
             if (m_ApplyAction.WasPressedThisFrame())
             {
-                if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.River)
+                if ((m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.River && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Sea && IsPositionWithinBorder(m_RaycastPoint.m_HitPosition)) || (IsPositionNearBorder(m_RaycastPoint.m_HitPosition, m_WaterToolUISystem.Radius, false) && m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.Sea))
                 {
                     float terrainHeight = TerrainUtils.SampleHeight(ref terrainHeightData, m_RaycastPoint.m_HitPosition);
                     TryAddWaterSource(ref inputDeps, new float3(m_RaycastPoint.m_HitPosition.x, terrainHeight, m_RaycastPoint.m_HitPosition.z));
                     return inputDeps;
                 }
-                else if (IsPositionNearBorder(m_RaycastPoint.m_HitPosition))
+                else if (IsPositionNearBorder(m_RaycastPoint.m_HitPosition, m_WaterToolUISystem.Radius, true) && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.River)
                 {
                     Vector3 borderPosition = m_RaycastPoint.m_HitPosition;
                     if (Mathf.Abs(m_RaycastPoint.m_HitPosition.x) >= Mathf.Abs(m_RaycastPoint.m_HitPosition.z))
@@ -282,9 +301,9 @@ namespace Water_Features.Tools
                     return inputDeps;
                 }
             }
-            else if (m_SecondaryApplyAction.WasReleasedThisFrame())
+            else if (m_SecondaryApplyAction.WasReleasedThisFrame() && m_HoveredWaterSources.Length > 0)
             {
-                RemoveWaterSourcesJob removeWaterSourcesJob = new()
+                RemoveWaterSourcesJob removeWaterSourcesJob = new ()
                 {
                     m_SourceType = __TypeHandle.__Game_Simulation_WaterSourceData_RO_ComponentTypeHandle,
                     m_EntityType = __TypeHandle.__Unity_Entities_Entity_TypeHandle,
@@ -293,46 +312,62 @@ namespace Water_Features.Tools
                     buffer = m_ToolOutputBarrier.CreateCommandBuffer(),
                     m_MapExtents = MapExtents,
                 };
-                JobHandle jobHandle = JobChunkExtensions.Schedule(removeWaterSourcesJob, m_WaterSourcesQuery, Dependency);
+                JobHandle jobHandle = JobChunkExtensions.Schedule(removeWaterSourcesJob, m_WaterSourcesQuery, inputDeps);
                 m_ToolOutputBarrier.AddJobHandleForProducer(jobHandle);
                 inputDeps = jobHandle;
+            }
+            else if (m_SecondaryApplyAction.WasPressedThisFrame() && m_HoveredWaterSources.IsEmpty)
+            {
+                m_WaterToolUISystem.SetElevation(m_RaycastPoint.m_HitPosition.y);
             }
 
             m_WaterTooltipSystem.HitPosition = m_RaycastPoint.m_HitPosition;
 
-            if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek)
-            {
-                float amount = m_WaterToolUISystem.Amount;
-                float radius = m_WaterToolUISystem.Radius;
-
-                float terrainHeight = TerrainUtils.SampleHeight(ref terrainHeightData, m_RaycastPoint.m_HitPosition);
-                float3 lakeProjectedWaterSurfacePosition = new float3(m_RaycastPoint.m_HitPosition.x, terrainHeight + amount, m_RaycastPoint.m_HitPosition.z);
-                LakeProjectionJob lakeProjectionJob = new()
-                {
-                    m_OverlayBuffer = m_OverlayRenderSystem.GetBuffer(out JobHandle outputJobHandle),
-                    m_Position = lakeProjectedWaterSurfacePosition,
-                    m_Radius = radius,
-                };
-                JobHandle jobHandle = IJobExtensions.Schedule(lakeProjectionJob, outputJobHandle);
-                m_OverlayRenderSystem.AddBufferWriter(jobHandle);
-                inputDeps = JobHandle.CombineDependencies(jobHandle, inputDeps);
-            }
-
             if (m_HoveredWaterSources.IsEmpty)
             {
-                float radius = m_WaterToolUISystem.Radius;
-                float terrainHeight = TerrainUtils.SampleHeight(ref terrainHeightData, m_RaycastPoint.m_HitPosition);
-                WaterToolRadiusJob waterToolRadiusJob = new ()
+                if ((m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.River && IsPositionNearBorder(m_RaycastPoint.m_HitPosition, m_WaterToolUISystem.Radius, true))
+                 || (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.Sea && IsPositionNearBorder(m_RaycastPoint.m_HitPosition, m_WaterToolUISystem.Radius, false))
+                 || (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.River && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.River && IsPositionWithinBorder(m_RaycastPoint.m_HitPosition)))
                 {
-                    m_OverlayBuffer = m_OverlayRenderSystem.GetBuffer(out JobHandle outJobHandle2),
-                    m_Position = new float3(m_RaycastPoint.m_HitPosition.x, terrainHeight, m_RaycastPoint.m_HitPosition.z),
-                    m_Radius = radius,
-                    m_SourceType = m_ActivePrefab.m_SourceType,
-                    m_MapExtents = MapExtents,
-                };
-                JobHandle jobHandle = IJobExtensions.Schedule(waterToolRadiusJob, outJobHandle2);
-                m_OverlayRenderSystem.AddBufferWriter(jobHandle);
-                inputDeps = JobHandle.CombineDependencies(jobHandle, inputDeps);
+                    float radius = m_WaterToolUISystem.Radius;
+                    float terrainHeight = TerrainUtils.SampleHeight(ref terrainHeightData, m_RaycastPoint.m_HitPosition);
+
+                    if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek)
+                    {
+                        float amount = m_WaterToolUISystem.Amount;
+                        float elevation = terrainHeight + amount;
+                        if (m_WaterToolUISystem.AmountIsAnElevation)
+                        {
+                            elevation = amount;
+                        }
+
+                        // Based on experiments the predicted water surface elevation is always higher than the result.
+                        float approximateError = 2.5f;
+
+                        float3 lakeProjectedWaterSurfacePosition = new float3(m_RaycastPoint.m_HitPosition.x, elevation - approximateError, m_RaycastPoint.m_HitPosition.z);
+                        LakeProjectionJob lakeProjectionJob = new ()
+                        {
+                            m_OverlayBuffer = m_OverlayRenderSystem.GetBuffer(out JobHandle outputJobHandle),
+                            m_Position = lakeProjectedWaterSurfacePosition,
+                            m_Radius = radius,
+                        };
+                        JobHandle jobHandle1 = IJobExtensions.Schedule(lakeProjectionJob, outputJobHandle);
+                        m_OverlayRenderSystem.AddBufferWriter(jobHandle1);
+                        inputDeps = JobHandle.CombineDependencies(jobHandle1, inputDeps);
+                    }
+
+                    WaterToolRadiusJob waterToolRadiusJob = new ()
+                    {
+                        m_OverlayBuffer = m_OverlayRenderSystem.GetBuffer(out JobHandle outJobHandle2),
+                        m_Position = new float3(m_RaycastPoint.m_HitPosition.x, terrainHeight, m_RaycastPoint.m_HitPosition.z),
+                        m_Radius = radius,
+                        m_SourceType = m_ActivePrefab.m_SourceType,
+                        m_MapExtents = MapExtents,
+                    };
+                    JobHandle jobHandle = IJobExtensions.Schedule(waterToolRadiusJob, outJobHandle2);
+                    m_OverlayRenderSystem.AddBufferWriter(jobHandle);
+                    inputDeps = JobHandle.CombineDependencies(jobHandle, inputDeps);
+                }
             }
 
             m_HoveredWaterSources.Clear();
@@ -368,9 +403,13 @@ namespace Water_Features.Tools
         {
             float pollution = 0; // Alter later if UI for adding pollution. Also check to make sure it's smaller than amount later.
             float amount = m_WaterToolUISystem.Amount;
-            if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.AutofillingLake)
+            if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.AutofillingLake && !m_WaterToolUISystem.AmountIsAnElevation)
             {
                 amount += position.y;
+            }
+            else if (m_WaterToolUISystem.AmountIsAnElevation && m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.AutofillingLake)
+            {
+                amount -= position.y;
             }
 
             float radius = m_WaterToolUISystem.Radius;
@@ -517,7 +556,7 @@ namespace Water_Features.Tools
                     Game.Objects.Transform currentTransform = transformNativeArray[i];
                     m_Position.y = 0;
                     currentTransform.m_Position.y = 0;
-                    if (WaterSourceUtils.CheckForHoveringOverWaterSource(m_Position, currentTransform.m_Position, currentWaterSourceData.m_Radius, m_MapExtents))
+                    if (math.distance(m_Position, currentTransform.m_Position) < Mathf.Clamp(currentWaterSourceData.m_Radius, 25f, 150f))
                     {
                         buffer.DestroyEntity(currentEntity);
                     }
@@ -621,7 +660,13 @@ namespace Water_Features.Tools
                 NativeArray<Entity> entityNativeArray = chunk.GetNativeArray(m_EntityType);
                 for (int i = 0; i < chunk.Count; i++)
                 {
+
                     Game.Simulation.WaterSourceData currentWaterSourceData = waterSourceDataNativeArray[i];
+                    if (currentWaterSourceData.m_Radius == 0f)
+                    {
+                        continue;
+                    }
+
                     Game.Objects.Transform currentTransform = transformNativeArray[i];
                     float3 terrainPosition = new (currentTransform.m_Position.x, TerrainUtils.SampleHeight(ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
                     float3 waterPosition = new (currentTransform.m_Position.x, WaterUtils.SampleHeight(ref m_WaterSurfaceData, ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
@@ -649,7 +694,7 @@ namespace Water_Features.Tools
                     UnityEngine.Color insideColor = borderColor;
                     insideColor.a = 0.1f;
 
-                    float radius = WaterSourceUtils.GetRadius(currentTransform.m_Position, currentWaterSourceData.m_Radius, m_MapExtents);
+                    float radius = Mathf.Clamp(currentWaterSourceData.m_Radius, 25f, 150f);
                     if (radius > currentWaterSourceData.m_Radius)
                     {
                         m_OverlayBuffer.DrawCircle(borderColor, insideColor, currentWaterSourceData.m_Radius / 20f, 0, new float2(0, 1), position, currentWaterSourceData.m_Radius * 2f);
@@ -670,7 +715,7 @@ namespace Water_Features.Tools
                     case 0:
                         return UnityEngine.Color.red;
                     case 1:
-                        return UnityEngine.Color.cyan;
+                        return new UnityEngine.Color(0.422f, 0.242f, 0.152f);
                     case 2:
                         return UnityEngine.Color.yellow;
                     case 3:
@@ -695,7 +740,7 @@ namespace Water_Features.Tools
                 UnityEngine.Color insideColor = borderColor;
                 insideColor.a = 0.1f;
 
-                float radius = WaterSourceUtils.GetRadius(m_Position, m_Radius, m_MapExtents);
+                float radius = Mathf.Clamp(m_Radius, 25f, 150f);
                 if (radius > m_Radius)
                 {
                     m_OverlayBuffer.DrawCircle(borderColor, insideColor, m_Radius / 20f, 0, new float2(0, 1), m_Position, m_Radius * 2f);
@@ -715,7 +760,7 @@ namespace Water_Features.Tools
                     case WaterToolUISystem.SourceType.Creek:
                         return UnityEngine.Color.red;
                     case WaterToolUISystem.SourceType.Lake:
-                        return UnityEngine.Color.cyan;
+                        return new UnityEngine.Color(0.422f, 0.242f, 0.152f);
                     case WaterToolUISystem.SourceType.River:
                         return UnityEngine.Color.yellow;
                     case WaterToolUISystem.SourceType.Sea:
@@ -766,10 +811,15 @@ namespace Water_Features.Tools
                 {
                     Entity currentEntity = entityNativeArray[i];
                     Game.Simulation.WaterSourceData currentWaterSourceData = waterSourceDataNativeArray[i];
+                    if (currentWaterSourceData.m_Radius == 0)
+                    {
+                        continue;
+                    }
+
                     Game.Objects.Transform currentTransform = transformNativeArray[i];
                     m_Position.y = 0;
                     currentTransform.m_Position.y = 0;
-                    if (WaterSourceUtils.CheckForHoveringOverWaterSource(m_Position, currentTransform.m_Position, currentWaterSourceData.m_Radius, m_MapExtents))
+                    if (math.distance(m_Position, currentTransform.m_Position) < Mathf.Clamp(currentWaterSourceData.m_Radius, 25f, 150f))
                     {
                         m_Entities.Add(in currentEntity);
                     }

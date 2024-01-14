@@ -77,7 +77,7 @@ namespace Water_Features.Tools
 
             if (waterSourcePrefab.m_SourceType == WaterToolUISystem.SourceType.River)
             {
-                if (!m_CustomWaterTool.IsPositionNearBorder(m_HitPosition))
+                if (!m_CustomWaterTool.IsPositionNearBorder(m_HitPosition, m_WaterToolUISystem.Radius, true))
                 {
                     StringTooltip mustBePlacedNearMapBorderTooltip = new ()
                     {
@@ -85,6 +85,30 @@ namespace Water_Features.Tools
                         value = LocalizedString.IdWithFallback("Tooltip.LABEL[YY.WT.PlaceNearBorder]", "Rivers must be placed near map border."),
                     };
                     AddMouseTooltip(mustBePlacedNearMapBorderTooltip);
+                }
+            }
+            else if (waterSourcePrefab.m_SourceType == WaterToolUISystem.SourceType.Sea)
+            {
+                if (!m_CustomWaterTool.IsPositionNearBorder(m_HitPosition, m_WaterToolUISystem.Radius, false))
+                {
+                    StringTooltip mustTouchBorderTooltip = new ()
+                    {
+                        path = "Tooltip.LABEL[YY.WT.MustTouchBorder]",
+                        value = LocalizedString.IdWithFallback("Tooltip.LABEL[YY.WT.MustTouchBorder]", "Sea water sources must touch the map border."),
+                    };
+                    AddMouseTooltip(mustTouchBorderTooltip);
+                }
+            }
+            else
+            {
+                if (!m_CustomWaterTool.IsPositionWithinBorder(m_HitPosition))
+                {
+                    StringTooltip mustBePlacedInsideBorderTooltip = new ()
+                    {
+                        path = "Tooltip.LABEL[YY.WT.PlaceInsideBorder]",
+                        value = LocalizedString.IdWithFallback("Tooltip.LABEL[YY.WT.PlaceInsideBorder]", "This water source must be placed inside the playable map."),
+                    };
+                    AddMouseTooltip(mustBePlacedInsideBorderTooltip);
                 }
             }
 
@@ -108,6 +132,15 @@ namespace Water_Features.Tools
                     value = LocalizedString.IdWithFallback("Tooltip.LABEL[YY.WT.RemoveWaterSource]", "Right click to remove water source."),
                 };
                 AddMouseTooltip(removeWaterSourceTooltip);
+            }
+            else if (waterSourcePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek && !m_WaterToolUISystem.AmountIsAnElevation)
+            {
+                StringTooltip lockElevationTooltip = new ()
+                {
+                    path = "Tooltip.LABEL[YY.WT.LockElevation]",
+                    value = LocalizedString.IdWithFallback("Tooltip.LABEL[YY.WT.LockElevation]", "Right click to designate the water surface elevation."),
+                };
+                AddMouseTooltip(lockElevationTooltip);
             }
         }
 

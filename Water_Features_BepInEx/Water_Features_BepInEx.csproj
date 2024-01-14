@@ -181,7 +181,6 @@
     <Compile Include="Tools\CustomWaterToolSystem.cs" />
     <Compile Include="Utils\ReflectionExtensions.cs" />
     <Compile Include="Utils\UIFileUtils.cs" />
-    <Compile Include="Utils\WaterSourceUtils.cs" />
     <Compile Include="WaterFeaturesMod.cs" />
   </ItemGroup>
   <ItemGroup>
