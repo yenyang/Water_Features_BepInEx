@@ -74,6 +74,11 @@ namespace Water_Features.Systems
             });
             RequireForUpdate(m_WaterSourceQuery);
             m_Log.Info($"[{nameof(TidesAndWavesSystem)}] {nameof(OnCreate)}");
+            if (!WaterFeaturesMod.Settings.EnableWavesAndTides)
+            {
+                m_Log.Info($"[{nameof(TidesAndWavesSystem)}] {nameof(OnCreate)} Waves and Tides disabled.");
+                Enabled = false;
+            }
         }
 
         /// <inheritdoc/>

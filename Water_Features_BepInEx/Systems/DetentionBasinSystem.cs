@@ -49,6 +49,12 @@ namespace Water_Features.Systems
         protected override void OnCreate()
         {
             base.OnCreate();
+            if (!WaterFeaturesMod.Settings.IncludeDetentionBasins)
+            {
+                Enabled = false;
+                return;
+            }
+
             m_Log = WaterFeaturesMod.Instance.Log;
             m_ClimateSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ClimateSystem>();
             m_EndFrameBarrier = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<EndFrameBarrier>();

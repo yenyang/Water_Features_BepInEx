@@ -79,6 +79,8 @@ namespace Water_Features.Systems
             findWaterSourcesJob.m_SourceType = __TypeHandle.__Game_Simulation_WaterSourceData_RW_ComponentTypeHandle;
             findWaterSourcesJob.m_EntityType = __TypeHandle.__Unity_Entities_Entity_TypeHandle;
             findWaterSourcesJob.buffer = m_EndFrameBarrier.CreateCommandBuffer();
+            findWaterSourcesJob.m_SeasonalStreamsEnabled = WaterFeaturesMod.Settings.EnableSeasonalStreams;
+            findWaterSourcesJob.m_WavesAndTidesEnabled = WaterFeaturesMod.Settings.EnableWavesAndTides;
             FindWaterSourcesJob jobData = findWaterSourcesJob;
             JobHandle jobHandle = JobChunkExtensions.Schedule(jobData, m_WaterSourcesQuery, Dependency);
             m_EndFrameBarrier.AddJobHandleForProducer(jobHandle);
@@ -121,6 +123,8 @@ namespace Water_Features.Systems
             public EntityTypeHandle m_EntityType;
             public ComponentTypeHandle<Game.Simulation.WaterSourceData> m_SourceType;
             public EntityCommandBuffer buffer;
+            public bool m_SeasonalStreamsEnabled;
+            public bool m_WavesAndTidesEnabled;
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
@@ -130,7 +134,7 @@ namespace Water_Features.Systems
                 {
                     Entity currentEntity = entityNativeArray[i];
                     Game.Simulation.WaterSourceData currentWaterSourceData = waterSourceDataNativeArray[i];
-                    if (currentWaterSourceData.m_ConstantDepth == 0 && currentWaterSourceData.m_Amount > 0f)
+                    if (currentWaterSourceData.m_ConstantDepth == 0 && currentWaterSourceData.m_Amount > 0f && m_SeasonalStreamsEnabled)
                     {
                         SeasonalStreamsData waterSourceRecordComponent = new ()
                         {
@@ -139,7 +143,7 @@ namespace Water_Features.Systems
                         buffer.AddComponent<SeasonalStreamsData>(currentEntity);
                         buffer.SetComponent(currentEntity, waterSourceRecordComponent);
                     }
-                    else if (currentWaterSourceData.m_ConstantDepth == 3 && currentWaterSourceData.m_Amount > 0f && currentWaterSourceData.m_Radius > 0f)
+                    else if (currentWaterSourceData.m_ConstantDepth == 3 && currentWaterSourceData.m_Amount > 0f && currentWaterSourceData.m_Radius > 0f && m_WavesAndTidesEnabled)
                     {
                         buffer.AddComponent<TidesAndWavesData>(currentEntity);
                         TidesAndWavesData wavesAndTidesData = new ()

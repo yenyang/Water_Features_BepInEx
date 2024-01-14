@@ -104,6 +104,8 @@ namespace Water_Features
             updateSystem.UpdateBefore<BeforeSerializeSystem>(SystemUpdatePhase.Serialize);
             updateSystem.UpdateAfter<TidesAndWavesSystem>(SystemUpdatePhase.Serialize);
             updateSystem.UpdateAt<SeasonalStreamsSystem>(SystemUpdatePhase.GameSimulation);
+            updateSystem.UpdateAt<DisableSeasonalStreamSystem>(SystemUpdatePhase.GameSimulation);
+            updateSystem.UpdateAt<DisableWavesAndTidesSystem>(SystemUpdatePhase.GameSimulation);
             updateSystem.UpdateAfter<SeasonalStreamsSystem>(SystemUpdatePhase.Serialize);
             updateSystem.UpdateAfter<AutofillingLakesSystem>(SystemUpdatePhase.Serialize);
             updateSystem.UpdateAfter<DetentionBasinSystem>(SystemUpdatePhase.Serialize);

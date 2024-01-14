@@ -25,11 +25,8 @@ namespace Water_Features.Systems
     using Unity.Mathematics;
     using UnityEngine;
     using Water_Features.Components;
-    using Water_Features.Prefabs;
-    using Water_Features.Settings;
     using Water_Features.Utils;
     using static Game.Simulation.ClimateSystem;
-    using static Water_Features.Tools.WaterToolUISystem;
 
     /// <summary>
     /// A system for handing creek seasonality and runoff.
@@ -96,6 +93,11 @@ namespace Water_Features.Systems
             RequireForUpdate(m_ClimateQuery);
             RequireForUpdate(m_OriginalAmountsQuery);
             m_Log.Info($"[{nameof(SeasonalStreamsSystem)}] {nameof(OnCreate)}");
+            if (!WaterFeaturesMod.Settings.EnableSeasonalStreams)
+            {
+                m_Log.Info($"[{nameof(TidesAndWavesSystem)}] {nameof(OnCreate)} Seasonal Streams disabled.");
+                Enabled = false;
+            }
         }
 
         /// <inheritdoc/>

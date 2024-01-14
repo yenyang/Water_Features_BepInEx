@@ -29,6 +29,9 @@ namespace Water_Features.Settings
             return new Dictionary<string, string>
             {
                 { m_Setting.GetSettingsLocaleID(), "Water Features" },
+                { m_Setting.GetOptionTabLocaleID(WaterFeaturesSettings.SeasonalStreams), "Seasonal Streams" },
+                { m_Setting.GetOptionTabLocaleID(WaterFeaturesSettings.WaterToolGroup), "Water Tool" },
+                { m_Setting.GetOptionTabLocaleID(WaterFeaturesSettings.WavesAndTides), "Waves and Tides" },
                 { m_Setting.GetOptionGroupLocaleID(WaterFeaturesSettings.SeasonalStreams), "Seasonal Streams" },
                 { m_Setting.GetOptionGroupLocaleID(WaterFeaturesSettings.WaterToolGroup), "Water Tool" },
                 { m_Setting.GetOptionGroupLocaleID(WaterFeaturesSettings.WavesAndTides), "Waves and Tides" },
@@ -38,6 +41,8 @@ namespace Water_Features.Settings
                 { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.IncludeDetentionBasins)), "Custom modded water source that rises with precipitation and snowmelt and slowly drains when the weather is dry. They have a maximum water surface elevation but no minimum water surface elevation. You may need to adjust the global evaporation rate in the settings for desirable infiltration of the pond water." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.EvaporationRate)), "Evaporation Rate" },
                 { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.EvaporationRate)), "Actual evaporation rate is 1000x smaller but this gives you control over the rate. This is global and you may want to rebalance and increase flows of water sources after increasing it." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.EnableSeasonalStreams)), "Enable Seasonal Streams" },
+                { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.EnableSeasonalStreams)), "Seasonal streams takes Creeks (a.k.a. Constant Rate Water Source) and ties them to the climate and weather for the map. For example, if your map features a dry summer, then these water sources will decrease during the summer. Seasonal streams by it-self should not cause flooding since it treats the map's default water source amount as a maximum unless you change it. All aspects are optional and adjustable in the mod's settings." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.SimulateSnowMelt)), "Simulate Snow Melt" },
                 { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.SimulateSnowMelt)), "Simulate snow accumulation and snow melt. Snow melt is not currently tied to snow visuals. This affects Constant Rate Water Sources, Detention and Retention basins." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.CreekSpringWater)), "Constant Flow Rate" },
@@ -50,6 +55,8 @@ namespace Water_Features.Settings
                 { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.MinimumMultiplier)), "Minimum multiplier applied to stream flowrates." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.MaximumMultiplier)), "Maximum Multiplier" },
                 { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.MaximumMultiplier)), "Maximum multiplier applied to stream flowrates." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.EnableWavesAndTides)), "Enable Waves and Tides" },
+                { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.EnableWavesAndTides)), "This feature is dependent on map design. Maps with a sea water source and a single shoreline work best. \r\nThe point of the waves feature is to make the shore move in and out and make sand along the shoreline. A better way to make beaches is to just paint them with surface painter instead. \r\nWaves exacerbate the magnitude of the water surface. Tides are similar but happen once or twice a day." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.WaveHeight)), "Wave Height" },
                 { m_Setting.GetOptionDescLocaleID(nameof(WaterFeaturesSettings.WaveHeight)), "EXPERIMENTAL! Waves are generated at the map boundary where there is a Sea water source. Once generated they head towards shore. Maps were not designed for these waves. Be prepared to need to change the map and design your build to accommodate the waves. You may even want to remove some or all sea water sources and make new ones in better locations." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(WaterFeaturesSettings.WaveFrequency)), "Wave Frequency" },

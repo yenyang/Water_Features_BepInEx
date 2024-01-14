@@ -9,13 +9,14 @@ namespace Water_Features.Settings
     using Game.Settings;
     using Unity.Entities;
     using Water_Features.Systems;
+    using static Game.Prefabs.CompositionFlags;
 
     /// <summary>
     /// The mod settings for the Water Features Mod.
     /// </summary>
     [FileLocation("Mods_Yenyang_Water_Features")]
-    [SettingsUIShowGroupName(SeasonalStreams, WaterToolGroup, WavesAndTides)]
-    [SettingsUIGroupOrder(SeasonalStreams, WaterToolGroup, WavesAndTides)]
+    [SettingsUITabOrder(SeasonalStreams, WaterToolGroup, WavesAndTides)]
+    [SettingsUISection(SeasonalStreams, WaterToolGroup, WavesAndTides)]
     public class WaterFeaturesSettings : ModSetting
     {
         /// <summary>
@@ -66,19 +67,19 @@ namespace Water_Features.Settings
         /// <summary>
         /// Gets or sets a value indicating whether to Include Detention Basins.
         /// </summary>
-        [SettingsUISection(WaterToolGroup)]
+        [SettingsUISection(WaterToolGroup, WaterToolGroup)]
         public bool IncludeDetentionBasins { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to Include Retention Basins.
         /// </summary>
-        [SettingsUISection(WaterToolGroup)]
+        [SettingsUISection(WaterToolGroup, WaterToolGroup)]
         public bool IncludeRetentionBasins { get; set; }
 
         /// <summary>
         /// Gets or sets the evaporatin rate for the whole map.
         /// </summary>
-        [SettingsUISection(WaterToolGroup)]
+        [SettingsUISection(WaterToolGroup, WaterToolGroup)]
         [SettingsUISlider(min = 0.1f, max = 1f, step = 0.1f, unit = "percentageSingleFraction", scalarMultiplier = 1000f)]
         public float EvaporationRate { get; set; }
 
@@ -87,7 +88,7 @@ namespace Water_Features.Settings
         /// </summary>
         [SettingsUIButton]
         [SettingsUIConfirmation]
-        [SettingsUISection(WaterToolGroup)]
+        [SettingsUISection(WaterToolGroup, WaterToolGroup)]
         public bool WaterCleanUpCycleButton
         {
             set { m_ChangeWaterSystemValues.ApplyNewEvaporationRate = true; }
@@ -98,7 +99,7 @@ namespace Water_Features.Settings
         /// </summary>
         [SettingsUIButton]
         [SettingsUIConfirmation]
-        [SettingsUISection(WaterToolGroup)]
+        [SettingsUISection(WaterToolGroup, WaterToolGroup)]
         public bool ResetWaterToolGroupButton
         {
             set
@@ -117,13 +118,13 @@ namespace Water_Features.Settings
         /// <summary>
         /// Gets or sets a value indicating whether to have Seasonal Streams.
         /// </summary>
-        [SettingsUISection(SeasonalStreams)]
+        [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         public bool EnableSeasonalStreams { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to simulate snow melt with creeks.
         /// </summary>
-        [SettingsUISection(SeasonalStreams)]
+        [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsSeasonalStreamsDisabled))]
         public bool SimulateSnowMelt { get; set; }
 
@@ -131,7 +132,7 @@ namespace Water_Features.Settings
         /// Gets or sets a value with a slider indicating the multiplier for water always emitted from a creek.
         /// </summary>
         [SettingsUISlider(min = 0f, max = 100f, step = 5f, unit = "percentageSingleFraction", scalarMultiplier = 100f)]
-        [SettingsUISection(SeasonalStreams)]
+        [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsSeasonalStreamsDisabled))]
         public float CreekSpringWater { get; set; }
 
@@ -139,7 +140,7 @@ namespace Water_Features.Settings
         /// Gets or sets a value with a slider indicating the multiplier for water seaonally emitted from a creek.
         /// </summary>
         [SettingsUISlider(min = 0f, max = 100f, step = 5f, unit = "percentageSingleFraction", scalarMultiplier = 100f)]
-        [SettingsUISection(SeasonalStreams)]
+        [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsSeasonalStreamsDisabled))]
         public float CreekMeanPrecipitationWeight { get; set; }
 
@@ -148,14 +149,14 @@ namespace Water_Features.Settings
         /// Gets or sets a value with a slider indicating the multiplier for water emitted from a creek due to rain.
         /// </summary>
         [SettingsUISlider(min = 0f, max = 100f, step = 5f, unit = "percentageSingleFraction", scalarMultiplier = 100f)]
-        [SettingsUISection(SeasonalStreams)]
+        [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsSeasonalStreamsDisabled))]
         public float CreekCurrentPrecipitationWeight { get; set; }
 
         /// <summary>
         /// Gets or sets a value with a slider indicating the minimum multiplier to apply to creeks.
         /// </summary>
-        [SettingsUISection(SeasonalStreams)]
+        [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsSeasonalStreamsDisabled))]
         [SettingsUISlider(min = 0f, max = 1f, step = 0.1f, unit = "floatSingleFraction")]
         public float MinimumMultiplier { get; set; }
@@ -164,7 +165,7 @@ namespace Water_Features.Settings
         /// Gets or sets a value with a slider indicating the maximum multiplier to apply to creeks.
         /// </summary>
         [SettingsUISlider(min = 1f, max = 10f, step = 0.1f, unit = "floatSingleFraction")]
-        [SettingsUISection(SeasonalStreams)]
+        [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsSeasonalStreamsDisabled))]
         public float MaximumMultiplier { get; set; }
 
@@ -173,8 +174,7 @@ namespace Water_Features.Settings
         /// </summary>
         [SettingsUIButton]
         [SettingsUIConfirmation]
-        [SettingsUISection(SeasonalStreams)]
-        [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsSeasonalStreamsDisabled))]
+        [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         public bool ResetSeasonalStreamsSettingsButton
         {
             set
@@ -186,13 +186,13 @@ namespace Water_Features.Settings
         /// <summary>
         /// Gets or sets a value indicating whether to have Waves and Tides.
         /// </summary>
-        [SettingsUISection(WavesAndTides)]
+        [SettingsUISection(WavesAndTides, WavesAndTides)]
         public bool EnableWavesAndTides { get; set; }
 
         /// <summary>
         /// Gets or sets a value with a slider indicating the height of waves generated.
         /// </summary>
-        [SettingsUISection(WavesAndTides)]
+        [SettingsUISection(WavesAndTides, WavesAndTides)]
         [SettingsUISlider(min = 0f, max = 50f, step = 1f, unit = "integer")]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsWavesAndTidesDisabled))]
         public float WaveHeight { get; set; }
@@ -200,7 +200,7 @@ namespace Water_Features.Settings
         /// <summary>
         /// Gets or sets a value with a slider indicating the frequency of waves generated.
         /// </summary>
-        [SettingsUISection(WavesAndTides)]
+        [SettingsUISection(WavesAndTides, WavesAndTides)]
         [SettingsUISlider(min = 10f, max = 250f, step = 10f)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsWavesAndTidesDisabled))]
         public float WaveFrequency { get; set; }
@@ -208,7 +208,7 @@ namespace Water_Features.Settings
         /// <summary>
         /// Gets or sets a value with a slider indicating the height of tides generated.
         /// </summary>
-        [SettingsUISection(WavesAndTides)]
+        [SettingsUISection(WavesAndTides, WavesAndTides)]
         [SettingsUISlider(min = 0f, max = 50f, step = 1f, unit = "integer")]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsWavesAndTidesDisabled))]
         public float TideHeight { get; set; }
@@ -216,14 +216,14 @@ namespace Water_Features.Settings
         /// <summary>
         /// Gets or sets an enum value indicating the tide classification.
         /// </summary>
-        [SettingsUISection(WavesAndTides)]
+        [SettingsUISection(WavesAndTides, WavesAndTides)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsWavesAndTidesDisabled))]
         public TideClassificationYYTAW TideClassification { get; set; }
 
         /// <summary>
         /// Gets or sets a value with a slider indicating the damping factor of the water system.
         /// </summary>
-        [SettingsUISection(WavesAndTides)]
+        [SettingsUISection(WavesAndTides, WavesAndTides)]
         [SettingsUISlider(min = 99f, max = 99.9f, step = 0.1f, unit = "percentageSingleFraction", scalarMultiplier = 100f)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsWavesAndTidesDisabled))]
         public float Damping { get; set; }
@@ -233,8 +233,7 @@ namespace Water_Features.Settings
         /// </summary>
         [SettingsUIButton]
         [SettingsUIConfirmation]
-        [SettingsUISection(WavesAndTides)]
-        [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsWavesAndTidesDisabled))]
+        [SettingsUISection(WavesAndTides, WavesAndTides)]
         public bool ResetWavesAndTidesSettingsButton
         {
             set
@@ -310,6 +309,46 @@ namespace Water_Features.Settings
             Damping = 0.995f;
             EnableSeasonalStreams = true;
             EnableWavesAndTides = false;
+        }
+
+        /// <summary>
+        /// Overriding Apply so that toggling the enable/disable buttons controls the systems involved.
+        /// </summary>
+        public override void Apply()
+        {
+            SeasonalStreamsSystem seasonalStreamsSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<SeasonalStreamsSystem>();
+            TidesAndWavesSystem tidesAndWavesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TidesAndWavesSystem>();
+            if (EnableSeasonalStreams != seasonalStreamsSystem.Enabled)
+            {
+                seasonalStreamsSystem.Enabled = EnableSeasonalStreams;
+                if (EnableSeasonalStreams)
+                {
+                    FindWaterSourcesSystem findWaterSourcesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<FindWaterSourcesSystem>();
+                    findWaterSourcesSystem.Enabled = true;
+                }
+                else
+                {
+                    DisableSeasonalStreamSystem disableSeasonalStreamSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<DisableSeasonalStreamSystem>();
+                    disableSeasonalStreamSystem.Enabled = true;
+                }
+            }
+
+            if (EnableWavesAndTides != tidesAndWavesSystem.Enabled)
+            {
+                tidesAndWavesSystem.Enabled = EnableSeasonalStreams;
+                if (EnableWavesAndTides)
+                {
+                    FindWaterSourcesSystem findWaterSourcesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<FindWaterSourcesSystem>();
+                    findWaterSourcesSystem.Enabled = true;
+                }
+                else
+                {
+                    DisableWavesAndTidesSystem disableWavesAndTidesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<DisableWavesAndTidesSystem>();
+                    disableWavesAndTidesSystem.Enabled = true;
+                }
+            }
+
+            base.Apply();
         }
     }
 }

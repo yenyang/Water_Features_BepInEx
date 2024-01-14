@@ -169,6 +169,8 @@
     <Compile Include="StyleCop\GlobalSuppressions.cs" />
     <Compile Include="Systems\AddPrefabsSystem.cs" />
     <Compile Include="Systems\AutofillingLakesSystem.cs" />
+    <Compile Include="Systems\DisableWavesAndTidesSystem.cs" />
+    <Compile Include="Systems\DisableSeasonalStreamsSystem.cs" />
     <Compile Include="Systems\BeforeSerializeSystem.cs" />
     <Compile Include="Systems\ChangeWaterSystemValues.cs" />
     <Compile Include="Systems\DetentionBasinSystem.cs" />
