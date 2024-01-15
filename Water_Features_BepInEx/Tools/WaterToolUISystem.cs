@@ -7,8 +7,12 @@ namespace Water_Features.Tools
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Xml.Serialization;
     using cohtml.Net;
     using Colossal.Logging;
+    using Colossal.PSI.Environment;
+    using Colossal.Serialization.Entities;
+    using Game;
     using Game.Prefabs;
     using Game.SceneFlow;
     using Game.Simulation;
@@ -19,10 +23,11 @@ namespace Water_Features.Tools
     using Water_Features;
     using Water_Features.Prefabs;
     using Water_Features.Settings;
+    using Water_Features.Systems;
     using Water_Features.Utils;
 
     /// <summary>
-    /// UI system for Custom Water Tool
+    /// UI system for Custom Water Tool.
     /// </summary>
     public partial class WaterToolUISystem : UISystemBase
     {
@@ -56,6 +61,7 @@ namespace Water_Features.Tools
         private string m_MinDepthItemScript = string.Empty;
         private CustomWaterToolSystem m_CustomWaterToolSystem;
         private TerrainSystem m_TerrainSystem;
+        private AddPrefabsSystem m_AddPrefabsSystem;
         private ILog m_Log;
         private bool m_WaterToolPanelShown;
         private List<BoundEventHandle> m_BoundEventHandles;
@@ -70,6 +76,7 @@ namespace Water_Features.Tools
         private bool m_ResetValues = true;
         private bool m_FirstTimeInjectingJS = true;
         private bool m_AmountIsElevation = false;
+        private List<WaterSourcePrefabValuesRepository> m_WaterSourcePrefabValuesRepositories;
 
         /// <summary>
         /// Types of water sources.
@@ -170,6 +177,7 @@ namespace Water_Features.Tools
             m_ToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ToolSystem>();
             m_CustomWaterToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<CustomWaterToolSystem>();
             m_TerrainSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TerrainSystem>();
+            m_AddPrefabsSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<AddPrefabsSystem>();
             m_UiView = GameManager.instance.userInterface.view.View;
             ToolSystem toolSystem = m_ToolSystem; // I don't know why vanilla game did this.
             m_ToolSystem.EventToolChanged = (Action<ToolBaseSystem>)Delegate.Combine(toolSystem.EventToolChanged, new Action<ToolBaseSystem>(OnToolChanged));
@@ -201,6 +209,7 @@ namespace Water_Features.Tools
                 { "YYWT-min-depth-rate-of-change", (Action)MinDepthRateOfChangePressed },
             };
 
+            m_WaterSourcePrefabValuesRepositories = new List<WaterSourcePrefabValuesRepository>();
             base.OnCreate();
         }
 
@@ -272,6 +281,7 @@ namespace Water_Features.Tools
                     {
                         m_Radius = waterSourcePrefab.m_DefaultRadius;
                         m_Amount = waterSourcePrefab.m_DefaultAmount;
+                        TryGetDefaultValuesForWaterSource(waterSourcePrefab, ref m_Amount, ref m_Radius);
                         m_AmountIsElevation = false;
                     }
 
@@ -327,6 +337,13 @@ namespace Water_Features.Tools
             }
 
             base.OnUpdate();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
+        {
+            base.OnGameLoadingComplete(purpose, mode);
+
         }
 
         /// <summary>
@@ -409,18 +426,7 @@ namespace Water_Features.Tools
                 m_Radius += 1 * m_RadiusRateOfChange;
             }
 
-            float minRadius = 5f;
-            /*
-            if (m_CustomWaterToolSystem.GetPrefab() != null)
-            {
-                WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
-                if (waterSourcePrefab.m_SourceType == SourceType.River || waterSourcePrefab.m_SourceType == SourceType.Sea)
-                {
-                    minRadius = 30f;
-                }
-            }*/
-
-            m_Radius = Mathf.Clamp(m_Radius, minRadius, 10000f);
+            m_Radius = Mathf.Clamp(m_Radius, 5f, 10000f);
 
             // This script sets the radius field to the desired radius;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
@@ -449,18 +455,7 @@ namespace Water_Features.Tools
                 m_Radius -= 500 * m_RadiusRateOfChange;
             }
 
-            float minRadius = 5f;
-            /*
-            if (m_CustomWaterToolSystem.GetPrefab() != null)
-            {
-                WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
-                if (waterSourcePrefab.m_SourceType == SourceType.River || waterSourcePrefab.m_SourceType == SourceType.Sea)
-                {
-                    minRadius = 30f;
-                }
-            }*/
-
-            m_Radius = Mathf.Clamp(m_Radius, minRadius, 10000f);
+            m_Radius = Mathf.Clamp(m_Radius, 5f, 10000f);
 
             // This script sets the radius field to the desired radius;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
@@ -790,6 +785,7 @@ namespace Water_Features.Tools
 
                 m_Radius = waterSourcePrefab.m_DefaultRadius;
                 m_Amount = waterSourcePrefab.m_DefaultAmount;
+                TryGetDefaultValuesForWaterSource(waterSourcePrefab, ref m_Amount, ref m_Radius);
                 m_AmountIsElevation = false;
 
                 // This script sets the radius field to the desired radius;
@@ -817,6 +813,81 @@ namespace Water_Features.Tools
                 m_ResetValues = true;
 
                 return;
+            }
+        }
+
+        /// <summary>
+        /// Tries to deserialize an xml with the amount and radius information for a specific water source.
+        /// </summary>
+        /// <param name="waterSource">Generally the active prefab for custom water tool.</param>
+        /// <param name="amount">The default amount will be changed if previous entry was serialized in xml.</param>
+        /// <param name="radius">The default radius will be changed if previous entry was serialized in xml.</param>
+        /// <returns>True if loaded from xml. False if nothing changed.</returns>
+        private bool TryGetDefaultValuesForWaterSource(WaterSourcePrefab waterSource, ref float amount, ref float radius)
+        {
+            string contentFolder = Path.Combine(EnvPath.kUserDataPath, "ModsData", "Mods_Yenyang_Water_Features");
+            Directory.CreateDirectory(contentFolder);
+            string fileName = Path.Combine(contentFolder, waterSource.m_SourceType.ToString());
+            if (File.Exists(fileName))
+            {
+                try
+                {
+                    XmlSerializer serTool = new XmlSerializer(typeof(WaterSourcePrefabValuesRepository)); // Create serializer
+                    System.IO.FileStream readStream = new System.IO.FileStream(fileName, System.IO.FileMode.Open); // Open file
+                    WaterSourcePrefabValuesRepository result = (WaterSourcePrefabValuesRepository)serTool.Deserialize(readStream); // Des-serialize to new Properties
+                    if (result.Amount >= 0.125f && result.Amount <= 1000f)
+                    {
+                        amount = result.Amount;
+                    }
+
+                    if (result.Radius >= 5f && result.Radius <= 10000f)
+                    {
+                        radius = result.Radius;
+                    }
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    m_Log.Warn($"{nameof(WaterToolUISystem)}.{nameof(TryGetDefaultValuesForWaterSource)} Could not get default values for WaterSource {waterSource.m_SourceType}. Encountered exception {ex}");
+                    return false;
+                }
+            }
+
+            if (TrySaveDefaultValuesForWaterSource(waterSource, amount, radius))
+            {
+                m_Log.Debug($"{nameof(WaterToolUISystem)}.{nameof(TryGetDefaultValuesForWaterSource)} Saved {waterSource.m_SourceType}'s default values because the file didn't exist.");
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to save the new default values for a water source for the next time they are placed.
+        /// </summary>
+        /// <param name="waterSource">Generally the active prefab for custom water tool.</param>
+        /// <param name="amount">The next default amount that will be saved.</param>
+        /// <param name="radius">The next default radius that will be saved.</param>
+        /// <returns>True if the information is saved. False if an exception is encountered.</returns>
+        private bool TrySaveDefaultValuesForWaterSource(WaterSourcePrefab waterSource, float amount, float radius)
+        {
+            string contentFolder = Path.Combine(EnvPath.kUserDataPath, "ModsData", "Mods_Yenyang_Water_Features");
+            Directory.CreateDirectory(contentFolder);
+            string fileName = Path.Combine(contentFolder, waterSource.m_SourceType.ToString());
+            WaterSourcePrefabValuesRepository repository = new WaterSourcePrefabValuesRepository() { Amount = amount, Radius = radius};
+            try
+            {
+                XmlSerializer serTool = new XmlSerializer(typeof(WaterSourcePrefabValuesRepository)); // Create serializer
+                System.IO.FileStream file = System.IO.File.Create(fileName); // Create file
+
+                serTool.Serialize(file, repository); // Serialize whole properties
+                file.Close(); // Close file
+                return true;
+            }
+            catch (Exception ex)
+            {
+                m_Log.Warn($"{nameof(WaterToolUISystem)}.{nameof(TryGetDefaultValuesForWaterSource)} Could not save values for water source WaterSource {waterSource.m_SourceType}. Encountered exception {ex}");
+                return false;
             }
         }
     }
