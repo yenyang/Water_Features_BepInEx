@@ -202,7 +202,7 @@ namespace Water_Features.Settings
         /// Gets or sets a value with a slider indicating the height of waves generated.
         /// </summary>
         [SettingsUISection(WavesAndTides, WavesAndTides)]
-        [SettingsUISlider(min = 0f, max = 50f, step = 1f, unit = "integer")]
+        [SettingsUISlider(min = 0f, max = 15f, step = 0.1f, unit = "floatSingleFraction")]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsWavesAndTidesDisabled))]
         public float WaveHeight { get; set; }
 
@@ -218,7 +218,7 @@ namespace Water_Features.Settings
         /// Gets or sets a value with a slider indicating the height of tides generated.
         /// </summary>
         [SettingsUISection(WavesAndTides, WavesAndTides)]
-        [SettingsUISlider(min = 0f, max = 50f, step = 1f, unit = "integer")]
+        [SettingsUISlider(min = 0f, max = 15f, step = 0.1f, unit = "floatSingleFraction")]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsWavesAndTidesDisabled))]
         public float TideHeight { get; set; }
 
@@ -279,8 +279,8 @@ namespace Water_Features.Settings
         /// </summary>
         public void ResetWavesAndTidesSettings()
         {
-            WaveHeight = 5f;
-            TideHeight = 5f;
+            WaveHeight = 1.5f;
+            TideHeight = 3f;
             WaveFrequency = 130f;
             TideClassification = TideClassificationYYTAW.Semidiurnal;
             Damping = 0.998f;
@@ -368,6 +368,11 @@ namespace Water_Features.Settings
             if (!Mathf.Approximately(WaterFeaturesMod.Settings.EvaporationRate, waterSystem.m_Evaporation) || !Mathf.Approximately(waterSystem.m_Damping, WaterFeaturesMod.Settings.Damping))
             {
                 m_ChangeWaterSystemValues.Enabled = true;
+            }
+
+            if (WaveHeight + TideHeight != tidesAndWavesSystem.PreviousWaveAndTideHeight)
+            {
+                tidesAndWavesSystem.ResetDummySeaWaterSource();
             }
 
             base.Apply();

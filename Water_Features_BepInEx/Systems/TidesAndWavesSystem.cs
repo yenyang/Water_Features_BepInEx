@@ -28,6 +28,7 @@ namespace Water_Features.Systems
         private EntityQuery m_WaterSourceQuery;
         private ILog m_Log;
         private Entity m_DummySeaWaterSource = Entity.Null;
+        private float m_PreviousWaveAndTideHeight = 0f;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TidesAndWavesSystem"/> class.
@@ -35,6 +36,11 @@ namespace Water_Features.Systems
         public TidesAndWavesSystem()
         {
         }
+
+        /// <summary>
+        /// Gets the previous wave and tide height that was used to determine the dummy sea water source.
+        /// </summary>
+        public float PreviousWaveAndTideHeight { get => m_PreviousWaveAndTideHeight; }
 
         /// <summary>
         /// The dummy sea water source should not be saved so this allows it to be removed before saving.
@@ -107,6 +113,8 @@ namespace Water_Features.Systems
                     }
                 }
 
+                m_PreviousWaveAndTideHeight = WaterFeaturesMod.Settings.WaveHeight + WaterFeaturesMod.Settings.TideHeight;
+                seaLevel -= WaterFeaturesMod.Settings.WaveHeight + WaterFeaturesMod.Settings.TideHeight;
                 WaterSourceData waterSourceData = new WaterSourceData()
                 {
                     m_Amount = seaLevel,
@@ -187,7 +195,7 @@ namespace Water_Features.Systems
                     TidesAndWavesData currentTidesAndWavesData = wavesAndTidesDataNativeArray[i];
                     if (currentWaterSourceData.m_ConstantDepth == 3 && currentWaterSourceData.m_Amount > 0f)
                     {
-                        currentWaterSourceData.m_Amount = currentTidesAndWavesData.m_OriginalAmount + m_WaveHeight;
+                        currentWaterSourceData.m_Amount = currentTidesAndWavesData.m_OriginalAmount - m_WaveHeight;
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                     }
                 }
