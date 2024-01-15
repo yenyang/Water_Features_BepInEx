@@ -6,6 +6,7 @@ namespace Water_Features.Systems
 {
     using System.Runtime.CompilerServices;
     using Colossal.Logging;
+    using Colossal.Serialization.Entities;
     using Game;
     using Game.Common;
     using Game.Simulation;
@@ -155,6 +156,12 @@ namespace Water_Features.Systems
         {
             base.OnCreateForCompiler();
             __TypeHandle.AssignHandles(ref CheckedStateRef);
+        }
+
+        protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
+        {
+            base.OnGameLoadingComplete(purpose, mode);
+            ResetDummySeaWaterSource();
         }
 
         private struct TypeHandle
