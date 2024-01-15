@@ -267,7 +267,7 @@ namespace Water_Features.Settings
         public void ResetSeasonalStreamsSettings()
         {
             CreekSpringWater = 0f;
-            CreekMeanPrecipitationWeight = 0.75f;
+            CreekMeanPrecipitationWeight = 0.5f;
             CreekCurrentPrecipitationWeight = 0.75f;
             MinimumMultiplier = 0f;
             MaximumMultiplier = 1.0f;
@@ -279,7 +279,7 @@ namespace Water_Features.Settings
         /// </summary>
         public void ResetWavesAndTidesSettings()
         {
-            WaveHeight = 1.5f;
+            WaveHeight = 3f;
             TideHeight = 3f;
             WaveFrequency = 130f;
             TideClassification = TideClassificationYYTAW.Semidiurnal;
@@ -306,16 +306,16 @@ namespace Water_Features.Settings
             IncludeDetentionBasins = false;
             IncludeRetentionBasins = false;
             CreekSpringWater = 0f;
-            CreekMeanPrecipitationWeight = 0.75f;
+            CreekMeanPrecipitationWeight = 0.5f;
             CreekCurrentPrecipitationWeight = 0.75f;
             MinimumMultiplier = 0f;
             MaximumMultiplier = 1.0f;
             SimulateSnowMelt = true;
-            WaveHeight = 0f;
-            TideHeight = 0f;
+            WaveHeight = 3f;
+            TideHeight = 3f;
             WaveFrequency = 130f;
             TideClassification = TideClassificationYYTAW.Semidiurnal;
-            Damping = 0.995f;
+            Damping = 0.998f;
             EnableSeasonalStreams = true;
             EnableWavesAndTides = false;
         }
