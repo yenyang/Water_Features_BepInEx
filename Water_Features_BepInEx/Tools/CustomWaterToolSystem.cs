@@ -243,7 +243,6 @@ namespace Water_Features.Tools
                 m_TransformType = __TypeHandle.__Game_Objects_Transform_RO_ComponentTypeHandle,
                 m_TerrainHeightData = m_TerrainSystem.GetHeightData(false),
                 m_WaterSurfaceData = m_WaterSystem.GetSurfaceData(out JobHandle waterSurfaceDataJob),
-                m_MapExtents = MapExtents,
                 m_DetentionBasinLookup = __TypeHandle.__DetentionBasin_Lookup,
                 m_RetentionBasinLookup = __TypeHandle.__RententionBasin_Lookup,
                 m_EntityType = __TypeHandle.__Unity_Entities_Entity_TypeHandle,
@@ -330,33 +329,7 @@ namespace Water_Features.Tools
                 {
                     float radius = m_WaterToolUISystem.Radius;
                     float terrainHeight = TerrainUtils.SampleHeight(ref terrainHeightData, m_RaycastPoint.m_HitPosition);
-
-                    if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek)
-                    {
-                        float amount = m_WaterToolUISystem.Amount;
-                        float elevation = terrainHeight + amount;
-                        if (m_WaterToolUISystem.AmountIsAnElevation)
-                        {
-                            elevation = amount;
-                        }
-
-                        // Based on experiments the predicted water surface elevation is always higher than the result.
-                        float approximateError = 2.5f;
-
-                        float3 lakeProjectedWaterSurfacePosition = new float3(m_RaycastPoint.m_HitPosition.x, elevation - approximateError, m_RaycastPoint.m_HitPosition.z);
-                        LakeProjectionJob lakeProjectionJob = new ()
-                        {
-                            m_OverlayBuffer = m_OverlayRenderSystem.GetBuffer(out JobHandle outputJobHandle),
-                            m_Position = lakeProjectedWaterSurfacePosition,
-                            m_Radius = radius,
-                        };
-                        JobHandle jobHandle1 = IJobExtensions.Schedule(lakeProjectionJob, outputJobHandle);
-                        m_OverlayRenderSystem.AddBufferWriter(jobHandle1);
-                        inputDeps = JobHandle.CombineDependencies(jobHandle1, inputDeps);
-                    }
-
                     float3 position = new float3(m_RaycastPoint.m_HitPosition.x, terrainHeight, m_RaycastPoint.m_HitPosition.z);
-
                     if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.River)
                     {
                         float3 borderPosition = m_RaycastPoint.m_HitPosition;
@@ -387,13 +360,42 @@ namespace Water_Features.Tools
                         position = new float3(borderPosition.x, terrainHeight, borderPosition.z);
                     }
 
+
+                    if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek)
+                    {
+                        float amount = m_WaterToolUISystem.Amount;
+                        float elevation = terrainHeight + amount;
+                        if (m_WaterToolUISystem.AmountIsAnElevation)
+                        {
+                            elevation = amount;
+                        }
+
+                        // Based on experiments the predicted water surface elevation is always higher than the result.
+                        float approximateError = 2.5f;
+
+                        float3 lakeProjectedWaterSurfacePosition = new float3(m_RaycastPoint.m_HitPosition.x, elevation - approximateError, m_RaycastPoint.m_HitPosition.z);
+                        if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.River)
+                        {
+                            lakeProjectedWaterSurfacePosition = new float3(position.x, elevation - approximateError, position.z);
+                        }
+
+                        LakeProjectionJob lakeProjectionJob = new ()
+                        {
+                            m_OverlayBuffer = m_OverlayRenderSystem.GetBuffer(out JobHandle outputJobHandle),
+                            m_Position = lakeProjectedWaterSurfacePosition,
+                            m_Radius = radius,
+                        };
+                        JobHandle jobHandle1 = IJobExtensions.Schedule(lakeProjectionJob, outputJobHandle);
+                        m_OverlayRenderSystem.AddBufferWriter(jobHandle1);
+                        inputDeps = JobHandle.CombineDependencies(jobHandle1, inputDeps);
+                    }
+
                     WaterToolRadiusJob waterToolRadiusJob = new ()
                     {
                         m_OverlayBuffer = m_OverlayRenderSystem.GetBuffer(out JobHandle outJobHandle2),
                         m_Position = position,
                         m_Radius = radius,
                         m_SourceType = m_ActivePrefab.m_SourceType,
-                        m_MapExtents = MapExtents,
                     };
                     JobHandle jobHandle = IJobExtensions.Schedule(waterToolRadiusJob, outJobHandle2);
                     m_OverlayRenderSystem.AddBufferWriter(jobHandle);
@@ -676,7 +678,6 @@ namespace Water_Features.Tools
             public EntityTypeHandle m_EntityType;
             public TerrainHeightData m_TerrainHeightData;
             public WaterSurfaceData m_WaterSurfaceData;
-            public float m_MapExtents;
             [ReadOnly]
             public ComponentLookup<RetentionBasin> m_RetentionBasinLookup;
             [ReadOnly]
@@ -763,7 +764,6 @@ namespace Water_Features.Tools
             public float3 m_Position;
             public float m_Radius;
             public WaterToolUISystem.SourceType m_SourceType;
-            public float m_MapExtents;
 
             public void Execute()
             {
