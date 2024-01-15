@@ -12,7 +12,6 @@ namespace Water_Features.Settings
     using Unity.Entities;
     using UnityEngine;
     using Water_Features.Systems;
-    using static Game.Prefabs.CompositionFlags;
 
     /// <summary>
     /// The mod settings for the Water Features Mod.

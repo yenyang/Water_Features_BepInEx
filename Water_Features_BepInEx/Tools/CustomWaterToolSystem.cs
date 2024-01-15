@@ -436,6 +436,16 @@ namespace Water_Features.Tools
         {
             float pollution = 0; // Alter later if UI for adding pollution. Also check to make sure it's smaller than amount later.
             float amount = m_WaterToolUISystem.Amount;
+
+            if (!m_WaterToolUISystem.AmountIsAnElevation)
+            {
+                m_WaterToolUISystem.TrySaveDefaultValuesForWaterSource(m_ActivePrefab, m_WaterToolUISystem.Amount, m_WaterToolUISystem.Radius);
+            }
+            else
+            {
+                m_WaterToolUISystem.TrySaveDefaultValuesForWaterSource(m_ActivePrefab, m_WaterToolUISystem.Radius);
+            }
+
             if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.AutofillingLake && !m_WaterToolUISystem.AmountIsAnElevation)
             {
                 amount += position.y;

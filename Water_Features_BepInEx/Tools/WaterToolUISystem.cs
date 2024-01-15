@@ -61,7 +61,6 @@ namespace Water_Features.Tools
         private string m_MinDepthItemScript = string.Empty;
         private CustomWaterToolSystem m_CustomWaterToolSystem;
         private TerrainSystem m_TerrainSystem;
-        private AddPrefabsSystem m_AddPrefabsSystem;
         private ILog m_Log;
         private bool m_WaterToolPanelShown;
         private List<BoundEventHandle> m_BoundEventHandles;
@@ -170,6 +169,70 @@ namespace Water_Features.Tools
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.amountField = document.getElementById(\"YYWT-amount-field\"); if (yyWaterTool.amountField) yyWaterTool.amountField.innerHTML = \"{m_Amount} m\";");
         }
 
+        /// <summary>
+        /// Tries to save the new default values for a water source for the next time they are placed.
+        /// </summary>
+        /// <param name="waterSource">Generally the active prefab for custom water tool.</param>
+        /// <param name="amount">The next default amount that will be saved.</param>
+        /// <param name="radius">The next default radius that will be saved.</param>
+        /// <returns>True if the information is saved. False if an exception is encountered.</returns>
+        public bool TrySaveDefaultValuesForWaterSource(WaterSourcePrefab waterSource, float amount, float radius)
+        {
+            string contentFolder = Path.Combine(EnvPath.kUserDataPath, "ModsData", "Mods_Yenyang_Water_Features");
+            Directory.CreateDirectory(contentFolder);
+            string fileName = Path.Combine(contentFolder, $"{waterSource.m_SourceType}.xml");
+            WaterSourcePrefabValuesRepository repository = new WaterSourcePrefabValuesRepository() { Amount = amount, Radius = radius };
+            try
+            {
+                XmlSerializer serTool = new XmlSerializer(typeof(WaterSourcePrefabValuesRepository)); // Create serializer
+                System.IO.FileStream file = System.IO.File.Create(fileName); // Create file
+
+                serTool.Serialize(file, repository); // Serialize whole properties
+                file.Close(); // Close file
+                return true;
+            }
+            catch (Exception ex)
+            {
+                m_Log.Warn($"{nameof(WaterToolUISystem)}.{nameof(TryGetDefaultValuesForWaterSource)} Could not save values for water source WaterSource {waterSource.m_SourceType}. Encountered exception {ex}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Tries to save the new default values for a water source for the next time they are placed.
+        /// </summary>
+        /// <param name="waterSource">Generally the active prefab for custom water tool.</param>
+        /// <param name="radius">The next default radius that will be saved.</param>
+        /// <returns>True if the information is saved. False if an exception is encountered.</returns>
+        public bool TrySaveDefaultValuesForWaterSource(WaterSourcePrefab waterSource, float radius)
+        {
+            string contentFolder = Path.Combine(EnvPath.kUserDataPath, "ModsData", "Mods_Yenyang_Water_Features");
+            Directory.CreateDirectory(contentFolder);
+            string fileName = Path.Combine(contentFolder, $"{waterSource.m_SourceType}.xml");
+            float amount = 0f;
+            float oldRadius = 0f;
+            if (!TryGetDefaultValuesForWaterSource(waterSource, ref amount, ref oldRadius))
+            {
+                return false;
+            }
+
+            WaterSourcePrefabValuesRepository repository = new WaterSourcePrefabValuesRepository() { Amount = amount, Radius = radius };
+            try
+            {
+                XmlSerializer serTool = new XmlSerializer(typeof(WaterSourcePrefabValuesRepository)); // Create serializer
+                System.IO.FileStream file = System.IO.File.Create(fileName); // Create file
+
+                serTool.Serialize(file, repository); // Serialize whole properties
+                file.Close(); // Close file
+                return true;
+            }
+            catch (Exception ex)
+            {
+                m_Log.Warn($"{nameof(WaterToolUISystem)}.{nameof(TryGetDefaultValuesForWaterSource)} Could not save values for water source WaterSource {waterSource.m_SourceType}. Encountered exception {ex}");
+                return false;
+            }
+        }
+
         /// <inheritdoc/>
         protected override void OnCreate()
         {
@@ -177,7 +240,6 @@ namespace Water_Features.Tools
             m_ToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ToolSystem>();
             m_CustomWaterToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<CustomWaterToolSystem>();
             m_TerrainSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TerrainSystem>();
-            m_AddPrefabsSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<AddPrefabsSystem>();
             m_UiView = GameManager.instance.userInterface.view.View;
             ToolSystem toolSystem = m_ToolSystem; // I don't know why vanilla game did this.
             m_ToolSystem.EventToolChanged = (Action<ToolBaseSystem>)Delegate.Combine(toolSystem.EventToolChanged, new Action<ToolBaseSystem>(OnToolChanged));
@@ -343,7 +405,6 @@ namespace Water_Features.Tools
         protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
         {
             base.OnGameLoadingComplete(purpose, mode);
-
         }
 
         /// <summary>
@@ -827,7 +888,7 @@ namespace Water_Features.Tools
         {
             string contentFolder = Path.Combine(EnvPath.kUserDataPath, "ModsData", "Mods_Yenyang_Water_Features");
             Directory.CreateDirectory(contentFolder);
-            string fileName = Path.Combine(contentFolder, waterSource.m_SourceType.ToString());
+            string fileName = Path.Combine(contentFolder, $"{waterSource.m_SourceType}.xml");
             if (File.Exists(fileName))
             {
                 try
@@ -862,33 +923,6 @@ namespace Water_Features.Tools
             return false;
         }
 
-        /// <summary>
-        /// Tries to save the new default values for a water source for the next time they are placed.
-        /// </summary>
-        /// <param name="waterSource">Generally the active prefab for custom water tool.</param>
-        /// <param name="amount">The next default amount that will be saved.</param>
-        /// <param name="radius">The next default radius that will be saved.</param>
-        /// <returns>True if the information is saved. False if an exception is encountered.</returns>
-        private bool TrySaveDefaultValuesForWaterSource(WaterSourcePrefab waterSource, float amount, float radius)
-        {
-            string contentFolder = Path.Combine(EnvPath.kUserDataPath, "ModsData", "Mods_Yenyang_Water_Features");
-            Directory.CreateDirectory(contentFolder);
-            string fileName = Path.Combine(contentFolder, waterSource.m_SourceType.ToString());
-            WaterSourcePrefabValuesRepository repository = new WaterSourcePrefabValuesRepository() { Amount = amount, Radius = radius};
-            try
-            {
-                XmlSerializer serTool = new XmlSerializer(typeof(WaterSourcePrefabValuesRepository)); // Create serializer
-                System.IO.FileStream file = System.IO.File.Create(fileName); // Create file
-
-                serTool.Serialize(file, repository); // Serialize whole properties
-                file.Close(); // Close file
-                return true;
-            }
-            catch (Exception ex)
-            {
-                m_Log.Warn($"{nameof(WaterToolUISystem)}.{nameof(TryGetDefaultValuesForWaterSource)} Could not save values for water source WaterSource {waterSource.m_SourceType}. Encountered exception {ex}");
-                return false;
-            }
-        }
+        
     }
 }
