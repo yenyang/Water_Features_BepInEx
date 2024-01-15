@@ -138,7 +138,9 @@ namespace Water_Features.Systems
                 }
                 else
                 {
-                    m_Log.Warn($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} Couldn't find Landscaping tab.");
+                    if (currentMenu.m_Menu == Entity.Null) {
+                        m_Log.Warn($"{nameof(AddPrefabsSystem)}.{nameof(OnGameLoadingComplete)} Couldn't find Landscaping tab.");
+                    }
                 }
             }
 

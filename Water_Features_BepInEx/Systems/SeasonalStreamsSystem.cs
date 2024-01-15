@@ -97,6 +97,8 @@ namespace Water_Features.Systems
             {
                 m_Log.Info($"[{nameof(TidesAndWavesSystem)}] {nameof(OnCreate)} Seasonal Streams disabled.");
                 Enabled = false;
+                DisableSeasonalStreamSystem disableSeasonalStreamSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<DisableSeasonalStreamSystem>();
+                disableSeasonalStreamSystem.Enabled = true;
             }
         }
 

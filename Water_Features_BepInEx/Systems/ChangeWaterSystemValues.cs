@@ -44,6 +44,7 @@ namespace Water_Features.Systems
             m_WaterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
             m_TimeSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TimeSystem>();
             m_Log.Info($"[{nameof(ChangeWaterSystemValues)}] {nameof(OnCreate)}");
+            Enabled = false;
         }
 
         /// <inheritdoc/>

@@ -6,12 +6,14 @@ namespace Water_Features.Systems
 {
     using System.Runtime.CompilerServices;
     using Colossal.Logging;
+    using Colossal.Mono.Cecil.Cil;
     using Game;
     using Game.Common;
     using Game.Tools;
     using Unity.Burst.Intrinsics;
     using Unity.Collections;
     using Unity.Entities;
+    using Unity.Jobs;
     using Water_Features.Components;
 
     /// <summary>
@@ -33,7 +35,7 @@ namespace Water_Features.Systems
         }
 
         /// <inheritdoc/>
-        protected override void OnCreate ()
+        protected override void OnCreate()
         {
             base.OnCreate();
             m_Log = WaterFeaturesMod.Instance.Log;
@@ -57,6 +59,7 @@ namespace Water_Features.Systems
             m_EndFrameBarrier = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<EndFrameBarrier>();
             RequireForUpdate(m_TidesAndWavesDataQuery);
             m_Log.Info($"[{nameof(DisableWavesAndTidesSystem)}] {nameof(OnCreate)}");
+            Enabled = false;
         }
 
         /// <inheritdoc/>
@@ -74,6 +77,7 @@ namespace Water_Features.Systems
                 buffer = m_EndFrameBarrier.CreateCommandBuffer(),
             };
             Dependency = JobChunkExtensions.Schedule(resetTidesAndWavesJob, m_TidesAndWavesDataQuery, Dependency);
+            m_EndFrameBarrier.AddJobHandleForProducer(Dependency);
             Enabled = false;
         }
 

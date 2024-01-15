@@ -5,9 +5,12 @@
 namespace Water_Features.Settings
 {
     using Colossal.IO.AssetDatabase;
+    using Colossal.Logging;
     using Game.Modding;
     using Game.Settings;
+    using Game.Simulation;
     using Unity.Entities;
+    using UnityEngine;
     using Water_Features.Systems;
     using static Game.Prefabs.CompositionFlags;
 
@@ -35,6 +38,7 @@ namespace Water_Features.Settings
         public const string WavesAndTides = "Waves and Tides";
 
         private ChangeWaterSystemValues m_ChangeWaterSystemValues;
+        private ILog m_Log;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WaterFeaturesSettings"/> class.
@@ -46,6 +50,7 @@ namespace Water_Features.Settings
             SetDefaults();
             Contra = false;
             m_ChangeWaterSystemValues = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ChangeWaterSystemValues>();
+            m_Log = WaterFeaturesMod.Instance.Log;
         }
 
         /// <summary>
@@ -91,7 +96,11 @@ namespace Water_Features.Settings
         [SettingsUISection(WaterToolGroup, WaterToolGroup)]
         public bool WaterCleanUpCycleButton
         {
-            set { m_ChangeWaterSystemValues.ApplyNewEvaporationRate = true; }
+            set 
+            { 
+                m_ChangeWaterSystemValues.ApplyNewEvaporationRate = true;
+                m_ChangeWaterSystemValues.Enabled = true;
+            }
         }
 
         /// <summary>
@@ -312,40 +321,53 @@ namespace Water_Features.Settings
         }
 
         /// <summary>
-        /// Overriding Apply so that toggling the enable/disable buttons controls the systems involved.
+        /// Overriding Apply so that toggling the enable/disable buttons controls the systems involved. Also for Change
         /// </summary>
         public override void Apply()
         {
             SeasonalStreamsSystem seasonalStreamsSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<SeasonalStreamsSystem>();
             TidesAndWavesSystem tidesAndWavesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TidesAndWavesSystem>();
+
             if (EnableSeasonalStreams != seasonalStreamsSystem.Enabled)
             {
+                m_Log.Debug($"{nameof(WaterFeaturesSettings)}.{nameof(Apply)} Toggling Seasonal streams Enabled = {EnableSeasonalStreams}");
                 seasonalStreamsSystem.Enabled = EnableSeasonalStreams;
+                DisableSeasonalStreamSystem disableSeasonalStreamSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<DisableSeasonalStreamSystem>();
+                FindWaterSourcesSystem findWaterSourcesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<FindWaterSourcesSystem>();
                 if (EnableSeasonalStreams)
                 {
-                    FindWaterSourcesSystem findWaterSourcesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<FindWaterSourcesSystem>();
                     findWaterSourcesSystem.Enabled = true;
+                    disableSeasonalStreamSystem.Enabled = false;
                 }
                 else
                 {
-                    DisableSeasonalStreamSystem disableSeasonalStreamSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<DisableSeasonalStreamSystem>();
+                    findWaterSourcesSystem.Enabled = false;
                     disableSeasonalStreamSystem.Enabled = true;
                 }
             }
 
             if (EnableWavesAndTides != tidesAndWavesSystem.Enabled)
             {
-                tidesAndWavesSystem.Enabled = EnableSeasonalStreams;
+                m_Log.Debug($"{nameof(WaterFeaturesSettings)}.{nameof(Apply)} Toggling Waves And Tides Enabled = {EnableWavesAndTides}");
+                tidesAndWavesSystem.Enabled = EnableWavesAndTides;
+                DisableWavesAndTidesSystem disableWavesAndTidesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<DisableWavesAndTidesSystem>();
+                FindWaterSourcesSystem findWaterSourcesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<FindWaterSourcesSystem>();
                 if (EnableWavesAndTides)
                 {
-                    FindWaterSourcesSystem findWaterSourcesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<FindWaterSourcesSystem>();
                     findWaterSourcesSystem.Enabled = true;
+                    disableWavesAndTidesSystem.Enabled = false;
                 }
                 else
                 {
-                    DisableWavesAndTidesSystem disableWavesAndTidesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<DisableWavesAndTidesSystem>();
+                    findWaterSourcesSystem.Enabled = false;
                     disableWavesAndTidesSystem.Enabled = true;
                 }
+            }
+
+            WaterSystem waterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
+            if (!Mathf.Approximately(WaterFeaturesMod.Settings.EvaporationRate, waterSystem.m_Evaporation) || !Mathf.Approximately(waterSystem.m_Damping, WaterFeaturesMod.Settings.Damping))
+            {
+                m_ChangeWaterSystemValues.Enabled = true;
             }
 
             base.Apply();

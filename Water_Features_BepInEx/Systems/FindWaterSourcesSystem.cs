@@ -4,9 +4,7 @@
 
 namespace Water_Features.Systems
 {
-    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
-    using Colossal.Entities;
     using Colossal.Logging;
     using Colossal.Serialization.Entities;
     using Game;
@@ -18,8 +16,6 @@ namespace Water_Features.Systems
     using Unity.Entities;
     using Unity.Jobs;
     using Water_Features.Components;
-    using static Water_Features.Tools.WaterToolUISystem;
-    using Water_Features.Prefabs;
 
     /// <summary>
     /// A system for finding different water sources and assigning additional componets related to the mod.
@@ -75,6 +71,7 @@ namespace Water_Features.Systems
         {
             __TypeHandle.__Game_Simulation_WaterSourceData_RW_ComponentTypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__Unity_Entities_Entity_TypeHandle.Update(ref CheckedStateRef);
+            m_Log.Debug($"{nameof(FindWaterSourcesSystem)}.{nameof(OnUpdate)} WaterFeaturesMod.Settings.EnableSeasonalStreams = {WaterFeaturesMod.Settings.EnableSeasonalStreams} &  WaterFeaturesMod.Settings.EnableWavesAndTides = {WaterFeaturesMod.Settings.EnableWavesAndTides}");
             FindWaterSourcesJob findWaterSourcesJob = default;
             findWaterSourcesJob.m_SourceType = __TypeHandle.__Game_Simulation_WaterSourceData_RW_ComponentTypeHandle;
             findWaterSourcesJob.m_EntityType = __TypeHandle.__Unity_Entities_Entity_TypeHandle;

@@ -12,6 +12,7 @@ namespace Water_Features.Systems
     using Unity.Burst.Intrinsics;
     using Unity.Collections;
     using Unity.Entities;
+    using Unity.Jobs;
     using Water_Features.Components;
 
     /// <summary>
@@ -32,7 +33,7 @@ namespace Water_Features.Systems
         }
 
         /// <inheritdoc/>
-        protected override void OnCreate ()
+        protected override void OnCreate()
         {
             base.OnCreate();
             m_Log = WaterFeaturesMod.Instance.Log;
@@ -72,6 +73,7 @@ namespace Water_Features.Systems
                 buffer = m_EndFrameBarrier.CreateCommandBuffer(),
             };
             Dependency = JobChunkExtensions.Schedule(resetSeasonalStreamsJob, m_SeasonalStreamsDataQuery, Dependency);
+            m_EndFrameBarrier.AddJobHandleForProducer(Dependency);
             Enabled = false;
         }
 
@@ -121,7 +123,7 @@ namespace Water_Features.Systems
                     Game.Simulation.WaterSourceData currentWaterSourceData = waterSourceDataNativeArray[i];
                     currentWaterSourceData.m_Amount = originalAmountNativeArray[i].m_OriginalAmount;
                     waterSourceDataNativeArray[i] = currentWaterSourceData;
-                    buffer.RemoveComponent<TidesAndWavesData>(entityNativeArray[i]);
+                    buffer.RemoveComponent<SeasonalStreamsData>(entityNativeArray[i]);
                 }
             }
         }

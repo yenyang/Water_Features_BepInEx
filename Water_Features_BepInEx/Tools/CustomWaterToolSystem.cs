@@ -63,13 +63,13 @@ namespace Water_Features.Tools
         /// </summary>
         /// <param name="pos">Position to be checked.</param>
         /// <param name="radius">Tolerance for acceptable position.</param>
-        /// <param name="clamp">Should the radius be clamped to between 25f and 150f.</param>
+        /// <param name="fixedMaxDistance">Should the radius be checked for a maximum.</param>
         /// <returns>True if within proximity of border.</returns>
-        public bool IsPositionNearBorder(float3 pos, float radius, bool clamp)
+        public bool IsPositionNearBorder(float3 pos, float radius, bool fixedMaxDistance)
         {
-            if (clamp)
+            if (fixedMaxDistance)
             {
-                radius = Mathf.Clamp(radius, 25f, 150f);
+                radius = Mathf.Max(150f, radius * 2f / 3f);
             }
 
             if (Mathf.Abs(MapExtents - Mathf.Abs(pos.x)) < radius || Mathf.Abs(MapExtents - Mathf.Abs(pos.z)) < radius)
@@ -204,7 +204,6 @@ namespace Water_Features.Tools
                     },
                 },
             });
-            RequireForUpdate(m_WaterSourcesQuery);
             base.OnCreate();
         }
 
@@ -270,9 +269,9 @@ namespace Water_Features.Tools
                     TryAddWaterSource(ref inputDeps, new float3(m_RaycastPoint.m_HitPosition.x, terrainHeight, m_RaycastPoint.m_HitPosition.z));
                     return inputDeps;
                 }
-                else if (IsPositionNearBorder(m_RaycastPoint.m_HitPosition, m_WaterToolUISystem.Radius, true) && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.River)
+                else if (IsPositionNearBorder(m_RaycastPoint.m_HitPosition, m_WaterToolUISystem.Radius, true) && m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.River)
                 {
-                    Vector3 borderPosition = m_RaycastPoint.m_HitPosition;
+                    float3 borderPosition = m_RaycastPoint.m_HitPosition;
                     if (Mathf.Abs(m_RaycastPoint.m_HitPosition.x) >= Mathf.Abs(m_RaycastPoint.m_HitPosition.z))
                     {
                         if (m_RaycastPoint.m_HitPosition.x > 0f)
@@ -356,10 +355,42 @@ namespace Water_Features.Tools
                         inputDeps = JobHandle.CombineDependencies(jobHandle1, inputDeps);
                     }
 
+                    float3 position = new float3(m_RaycastPoint.m_HitPosition.x, terrainHeight, m_RaycastPoint.m_HitPosition.z);
+
+                    if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.River)
+                    {
+                        float3 borderPosition = m_RaycastPoint.m_HitPosition;
+                        if (Mathf.Abs(m_RaycastPoint.m_HitPosition.x) >= Mathf.Abs(m_RaycastPoint.m_HitPosition.z))
+                        {
+                            if (m_RaycastPoint.m_HitPosition.x > 0f)
+                            {
+                                borderPosition.x = MapExtents;
+                            }
+                            else
+                            {
+                                borderPosition.x = MapExtents * -1f;
+                            }
+                        }
+                        else
+                        {
+                            if (m_RaycastPoint.m_HitPosition.z > 0f)
+                            {
+                                borderPosition.z = MapExtents;
+                            }
+                            else
+                            {
+                                borderPosition.z = MapExtents * -1f;
+                            }
+                        }
+
+                        terrainHeight = TerrainUtils.SampleHeight(ref terrainHeightData, borderPosition);
+                        position = new float3(borderPosition.x, terrainHeight, borderPosition.z);
+                    }
+
                     WaterToolRadiusJob waterToolRadiusJob = new ()
                     {
                         m_OverlayBuffer = m_OverlayRenderSystem.GetBuffer(out JobHandle outJobHandle2),
-                        m_Position = new float3(m_RaycastPoint.m_HitPosition.x, terrainHeight, m_RaycastPoint.m_HitPosition.z),
+                        m_Position = position,
                         m_Radius = radius,
                         m_SourceType = m_ActivePrefab.m_SourceType,
                         m_MapExtents = MapExtents,

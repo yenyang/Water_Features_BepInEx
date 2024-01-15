@@ -78,6 +78,8 @@ namespace Water_Features.Systems
             {
                 m_Log.Info($"[{nameof(TidesAndWavesSystem)}] {nameof(OnCreate)} Waves and Tides disabled.");
                 Enabled = false;
+                DisableWavesAndTidesSystem disableWavesAndTidesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<DisableWavesAndTidesSystem>();
+                disableWavesAndTidesSystem.Enabled = true;
             }
         }
 
