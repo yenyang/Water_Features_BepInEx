@@ -315,7 +315,7 @@ namespace Water_Features.Tools
                 m_ToolOutputBarrier.AddJobHandleForProducer(jobHandle);
                 inputDeps = jobHandle;
             }
-            else if (m_SecondaryApplyAction.WasPressedThisFrame() && m_HoveredWaterSources.IsEmpty)
+            else if (m_SecondaryApplyAction.WasPressedThisFrame() && m_HoveredWaterSources.IsEmpty && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek)
             {
                 m_WaterToolUISystem.SetElevation(m_RaycastPoint.m_HitPosition.y);
             }
