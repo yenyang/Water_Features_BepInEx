@@ -2,7 +2,7 @@
 // Copyright (c) Yenyang's Mods. MIT License. All rights reserved.
 // </copyright>
 
-#define RELEASE // Change before release.
+#define DEBUG // Change before release.
 namespace Water_Features
 {
     using System.IO;

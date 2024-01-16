@@ -75,7 +75,8 @@ namespace Water_Features.Tools
         private bool m_ResetValues = true;
         private bool m_FirstTimeInjectingJS = true;
         private bool m_AmountIsElevation = false;
-        private List<WaterSourcePrefabValuesRepository> m_WaterSourcePrefabValuesRepositories;
+        private string m_ContentFolder;
+        private Dictionary<WaterSourcePrefab, WaterSourcePrefabValuesRepository> m_WaterSourcePrefabValuesRepositories;
 
         /// <summary>
         /// Types of water sources.
@@ -178,17 +179,28 @@ namespace Water_Features.Tools
         /// <returns>True if the information is saved. False if an exception is encountered.</returns>
         public bool TrySaveDefaultValuesForWaterSource(WaterSourcePrefab waterSource, float amount, float radius)
         {
-            string contentFolder = Path.Combine(EnvPath.kUserDataPath, "ModsData", "Mods_Yenyang_Water_Features");
-            Directory.CreateDirectory(contentFolder);
-            string fileName = Path.Combine(contentFolder, $"{waterSource.m_SourceType}.xml");
+            string fileName = Path.Combine(m_ContentFolder, $"{waterSource.m_SourceType}.xml");
             WaterSourcePrefabValuesRepository repository = new WaterSourcePrefabValuesRepository() { Amount = amount, Radius = radius };
             try
             {
                 XmlSerializer serTool = new XmlSerializer(typeof(WaterSourcePrefabValuesRepository)); // Create serializer
-                System.IO.FileStream file = System.IO.File.Create(fileName); // Create file
+                using (System.IO.FileStream file = System.IO.File.Create(fileName)) // Create file
+                {
+                    serTool.Serialize(file, repository); // Serialize whole properties
+                }
 
-                serTool.Serialize(file, repository); // Serialize whole properties
-                file.Close(); // Close file
+                if (m_WaterSourcePrefabValuesRepositories.ContainsKey(waterSource))
+                {
+                    m_WaterSourcePrefabValuesRepositories[waterSource].Amount = amount;
+                    m_WaterSourcePrefabValuesRepositories[waterSource].Radius = radius;
+                    m_Log.Debug($"{nameof(WaterToolUISystem)}.{nameof(TrySaveDefaultValuesForWaterSource)} updating repository for {waterSource.m_SourceType}.");
+                }
+                else
+                {
+                    m_WaterSourcePrefabValuesRepositories.Add(waterSource, repository);
+                    m_Log.Debug($"{nameof(WaterToolUISystem)}.{nameof(TrySaveDefaultValuesForWaterSource)} adding repository for {waterSource.m_SourceType}.");
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -206,31 +218,13 @@ namespace Water_Features.Tools
         /// <returns>True if the information is saved. False if an exception is encountered.</returns>
         public bool TrySaveDefaultValuesForWaterSource(WaterSourcePrefab waterSource, float radius)
         {
-            string contentFolder = Path.Combine(EnvPath.kUserDataPath, "ModsData", "Mods_Yenyang_Water_Features");
-            Directory.CreateDirectory(contentFolder);
-            string fileName = Path.Combine(contentFolder, $"{waterSource.m_SourceType}.xml");
-            float amount = 0f;
-            float oldRadius = 0f;
-            if (!TryGetDefaultValuesForWaterSource(waterSource, ref amount, ref oldRadius))
+            if (m_WaterSourcePrefabValuesRepositories.ContainsKey(waterSource))
             {
-                return false;
+                float amount = m_WaterSourcePrefabValuesRepositories[waterSource].Amount;
+                return TryGetDefaultValuesForWaterSource(waterSource, ref amount, ref radius);
             }
 
-            WaterSourcePrefabValuesRepository repository = new WaterSourcePrefabValuesRepository() { Amount = amount, Radius = radius };
-            try
-            {
-                XmlSerializer serTool = new XmlSerializer(typeof(WaterSourcePrefabValuesRepository)); // Create serializer
-                System.IO.FileStream file = System.IO.File.Create(fileName); // Create file
-
-                serTool.Serialize(file, repository); // Serialize whole properties
-                file.Close(); // Close file
-                return true;
-            }
-            catch (Exception ex)
-            {
-                m_Log.Warn($"{nameof(WaterToolUISystem)}.{nameof(TryGetDefaultValuesForWaterSource)} Could not save values for water source WaterSource {waterSource.m_SourceType}. Encountered exception {ex}");
-                return false;
-            }
+            return false;
         }
 
         /// <inheritdoc/>
@@ -245,7 +239,8 @@ namespace Water_Features.Tools
             m_ToolSystem.EventToolChanged = (Action<ToolBaseSystem>)Delegate.Combine(toolSystem.EventToolChanged, new Action<ToolBaseSystem>(OnToolChanged));
             ToolSystem toolSystem2 = m_ToolSystem; // I don't know why vanilla game did this.
             m_ToolSystem.EventPrefabChanged = (Action<PrefabBase>)Delegate.Combine(toolSystem2.EventPrefabChanged, new Action<PrefabBase>(OnPrefabChanged));
-
+            m_ContentFolder = Path.Combine(EnvPath.kUserDataPath, "ModsData", "Mods_Yenyang_Water_Features");
+            Directory.CreateDirectory(m_ContentFolder);
             m_BoundEventHandles = new ();
 
             m_InjectedJS = UIFileUtils.ReadJS(Path.Combine(UIFileUtils.AssemblyPath, "ui.js"));
@@ -271,7 +266,7 @@ namespace Water_Features.Tools
                 { "YYWT-min-depth-rate-of-change", (Action)MinDepthRateOfChangePressed },
             };
 
-            m_WaterSourcePrefabValuesRepositories = new List<WaterSourcePrefabValuesRepository>();
+            m_WaterSourcePrefabValuesRepositories = new Dictionary<WaterSourcePrefab, WaterSourcePrefabValuesRepository>();
             base.OnCreate();
         }
 
@@ -886,15 +881,21 @@ namespace Water_Features.Tools
         /// <returns>True if loaded from xml. False if nothing changed.</returns>
         private bool TryGetDefaultValuesForWaterSource(WaterSourcePrefab waterSource, ref float amount, ref float radius)
         {
-            string contentFolder = Path.Combine(EnvPath.kUserDataPath, "ModsData", "Mods_Yenyang_Water_Features");
-            Directory.CreateDirectory(contentFolder);
-            string fileName = Path.Combine(contentFolder, $"{waterSource.m_SourceType}.xml");
+            string fileName = Path.Combine(m_ContentFolder, $"{waterSource.m_SourceType}.xml");
+            if (m_WaterSourcePrefabValuesRepositories.ContainsKey(waterSource))
+            {
+                amount = m_WaterSourcePrefabValuesRepositories[waterSource].Amount;
+                radius = m_WaterSourcePrefabValuesRepositories[waterSource].Radius;
+                m_Log.Debug($"{nameof(WaterToolUISystem)}.{nameof(TryGetDefaultValuesForWaterSource)} found repository for {waterSource.m_SourceType}.");
+                return true;
+            }
+
             if (File.Exists(fileName))
             {
                 try
                 {
                     XmlSerializer serTool = new XmlSerializer(typeof(WaterSourcePrefabValuesRepository)); // Create serializer
-                    System.IO.FileStream readStream = new System.IO.FileStream(fileName, System.IO.FileMode.Open); // Open file
+                    using System.IO.FileStream readStream = new System.IO.FileStream(fileName, System.IO.FileMode.Open); // Open file
                     WaterSourcePrefabValuesRepository result = (WaterSourcePrefabValuesRepository)serTool.Deserialize(readStream); // Des-serialize to new Properties
                     if (result.Amount >= 0.125f && result.Amount <= 1000f)
                     {
@@ -906,6 +907,7 @@ namespace Water_Features.Tools
                         radius = result.Radius;
                     }
 
+                    m_Log.Debug($"{nameof(WaterToolUISystem)}.{nameof(TryGetDefaultValuesForWaterSource)} loaded repository for {waterSource.m_SourceType}.");
                     return true;
                 }
                 catch (Exception ex)
@@ -922,7 +924,5 @@ namespace Water_Features.Tools
 
             return false;
         }
-
-        
     }
 }
