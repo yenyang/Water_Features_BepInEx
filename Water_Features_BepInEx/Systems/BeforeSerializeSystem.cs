@@ -15,7 +15,7 @@ namespace Water_Features.Systems
     using Water_Features.Components;
 
     /// <summary>
-    /// A system that runes before serailaztion so that all water sources are reset and/or saved in a manner that can be reloaded safely without the mod.
+    /// A system that runs before serialization so that all water sources are reset and/or saved in a manner that can be reloaded safely without the mod.
     /// </summary>
     public partial class BeforeSerializeSystem : GameSystemBase
     {

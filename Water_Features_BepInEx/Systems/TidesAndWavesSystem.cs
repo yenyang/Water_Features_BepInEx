@@ -44,7 +44,7 @@ namespace Water_Features.Systems
         public float PreviousWaveAndTideHeight { get => m_PreviousWaveAndTideHeight; }
 
         /// <summary>
-        /// The dummy sea water source should not be saved so this allows it to be removed before saving.
+        /// The dummy sea water source should not be saved so this allows it to be removed before saving. This may need to be done in a job with a jobhandle. . .?.
         /// </summary>
         public void ResetDummySeaWaterSource()
         {
@@ -81,13 +81,6 @@ namespace Water_Features.Systems
             });
             RequireForUpdate(m_WaterSourceQuery);
             m_Log.Info($"[{nameof(TidesAndWavesSystem)}] {nameof(OnCreate)}");
-            if (!WaterFeaturesMod.Settings.EnableWavesAndTides)
-            {
-                m_Log.Info($"[{nameof(TidesAndWavesSystem)}] {nameof(OnCreate)} Waves and Tides disabled.");
-                Enabled = false;
-                DisableWavesAndTidesSystem disableWavesAndTidesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<DisableWavesAndTidesSystem>();
-                disableWavesAndTidesSystem.Enabled = true;
-            }
         }
 
         /// <inheritdoc/>
@@ -102,6 +95,7 @@ namespace Water_Features.Systems
             __TypeHandle.__Unity_Entities_Entity_TypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__TidesAndWavesData_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
 
+            // This section adds the dummy water source if it does not exist.
             if (m_DummySeaWaterSource == Entity.Null)
             {
                 float seaLevel = float.MaxValue;
@@ -124,6 +118,11 @@ namespace Water_Features.Systems
                     m_Polluted = 0f,
                     m_Radius = 0f,
                 };
+
+                /* The dummy water source must be a sea water source, with the amount at the designated constant sea level.
+                 * In this case that is the lowest original amount for all the sea levels minus waves and tides.
+                 * The dummy water source is at coordinate 0,0 and has a radius of 0 so that it can be distinguished from actual sea water sources.
+                */
 
                 Game.Objects.Transform transform = new Game.Objects.Transform()
                 {
@@ -158,9 +157,21 @@ namespace Water_Features.Systems
             __TypeHandle.AssignHandles(ref CheckedStateRef);
         }
 
+        /// <inheritdoc/>
         protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
         {
             base.OnGameLoadingComplete(purpose, mode);
+
+            // This will disable the system if the user has the setting for Waves and Tides disabled.
+            if (!WaterFeaturesMod.Settings.EnableWavesAndTides)
+            {
+                m_Log.Info($"[{nameof(TidesAndWavesSystem)}] {nameof(OnGameLoadingComplete)} Waves and Tides disabled.");
+                Enabled = false;
+                DisableWavesAndTidesSystem disableWavesAndTidesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<DisableWavesAndTidesSystem>();
+                disableWavesAndTidesSystem.Enabled = true;
+            }
+
+            // Sometimes the dummy water source does not have the correct sea level at first, so resetting it at game loading fixes it.
             ResetDummySeaWaterSource();
         }
 
@@ -181,6 +192,9 @@ namespace Water_Features.Systems
             }
         }
 
+        /// <summary>
+        /// This job adjusts the water surface elevation of sea water sources according to the settings for waves and tides.
+        /// </summary>
         private struct AlterSeaWaterSourcesJob : IJobChunk
         {
             [ReadOnly]

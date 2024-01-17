@@ -1,6 +1,6 @@
 {
   "name": "Water_Features",
-  "description": "Water Tool, Optional Seasonal Streams, and Experimental Waves and Tides",
+  "description": "In-Game Water Tool, Optional Seasonal Streams, and Optional Waves and Tides",
   "version_number": "1.0.0",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100",

@@ -221,7 +221,7 @@ namespace Water_Features.Tools
             if (m_WaterSourcePrefabValuesRepositories.ContainsKey(waterSource))
             {
                 float amount = m_WaterSourcePrefabValuesRepositories[waterSource].Amount;
-                return TryGetDefaultValuesForWaterSource(waterSource, ref amount, ref radius);
+                return TrySaveDefaultValuesForWaterSource(waterSource, amount, radius);
             }
 
             return false;
@@ -905,6 +905,12 @@ namespace Water_Features.Tools
                     if (result.Radius >= 5f && result.Radius <= 10000f)
                     {
                         radius = result.Radius;
+                    }
+
+                    if (!m_WaterSourcePrefabValuesRepositories.ContainsKey(waterSource))
+                    {
+                        m_WaterSourcePrefabValuesRepositories.Add(waterSource, result);
+                        m_Log.Debug($"{nameof(WaterToolUISystem)}.{nameof(TryGetDefaultValuesForWaterSource)} adding repository for {waterSource.m_SourceType}.");
                     }
 
                     m_Log.Debug($"{nameof(WaterToolUISystem)}.{nameof(TryGetDefaultValuesForWaterSource)} loaded repository for {waterSource.m_SourceType}.");

@@ -12,11 +12,10 @@ namespace Water_Features.Systems
     using Unity.Burst.Intrinsics;
     using Unity.Collections;
     using Unity.Entities;
-    using Unity.Jobs;
     using Water_Features.Components;
 
     /// <summary>
-    /// A system that runes before serailaztion so that all water sources are reset and/or saved in a manner that can be reloaded safely without the mod.
+    /// A system that will disable seasonal streams and remove related components.
     /// </summary>
     public partial class DisableSeasonalStreamSystem : GameSystemBase
     {
@@ -103,7 +102,7 @@ namespace Water_Features.Systems
         }
 
         /// <summary>
-        /// This job sets the amounts for seasonal stream water sources back to original amount.
+        /// This job sets the amounts for seasonal stream water sources back to original amount and removes the seasonal streams component.
         /// </summary>
         private struct ResetSeasonalStreamsJob : IJobChunk
         {
@@ -122,7 +121,7 @@ namespace Water_Features.Systems
                 {
                     Game.Simulation.WaterSourceData currentWaterSourceData = waterSourceDataNativeArray[i];
                     currentWaterSourceData.m_Amount = originalAmountNativeArray[i].m_OriginalAmount;
-                    waterSourceDataNativeArray[i] = currentWaterSourceData;
+                    buffer.SetComponent(entityNativeArray[i], currentWaterSourceData);
                     buffer.RemoveComponent<SeasonalStreamsData>(entityNativeArray[i]);
                 }
             }

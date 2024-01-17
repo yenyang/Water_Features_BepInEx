@@ -5,15 +5,11 @@
 namespace Water_Features.Tools
 {
     using System.Runtime.CompilerServices;
-    using cohtml.Net;
     using Colossal.Logging;
-    using Game.Audio.Radio;
-    using Game.Citizens;
     using Game.Common;
     using Game.Input;
     using Game.Prefabs;
     using Game.Rendering;
-    using Game.Routes;
     using Game.Simulation;
     using Game.Tools;
     using Unity.Burst.Intrinsics;
@@ -28,7 +24,7 @@ namespace Water_Features.Tools
     using Water_Features.Systems;
 
     /// <summary>
-    /// A custom water tool system for creating or modifying water sources.
+    /// A custom water tool system for creating and removing water sources.
     /// </summary>
     public partial class CustomWaterToolSystem : ToolBaseSystem
     {
@@ -44,6 +40,7 @@ namespace Water_Features.Tools
         private EntityQuery m_WaterSourcesQuery;
         private ToolOutputBarrier m_ToolOutputBarrier;
         private OverlayRenderSystem m_OverlayRenderSystem;
+        private TidesAndWavesSystem m_TidesAndWavesSystem;
         private WaterToolUISystem m_WaterToolUISystem;
         private FindWaterSourcesSystem m_FindWaterSourcesSystem;
         private WaterTooltipSystem m_WaterTooltipSystem;
@@ -179,6 +176,7 @@ namespace Water_Features.Tools
             m_WaterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
             m_WaterTooltipSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterTooltipSystem>();
             m_TerrainSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TerrainSystem>();
+            m_TidesAndWavesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TidesAndWavesSystem>();
             m_WaterToolUISystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterToolUISystem>();
             m_FindWaterSourcesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<FindWaterSourcesSystem>();
             m_WaterSourceArchetype = EntityManager.CreateArchetype(ComponentType.ReadWrite<Game.Simulation.WaterSourceData>(), ComponentType.ReadWrite<Game.Objects.Transform>());
@@ -254,6 +252,8 @@ namespace Water_Features.Tools
             m_WaterSystem.AddSurfaceReader(inputDeps);
 
             bool raycastHit = GetRaycastResult(out m_RaycastPoint);
+
+            // This clears HoveredWaterSources and returns early if raycast cannot hit terrain or water. Usually this is from hovering over a ui panel.
             if (!raycastHit)
             {
                 m_HoveredWaterSources.Clear();
@@ -262,12 +262,15 @@ namespace Water_Features.Tools
 
             if (m_ApplyAction.WasPressedThisFrame())
             {
+                // Checks for valid placement of Seas, and water sources placed within the playable area.
                 if ((m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.River && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Sea && IsPositionWithinBorder(m_RaycastPoint.m_HitPosition)) || (IsPositionNearBorder(m_RaycastPoint.m_HitPosition, m_WaterToolUISystem.Radius, false) && m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.Sea))
                 {
                     float terrainHeight = TerrainUtils.SampleHeight(ref terrainHeightData, m_RaycastPoint.m_HitPosition);
                     TryAddWaterSource(ref inputDeps, new float3(m_RaycastPoint.m_HitPosition.x, terrainHeight, m_RaycastPoint.m_HitPosition.z));
                     return inputDeps;
                 }
+
+                // Checks for valid placement of Rivers.
                 else if (IsPositionNearBorder(m_RaycastPoint.m_HitPosition, m_WaterToolUISystem.Radius, true) && m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.River)
                 {
                     float3 borderPosition = m_RaycastPoint.m_HitPosition;
@@ -299,6 +302,8 @@ namespace Water_Features.Tools
                     return inputDeps;
                 }
             }
+
+            // This section is for removing water sources. The player must have hovered over one in the previous frame.
             else if (m_SecondaryApplyAction.WasReleasedThisFrame() && m_HoveredWaterSources.Length > 0)
             {
                 RemoveWaterSourcesJob removeWaterSourcesJob = new ()
@@ -314,6 +319,8 @@ namespace Water_Features.Tools
                 m_ToolOutputBarrier.AddJobHandleForProducer(jobHandle);
                 inputDeps = jobHandle;
             }
+
+            // This section is for setting the target elevation with sources other than Streams.
             else if (m_SecondaryApplyAction.WasPressedThisFrame() && m_HoveredWaterSources.IsEmpty && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek)
             {
                 m_WaterToolUISystem.SetElevation(m_RaycastPoint.m_HitPosition.y);
@@ -321,6 +328,7 @@ namespace Water_Features.Tools
 
             m_WaterTooltipSystem.HitPosition = m_RaycastPoint.m_HitPosition;
 
+            // This section will render the circle(s) for new water source if not hovering over a water source, and valid placement.
             if (m_HoveredWaterSources.IsEmpty)
             {
                 if ((m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.River && IsPositionNearBorder(m_RaycastPoint.m_HitPosition, m_WaterToolUISystem.Radius, true))
@@ -330,6 +338,8 @@ namespace Water_Features.Tools
                     float radius = m_WaterToolUISystem.Radius;
                     float terrainHeight = TerrainUtils.SampleHeight(ref terrainHeightData, m_RaycastPoint.m_HitPosition);
                     float3 position = new float3(m_RaycastPoint.m_HitPosition.x, terrainHeight, m_RaycastPoint.m_HitPosition.z);
+
+                    // This section makes the overlay for Rivers snap to the boundary.
                     if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.River)
                     {
                         float3 borderPosition = m_RaycastPoint.m_HitPosition;
@@ -360,7 +370,7 @@ namespace Water_Features.Tools
                         position = new float3(borderPosition.x, terrainHeight, borderPosition.z);
                     }
 
-
+                    // This section handles projected water surface elevation.
                     if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek)
                     {
                         float amount = m_WaterToolUISystem.Amount;
@@ -373,19 +383,19 @@ namespace Water_Features.Tools
                         // Based on experiments the predicted water surface elevation is always higher than the result.
                         float approximateError = 2.5f;
 
-                        float3 lakeProjectedWaterSurfacePosition = new float3(m_RaycastPoint.m_HitPosition.x, elevation - approximateError, m_RaycastPoint.m_HitPosition.z);
+                        float3 projectedWaterSurfacePosition = new float3(m_RaycastPoint.m_HitPosition.x, elevation - approximateError, m_RaycastPoint.m_HitPosition.z);
                         if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.River)
                         {
-                            lakeProjectedWaterSurfacePosition = new float3(position.x, elevation - approximateError, position.z);
+                            projectedWaterSurfacePosition = new float3(position.x, elevation - approximateError, position.z);
                         }
 
-                        LakeProjectionJob lakeProjectionJob = new ()
+                        WaterLevelProjectionJob waterLevelProjectionJob = new ()
                         {
                             m_OverlayBuffer = m_OverlayRenderSystem.GetBuffer(out JobHandle outputJobHandle),
-                            m_Position = lakeProjectedWaterSurfacePosition,
+                            m_Position = projectedWaterSurfacePosition,
                             m_Radius = radius,
                         };
-                        JobHandle jobHandle1 = IJobExtensions.Schedule(lakeProjectionJob, outputJobHandle);
+                        JobHandle jobHandle1 = IJobExtensions.Schedule(waterLevelProjectionJob, outputJobHandle);
                         m_OverlayRenderSystem.AddBufferWriter(jobHandle1);
                         inputDeps = JobHandle.CombineDependencies(jobHandle1, inputDeps);
                     }
@@ -432,11 +442,17 @@ namespace Water_Features.Tools
             __TypeHandle.AssignHandles(ref CheckedStateRef);
         }
 
+        /// <summary>
+        /// This method setsup the components needed to create a water source and schedules the job.
+        /// </summary>
+        /// <param name="deps">A jobhandle, usually InputDeps.</param>
+        /// <param name="position">The location for the new water source.</param>
         private void TryAddWaterSource(ref JobHandle deps, float3 position)
         {
             float pollution = 0; // Alter later if UI for adding pollution. Also check to make sure it's smaller than amount later.
             float amount = m_WaterToolUISystem.Amount;
 
+            // This section handles saving new default values for future use.
             if (!m_WaterToolUISystem.AmountIsAnElevation)
             {
                 m_WaterToolUISystem.TrySaveDefaultValuesForWaterSource(m_ActivePrefab, m_WaterToolUISystem.Amount, m_WaterToolUISystem.Radius);
@@ -446,6 +462,7 @@ namespace Water_Features.Tools
                 m_WaterToolUISystem.TrySaveDefaultValuesForWaterSource(m_ActivePrefab, m_WaterToolUISystem.Radius);
             }
 
+            // This section adjusts the amount value for different types of water sources.
             if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.AutofillingLake && !m_WaterToolUISystem.AmountIsAnElevation)
             {
                 amount += position.y;
@@ -475,6 +492,8 @@ namespace Water_Features.Tools
                 m_Position = new Unity.Mathematics.float3(position.x, position.y, position.z),
                 m_Rotation = quaternion.identity,
             };
+
+            // This section checks for unaccectable multipliers and tries to adjust the radius if necessary. Right now the ui is limitting the radius amount to a generally acceptable range.
             bool acceptableMultiplier = true;
             bool unacceptableMultiplier = false;
             if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.River && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Sea)
@@ -509,6 +528,11 @@ namespace Water_Features.Tools
             {
                 if ((int)m_ActivePrefab.m_SourceType <= 3)
                 {
+                    if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.Sea)
+                    {
+                        m_TidesAndWavesSystem.ResetDummySeaWaterSource(); // Hopefully this doesn't cause problems.
+                    }
+
                     AddWaterSourceJob addWaterSourceJob = new ()
                     {
                         waterSourceData = waterSourceDataComponent,
@@ -575,6 +599,9 @@ namespace Water_Features.Tools
             m_FindWaterSourcesSystem.Enabled = true;
         }
 
+        /// <summary>
+        /// This job removes a water source.
+        /// </summary>
         private struct RemoveWaterSourcesJob : IJobChunk
         {
             [ReadOnly]
@@ -607,6 +634,9 @@ namespace Water_Features.Tools
             }
         }
 
+        /// <summary>
+        /// This job adds a vanilla water source.
+        /// </summary>
         private struct AddWaterSourceJob : IJob
         {
             public Game.Simulation.WaterSourceData waterSourceData;
@@ -623,6 +653,9 @@ namespace Water_Features.Tools
             }
         }
 
+        /// <summary>
+        /// This job adds an AutoFillingLake water source.
+        /// </summary>
         private struct AddAutoFillingLakeJob : IJob
         {
             public Game.Simulation.WaterSourceData waterSourceData;
@@ -641,6 +674,9 @@ namespace Water_Features.Tools
             }
         }
 
+        /// <summary>
+        /// This job adds a detention basin water source.
+        /// </summary>
         private struct AddDetentionBasinJob : IJob
         {
             public Game.Simulation.WaterSourceData waterSourceData;
@@ -659,6 +695,9 @@ namespace Water_Features.Tools
             }
         }
 
+        /// <summary>
+        /// This job adds a retention basin water source.
+        /// </summary>
         private struct AddRetentionBasinJob : IJob
         {
             public Game.Simulation.WaterSourceData waterSourceData;
@@ -677,6 +716,9 @@ namespace Water_Features.Tools
             }
         }
 
+        /// <summary>
+        /// This job renders circles related to the various water sources.
+        /// </summary>
         private struct WaterSourceCirclesRenderJob : IJobChunk
         {
             public OverlayRenderSystem.Buffer m_OverlayBuffer;
@@ -768,6 +810,9 @@ namespace Water_Features.Tools
             }
         }
 
+        /// <summary>
+        /// This job renders the circle for the current water source being placed.
+        /// </summary>
         private struct WaterToolRadiusJob : IJob
         {
             public OverlayRenderSystem.Buffer m_OverlayBuffer;
@@ -818,7 +863,10 @@ namespace Water_Features.Tools
             }
         }
 
-        private struct LakeProjectionJob : IJob
+        /// <summary>
+        /// This job draws the overlay for the projected water level.
+        /// </summary>
+        private struct WaterLevelProjectionJob : IJob
         {
             public OverlayRenderSystem.Buffer m_OverlayBuffer;
             public float3 m_Position;

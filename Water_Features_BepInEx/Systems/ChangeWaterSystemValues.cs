@@ -11,7 +11,7 @@ namespace Water_Features.Systems
     using UnityEngine;
 
     /// <summary>
-    /// Changes the various rates of the vanilla water system.
+    /// Changes the various rates of the vanilla water system. Some or all of this could be incorporated into the Settings Apply method.
     /// </summary>
     public partial class ChangeWaterSystemValues : GameSystemBase
     {
@@ -50,6 +50,7 @@ namespace Water_Features.Systems
         /// <inheritdoc/>
         protected override void OnUpdate()
         {
+            // This is for the water cleanup cycle.
             if (ApplyNewEvaporationRate)
             {
                 m_WaterSystem.m_Evaporation = m_TemporaryEvaporation;
@@ -60,6 +61,7 @@ namespace Water_Features.Systems
                 WaterFeaturesMod.Settings.ApplyAndSave();
             }
 
+            // This is for changin the evaporation rate with the settings.
             if (!Mathf.Approximately(WaterFeaturesMod.Settings.EvaporationRate, m_WaterSystem.m_Evaporation))
             {
                 if (m_TimeSystem.normalizedTime > m_TimeLastChanged + m_ResetTimeLimit || m_DateLastChange > m_DateLastChange + m_ResetTimeLimit)
@@ -69,6 +71,7 @@ namespace Water_Features.Systems
                 }
             }
 
+            // This is for changing the damping constant with the settings.
             if (!Mathf.Approximately(m_WaterSystem.m_Damping, WaterFeaturesMod.Settings.Damping))
             {
                 m_WaterSystem.m_Damping = WaterFeaturesMod.Settings.Damping;

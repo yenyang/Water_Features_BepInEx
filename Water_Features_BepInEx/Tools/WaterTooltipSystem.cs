@@ -75,6 +75,7 @@ namespace Water_Features.Tools
 
             WaterSourcePrefab waterSourcePrefab = prefab as WaterSourcePrefab;
 
+            // Checks position of river and displays tooltip if needed.
             if (waterSourcePrefab.m_SourceType == WaterToolUISystem.SourceType.River)
             {
                 if (!m_CustomWaterTool.IsPositionNearBorder(m_HitPosition, m_WaterToolUISystem.Radius, true))
@@ -87,6 +88,8 @@ namespace Water_Features.Tools
                     AddMouseTooltip(mustBePlacedNearMapBorderTooltip);
                 }
             }
+
+            // Checks position of sea and displays tooltip if needed.
             else if (waterSourcePrefab.m_SourceType == WaterToolUISystem.SourceType.Sea)
             {
                 if (!m_CustomWaterTool.IsPositionNearBorder(m_HitPosition, m_WaterToolUISystem.Radius, false))
@@ -99,6 +102,8 @@ namespace Water_Features.Tools
                     AddMouseTooltip(mustTouchBorderTooltip);
                 }
             }
+
+            // Checks position of water sources placed in playable area and displays tooltip if needed.
             else
             {
                 if (!m_CustomWaterTool.IsPositionWithinBorder(m_HitPosition))
@@ -112,6 +117,7 @@ namespace Water_Features.Tools
                 }
             }
 
+            // If Radius is too small displays a tooltip. UI should prevent this from happening.
             if (m_RadiusTooSmall || UnityEngine.Time.time < timeLastWarned + 1f)
             {
                 StringTooltip radiusTooSmallTooltip = new ()
@@ -124,6 +130,7 @@ namespace Water_Features.Tools
                 timeLastWarned = UnityEngine.Time.time;
             }
 
+            // Displays a tooltip while hovering over a water source.
             if (m_CustomWaterTool.CanDeleteWaterSource())
             {
                 StringTooltip removeWaterSourceTooltip = new ()
@@ -133,6 +140,8 @@ namespace Water_Features.Tools
                 };
                 AddMouseTooltip(removeWaterSourceTooltip);
             }
+
+            // Informs the player if they can set the elevation by right clicking.
             else if (waterSourcePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek && !m_WaterToolUISystem.AmountIsAnElevation)
             {
                 StringTooltip lockElevationTooltip = new ()

@@ -6,6 +6,7 @@ namespace Water_Features.Systems
 {
     using System.Runtime.CompilerServices;
     using Colossal.Logging;
+    using Colossal.Serialization.Entities;
     using Game;
     using Game.Common;
     using Game.Simulation;
@@ -49,11 +50,6 @@ namespace Water_Features.Systems
         protected override void OnCreate()
         {
             base.OnCreate();
-            if (!WaterFeaturesMod.Settings.IncludeDetentionBasins)
-            {
-                Enabled = false;
-                return;
-            }
 
             m_Log = WaterFeaturesMod.Instance.Log;
             m_ClimateSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ClimateSystem>();
@@ -116,6 +112,17 @@ namespace Water_Features.Systems
             __TypeHandle.AssignHandles(ref CheckedStateRef);
         }
 
+        /// <inheritdoc/>
+        protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
+        {
+            base.OnGameLoadingComplete(purpose, mode);
+            if (!WaterFeaturesMod.Settings.IncludeDetentionBasins)
+            {
+                Enabled = false;
+                return;
+            }
+        }
+
         private struct TypeHandle
         {
             public ComponentTypeHandle<Game.Simulation.WaterSourceData> __Game_Simulation_WaterSourceData_RW_ComponentTypeHandle;
@@ -135,6 +142,12 @@ namespace Water_Features.Systems
             }
         }
 
+        /// <summary>
+        /// This job checks the water level of detention basins.
+        /// Detention basins only fill up with precipitation or melting snow.
+        /// When it reaches 95% full then the amount is throttled.
+        /// When it reaches 100% full or higher the amount is set to 0.
+        /// </summary>
         private struct DetentionBasinJob : IJobChunk
         {
             public ComponentTypeHandle<DetentionBasin> m_DetentionBasinType;
@@ -168,40 +181,61 @@ namespace Water_Features.Systems
                     float waterDepth = waterPosition.y - terrainPosition.y;
                     float maximumDepth = currentDetentionBasin.m_MaximumWaterHeight - terrainPosition.y;
                     float temperatureDifferentialAtWaterSource = m_TemperatureDifferential - (terrainPosition.y / 500f);
+
+                    // This resets the water source back to being a creek if it was converted to a lake for safe saving.
                     if (currentWaterSourceData.m_ConstantDepth != 0) // Creek
                     {
                         currentWaterSourceData.m_ConstantDepth = 0; // Creek
                     }
 
+                    // If it's snowing add snow accumulation.
                     if (m_Precipiation > 0f && m_Snowing)
                     {
                         currentDetentionBasin.m_SnowAccumulation += m_Precipiation * maximumDepth * maxDepthToRunoffCoefficient;
                         buffer.SetComponent(currentEntity, currentDetentionBasin);
                     }
 
+                    // When it reaches 100% full or higher the amount is set to 0.
                     if (waterHeight > currentDetentionBasin.m_MaximumWaterHeight && currentWaterSourceData.m_Amount >= 0f)
                     {
                         currentWaterSourceData.m_Amount = 0f;
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                     }
-                    else if (m_Precipiation > 0f && !m_Snowing)
+                    else if (m_Precipiation > 0f && !m_Snowing) // If it's not full and it's raining add water.
                     {
+                        // If there is no snow to melt than just simulate rain.
                         if (Mathf.Approximately(currentDetentionBasin.m_SnowAccumulation, 0f) && temperatureDifferentialAtWaterSource > 0f)
                         {
                             currentWaterSourceData.m_Amount = m_Precipiation * maximumDepth * maxDepthToRunoffCoefficient;
                         }
+
+                        // If there is snow that is melting add that to the amount.
                         else
                         {
                             currentWaterSourceData.m_Amount = (m_Precipiation * maximumDepth * maxDepthToRunoffCoefficient) + TryMeltSnow(ref currentDetentionBasin, temperatureDifferentialAtWaterSource, maximumDepth);
                             buffer.SetComponent(currentEntity, currentDetentionBasin);
                         }
 
+                        // When it reaches 95% full then the amount is throttled.
                         if (waterDepth > 0.95f * maximumDepth)
                         {
-                            currentWaterSourceData.m_Amount = Mathf.Min(currentWaterSourceData.m_Amount, maximumDepth * .1f);
+                            currentWaterSourceData.m_Amount = Mathf.Min(currentWaterSourceData.m_Amount, maximumDepth * .05f);
                         }
 
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
+                    }
+
+                    // If it is not raining, but their is snow that can melt.
+                    else if (m_Precipiation == 0f && temperatureDifferentialAtWaterSource > 0f && currentDetentionBasin.m_SnowAccumulation > 0f)
+                    {
+                        currentWaterSourceData.m_Amount = TryMeltSnow(ref currentDetentionBasin, temperatureDifferentialAtWaterSource, maximumDepth); // If there is snow that is melting add that to the amount.
+
+                        if (waterDepth > 0.95f * maximumDepth) // When it reaches 95% full then the amount is throttled.
+                        {
+                            currentWaterSourceData.m_Amount = Mathf.Min(currentWaterSourceData.m_Amount, maximumDepth * .05f);
+                        }
+
+                        buffer.SetComponent(currentEntity, currentDetentionBasin);
                     }
                     else
                     {
@@ -211,6 +245,7 @@ namespace Water_Features.Systems
                 }
             }
 
+            // Determines a value of snow to melt right now based on the amount of snow and the tepmerature differential.
             private float TryMeltSnow(ref DetentionBasin data, float temperatureDifferential, float maxDepth)
             {
                 const float meltingRate = 1f / 30f;

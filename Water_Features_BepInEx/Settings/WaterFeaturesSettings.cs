@@ -6,6 +6,7 @@ namespace Water_Features.Settings
 {
     using Colossal.IO.AssetDatabase;
     using Colossal.Logging;
+    using Game;
     using Game.Modding;
     using Game.Settings;
     using Game.Simulation;
