@@ -27,10 +27,10 @@ namespace Water_Features.Systems
         /// </summary>
         private List<WaterSourcePrefabData> m_SourcePrefabDataList = new List<WaterSourcePrefabData>()
         {
-            { new WaterSourcePrefabData { m_SourceType = SourceType.Creek, m_Icon = "coui://yy-water-tool/WaterSourceCreek.svg", m_AmountLocaleKey = "YY_WATER_FEATURES.Flow", m_Priority = 10, m_DefaultRadius = 5f, m_DefaultAmount = 1f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.Stream, m_Icon = "coui://yy-water-tool/WaterSourceStream.svg", m_AmountLocaleKey = "YY_WATER_FEATURES.Flow", m_Priority = 10, m_DefaultRadius = 5f, m_DefaultAmount = 1f, } },
             { new WaterSourcePrefabData { m_SourceType = SourceType.River, m_Icon = "coui://yy-water-tool/WaterSourceRiver.svg", m_AmountLocaleKey = "YY_WATER_FEATURES.Depth", m_Priority = 20, m_DefaultRadius = 50f, m_DefaultAmount = 20f, } },
             { new WaterSourcePrefabData { m_SourceType = SourceType.Sea, m_Icon = "coui://yy-water-tool/WaterSourceSea.svg", m_AmountLocaleKey = "YY_WATER_FEATURES.Depth", m_Priority = 70, m_DefaultRadius = 2500f, m_DefaultAmount = 25f, } },
-            { new WaterSourcePrefabData { m_SourceType = SourceType.AutofillingLake, m_Icon = "coui://yy-water-tool/WaterSourceLake.svg", m_AmountLocaleKey = "YY_WATER_FEATURES.Depth", m_Priority = 50, m_DefaultRadius = 20f, m_DefaultAmount = 15f, } },
+            { new WaterSourcePrefabData { m_SourceType = SourceType.Lake, m_Icon = "coui://yy-water-tool/WaterSourceLake.svg", m_AmountLocaleKey = "YY_WATER_FEATURES.Depth", m_Priority = 50, m_DefaultRadius = 20f, m_DefaultAmount = 15f, } },
         };
 
         private PrefabSystem m_PrefabSystem;

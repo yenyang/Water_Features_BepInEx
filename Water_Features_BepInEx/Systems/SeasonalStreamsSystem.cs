@@ -29,7 +29,7 @@ namespace Water_Features.Systems
     using static Game.Simulation.ClimateSystem;
 
     /// <summary>
-    /// A system for handing creek seasonality and runoff.
+    /// A system for handing stream seasonality and runoff.
     /// </summary>
     public partial class SeasonalStreamsSystem : GameSystemBase
     {
@@ -131,7 +131,7 @@ namespace Water_Features.Systems
             if (m_ClimateSystem.isSnowing == false)
             {
                 // Calculate water source multiplier based on precipiattion, spring water, and seasonality.
-                reviseWaterSourcesJob.m_WaterSourceMultiplier = Mathf.Clamp((m_CurrentSeasonMeanPrecipitation / m_MaxSeasonMeanPrecipitation * WaterFeaturesMod.Settings.CreekMeanPrecipitationWeight) + (m_ClimateSystem.precipitation * WaterFeaturesMod.Settings.CreekCurrentPrecipitationWeight) + WaterFeaturesMod.Settings.CreekSpringWater, WaterFeaturesMod.Settings.MinimumMultiplier, WaterFeaturesMod.Settings.MaximumMultiplier);
+                reviseWaterSourcesJob.m_WaterSourceMultiplier = Mathf.Clamp((m_CurrentSeasonMeanPrecipitation / m_MaxSeasonMeanPrecipitation * WaterFeaturesMod.Settings.StreamSeasonality) + (m_ClimateSystem.precipitation * WaterFeaturesMod.Settings.StreamStormwaterEffects) + WaterFeaturesMod.Settings.ConstantFlowRate, WaterFeaturesMod.Settings.MinimumMultiplier, WaterFeaturesMod.Settings.MaximumMultiplier);
                 reviseWaterSourcesJob.m_SnowAccumulationMultiplier = 0f;
 
                 // If the temperature is high enough to melt snow record the temperature and the leftover multiplier that can be used for snow melt.
@@ -151,8 +151,8 @@ namespace Water_Features.Systems
             else if (WaterFeaturesMod.Settings.SimulateSnowMelt == true)
             {
                 // Seasonal water flow and spring water still continue during snow.
-                reviseWaterSourcesJob.m_WaterSourceMultiplier = Mathf.Clamp((m_CurrentSeasonMeanPrecipitation / m_MaxSeasonMeanPrecipitation * WaterFeaturesMod.Settings.CreekMeanPrecipitationWeight) + WaterFeaturesMod.Settings.CreekSpringWater, WaterFeaturesMod.Settings.MinimumMultiplier, WaterFeaturesMod.Settings.MaximumMultiplier);
-                reviseWaterSourcesJob.m_SnowAccumulationMultiplier = m_ClimateSystem.precipitation * WaterFeaturesMod.Settings.CreekCurrentPrecipitationWeight;
+                reviseWaterSourcesJob.m_WaterSourceMultiplier = Mathf.Clamp((m_CurrentSeasonMeanPrecipitation / m_MaxSeasonMeanPrecipitation * WaterFeaturesMod.Settings.StreamSeasonality) + WaterFeaturesMod.Settings.ConstantFlowRate, WaterFeaturesMod.Settings.MinimumMultiplier, WaterFeaturesMod.Settings.MaximumMultiplier);
+                reviseWaterSourcesJob.m_SnowAccumulationMultiplier = m_ClimateSystem.precipitation * WaterFeaturesMod.Settings.StreamStormwaterEffects;
                 reviseWaterSourcesJob.m_PotentialSnowMeltMultiplier = 0f;
                 reviseWaterSourcesJob.m_TemperatureDifferential = 0f;
             }
@@ -272,7 +272,7 @@ namespace Water_Features.Systems
         }
 
         /// <summary>
-        /// This job sets the creek flow amount based on all the various factors calculated during the onUpdate.
+        /// This job sets the stream flow amount based on all the various factors calculated during the onUpdate.
         /// </summary>
         private struct ReviseWaterSourcesJob : IJobChunk
         {

@@ -131,39 +131,39 @@ namespace Water_Features.Settings
         public bool EnableSeasonalStreams { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to simulate snow melt with creeks.
+        /// Gets or sets a value indicating whether to simulate snow melt with streams.
         /// </summary>
         [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsSeasonalStreamsDisabled))]
         public bool SimulateSnowMelt { get; set; }
 
         /// <summary>
-        /// Gets or sets a value with a slider indicating the multiplier for water always emitted from a creek.
+        /// Gets or sets a value with a slider indicating the multiplier for water always emitted from a stream.
         /// </summary>
         [SettingsUISlider(min = 0f, max = 100f, step = 5f, unit = "percentageSingleFraction", scalarMultiplier = 100f)]
         [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsSeasonalStreamsDisabled))]
-        public float CreekSpringWater { get; set; }
+        public float ConstantFlowRate { get; set; }
 
         /// <summary>
-        /// Gets or sets a value with a slider indicating the multiplier for water seaonally emitted from a creek.
+        /// Gets or sets a value with a slider indicating the multiplier for water seaonally emitted from a stream.
         /// </summary>
         [SettingsUISlider(min = 0f, max = 100f, step = 5f, unit = "percentageSingleFraction", scalarMultiplier = 100f)]
         [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsSeasonalStreamsDisabled))]
-        public float CreekMeanPrecipitationWeight { get; set; }
+        public float StreamSeasonality { get; set; }
 
 
         /// <summary>
-        /// Gets or sets a value with a slider indicating the multiplier for water emitted from a creek due to rain.
+        /// Gets or sets a value with a slider indicating the multiplier for water emitted from a stream due to rain.
         /// </summary>
         [SettingsUISlider(min = 0f, max = 100f, step = 5f, unit = "percentageSingleFraction", scalarMultiplier = 100f)]
         [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsSeasonalStreamsDisabled))]
-        public float CreekCurrentPrecipitationWeight { get; set; }
+        public float StreamStormwaterEffects { get; set; }
 
         /// <summary>
-        /// Gets or sets a value with a slider indicating the minimum multiplier to apply to creeks.
+        /// Gets or sets a value with a slider indicating the minimum multiplier to apply to streams.
         /// </summary>
         [SettingsUISection(SeasonalStreams, SeasonalStreams)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsSeasonalStreamsDisabled))]
@@ -171,7 +171,7 @@ namespace Water_Features.Settings
         public float MinimumMultiplier { get; set; }
 
         /// <summary>
-        /// Gets or sets a value with a slider indicating the maximum multiplier to apply to creeks.
+        /// Gets or sets a value with a slider indicating the maximum multiplier to apply to streams.
         /// </summary>
         [SettingsUISlider(min = 1f, max = 10f, step = 0.1f, unit = "floatSingleFraction")]
         [SettingsUISection(SeasonalStreams, SeasonalStreams)]
@@ -266,9 +266,9 @@ namespace Water_Features.Settings
         /// </summary>
         public void ResetSeasonalStreamsSettings()
         {
-            CreekSpringWater = 0f;
-            CreekMeanPrecipitationWeight = 0.5f;
-            CreekCurrentPrecipitationWeight = 0.75f;
+            ConstantFlowRate = 0f;
+            StreamSeasonality = 0.5f;
+            StreamStormwaterEffects = 0.75f;
             MinimumMultiplier = 0f;
             MaximumMultiplier = 1.0f;
             SimulateSnowMelt = true;
@@ -305,9 +305,9 @@ namespace Water_Features.Settings
             EvaporationRate = 0.0001f;
             IncludeDetentionBasins = false;
             IncludeRetentionBasins = false;
-            CreekSpringWater = 0f;
-            CreekMeanPrecipitationWeight = 0.5f;
-            CreekCurrentPrecipitationWeight = 0.75f;
+            ConstantFlowRate = 0f;
+            StreamSeasonality = 0.5f;
+            StreamStormwaterEffects = 0.75f;
             MinimumMultiplier = 0f;
             MaximumMultiplier = 1.0f;
             SimulateSnowMelt = true;

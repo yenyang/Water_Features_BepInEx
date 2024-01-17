@@ -321,7 +321,7 @@ namespace Water_Features.Tools
             }
 
             // This section is for setting the target elevation with sources other than Streams.
-            else if (m_SecondaryApplyAction.WasPressedThisFrame() && m_HoveredWaterSources.IsEmpty && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek)
+            else if (m_SecondaryApplyAction.WasPressedThisFrame() && m_HoveredWaterSources.IsEmpty && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Stream)
             {
                 m_WaterToolUISystem.SetElevation(m_RaycastPoint.m_HitPosition.y);
             }
@@ -371,7 +371,7 @@ namespace Water_Features.Tools
                     }
 
                     // This section handles projected water surface elevation.
-                    if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek)
+                    if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Stream)
                     {
                         float amount = m_WaterToolUISystem.Amount;
                         float elevation = terrainHeight + amount;
@@ -463,11 +463,11 @@ namespace Water_Features.Tools
             }
 
             // This section adjusts the amount value for different types of water sources.
-            if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.AutofillingLake && !m_WaterToolUISystem.AmountIsAnElevation)
+            if (m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Stream && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Lake && !m_WaterToolUISystem.AmountIsAnElevation)
             {
                 amount += position.y;
             }
-            else if (m_WaterToolUISystem.AmountIsAnElevation && m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.AutofillingLake)
+            else if (m_WaterToolUISystem.AmountIsAnElevation && m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.Lake)
             {
                 amount -= position.y;
             }
@@ -544,7 +544,7 @@ namespace Water_Features.Tools
                     m_ToolOutputBarrier.AddJobHandleForProducer(jobHandle);
                     deps = jobHandle;
                 }
-                else if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.AutofillingLake)
+                else if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.Lake)
                 {
                     waterSourceDataComponent.m_Amount *= 0.4f;
                     AddAutoFillingLakeJob addAutoFillingLakeJob = new ()
@@ -843,15 +843,15 @@ namespace Water_Features.Tools
             {
                 switch (m_SourceType)
                 {
-                    case WaterToolUISystem.SourceType.Creek:
+                    case WaterToolUISystem.SourceType.Stream:
                         return UnityEngine.Color.red;
-                    case WaterToolUISystem.SourceType.Lake:
+                    case WaterToolUISystem.SourceType.VanillaLake:
                         return new UnityEngine.Color(0.422f, 0.242f, 0.152f);
                     case WaterToolUISystem.SourceType.River:
                         return UnityEngine.Color.yellow;
                     case WaterToolUISystem.SourceType.Sea:
                         return UnityEngine.Color.green;
-                    case WaterToolUISystem.SourceType.AutofillingLake:
+                    case WaterToolUISystem.SourceType.Lake:
                         return new UnityEngine.Color(0.422f, 0.242f, 0.152f);
                     case WaterToolUISystem.SourceType.DetentionBasin:
                         return new UnityEngine.Color(0.95f, 0.44f, 0.13f, 1f);

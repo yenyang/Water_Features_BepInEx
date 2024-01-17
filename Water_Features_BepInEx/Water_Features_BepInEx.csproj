@@ -201,7 +201,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="UI\WaterSourceAutomaticFill.svg" />
-    <Content Include="UI\WaterSourceCreek.svg">
+    <Content Include="UI\WaterSourceStream.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="UI\WaterSourceDetentionBasin.svg">

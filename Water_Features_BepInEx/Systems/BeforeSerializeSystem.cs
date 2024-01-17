@@ -262,7 +262,7 @@ namespace Water_Features.Systems
                 {
                     Game.Simulation.WaterSourceData currentWaterSourceData = waterSourceDataNativeArray[i];
                     currentWaterSourceData.m_Amount = autofillingLakeNativeArray[i].m_MaximumWaterHeight;
-                    currentWaterSourceData.m_ConstantDepth = 1; // Lake
+                    currentWaterSourceData.m_ConstantDepth = 1; // Vanilla Lake
                     waterSourceDataNativeArray[i] = currentWaterSourceData;
                 }
             }
@@ -285,7 +285,7 @@ namespace Water_Features.Systems
                 {
                     Game.Simulation.WaterSourceData currentWaterSourceData = waterSourceDataNativeArray[i];
                     currentWaterSourceData.m_Amount = detentionBasinNativeArray[i].m_MaximumWaterHeight;
-                    currentWaterSourceData.m_ConstantDepth = 1; // Lake
+                    currentWaterSourceData.m_ConstantDepth = 1; // Vanilla Lake
                     waterSourceDataNativeArray[i] = currentWaterSourceData;
                 }
             }
@@ -308,7 +308,7 @@ namespace Water_Features.Systems
                 {
                     Game.Simulation.WaterSourceData currentWaterSourceData = waterSourceDataNativeArray[i];
                     currentWaterSourceData.m_Amount = retentionBasinNativeArray[i].m_MaximumWaterHeight;
-                    currentWaterSourceData.m_ConstantDepth = 1; // Lake
+                    currentWaterSourceData.m_ConstantDepth = 1; // Vanilla Lake
                     waterSourceDataNativeArray[i] = currentWaterSourceData;
                 }
             }

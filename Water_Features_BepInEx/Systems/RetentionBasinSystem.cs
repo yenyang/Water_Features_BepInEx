@@ -182,10 +182,10 @@ namespace Water_Features.Systems
                     float maxDepth = currentRetentionBasin.m_MaximumWaterHeight - terrainPosition.y;
                     float temperatureDifferentialAtWaterSource = m_TemperatureDifferential - (terrainPosition.y / 500f);
 
-                    // This resets the water source back to being a creek if it was converted to a lake for safe saving.
-                    if (currentWaterSourceData.m_ConstantDepth != 0) // Creek
+                    // This resets the water source back to being a stream if it was converted to a vanilla lake for safe saving.
+                    if (currentWaterSourceData.m_ConstantDepth != 0) // Stream
                     {
-                        currentWaterSourceData.m_ConstantDepth = 0; // Creek
+                        currentWaterSourceData.m_ConstantDepth = 0; // Stream
                     }
 
                     // If it's snowing add snow accumulation.

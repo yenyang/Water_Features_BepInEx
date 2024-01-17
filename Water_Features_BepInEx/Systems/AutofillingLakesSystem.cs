@@ -107,7 +107,7 @@ namespace Water_Features.Systems
 
         /// <summary>
         /// This job checks the water level of the automatic filling lake.
-        /// At first the autofilling lake is a creek water source that is filling up the lake with water.
+        /// At first the autofilling lake is a stream water source that is filling up the lake with water.
         /// When it reaches 75% full then the amount is throttled.
         /// When it reaches 100% full or higher the water source is converted to a lake.
         /// The component for automatic filling is then removed.
@@ -144,7 +144,7 @@ namespace Water_Features.Systems
                     // When it reaches 100% full or higher the water source is converted to a lake.
                     if (waterHeight > currentAutofillingLake.m_MaximumWaterHeight)
                     {
-                        currentWaterSourceData.m_ConstantDepth = (int)WaterToolUISystem.SourceType.Lake;
+                        currentWaterSourceData.m_ConstantDepth = (int)WaterToolUISystem.SourceType.VanillaLake;
                         currentWaterSourceData.m_Amount = currentAutofillingLake.m_MaximumWaterHeight;
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                         buffer.RemoveComponent<AutofillingLake>(currentEntity);
@@ -153,20 +153,20 @@ namespace Water_Features.Systems
                     // When it reaches 75% full then the amount is throttled.
                     else if (waterDepth >= 0.75f * maxDepth)
                     {
-                        currentWaterSourceData.m_ConstantDepth = 0; // Creek
+                        currentWaterSourceData.m_ConstantDepth = 0; // Stream
                         currentWaterSourceData.m_Amount = maxDepth * 0.1f;
-                        if (currentWaterSourceData.m_ConstantDepth != 0) // Creek
+                        if (currentWaterSourceData.m_ConstantDepth != 0) // Stream
                         {
-                            currentWaterSourceData.m_ConstantDepth = 0; // Creek
+                            currentWaterSourceData.m_ConstantDepth = 0; // Stream
                         }
 
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                     }
 
-                    // If an automatic filling lake was saved and converted to a lake, then this converts it back into a creek to continue filling.
-                    else if (currentWaterSourceData.m_ConstantDepth != 0) // Creek
+                    // If an automatic filling lake was saved and converted to a vanilla lake, then this converts it back into a stream to continue filling.
+                    else if (currentWaterSourceData.m_ConstantDepth != 0) // Stream
                     {
-                        currentWaterSourceData.m_ConstantDepth = 0; // Creek
+                        currentWaterSourceData.m_ConstantDepth = 0; // Stream
                         currentWaterSourceData.m_Amount = maxDepth * 0.4f;
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                     }

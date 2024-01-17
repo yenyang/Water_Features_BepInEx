@@ -142,7 +142,7 @@ namespace Water_Features.Tools
             }
 
             // Informs the player if they can set the elevation by right clicking.
-            else if (waterSourcePrefab.m_SourceType != WaterToolUISystem.SourceType.Creek && !m_WaterToolUISystem.AmountIsAnElevation)
+            else if (waterSourcePrefab.m_SourceType != WaterToolUISystem.SourceType.Stream && !m_WaterToolUISystem.AmountIsAnElevation)
             {
                 StringTooltip lockElevationTooltip = new ()
                 {

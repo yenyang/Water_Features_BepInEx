@@ -115,7 +115,7 @@ namespace Water_Features.Systems
         }
 
         /// <summary>
-        /// If Seasonal streams is enabled, this job will add seasonal streams component to creeks and record the original amounts.
+        /// If Seasonal streams is enabled, this job will add seasonal streams component to streams and record the original amounts.
         /// If Waves and tides are enabled, this job will add waves and tides component to seas and record the original amounts.
         /// </summary>
         private struct FindWaterSourcesJob : IJobChunk

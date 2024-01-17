@@ -31,28 +31,6 @@ namespace Water_Features.Tools
     /// </summary>
     public partial class WaterToolUISystem : UISystemBase
     {
-        private readonly Dictionary<SourceType, string> m_SourceTypeToButtonIDs = new Dictionary<SourceType, string>() 
-        {
-            { SourceType.Creek, "YYWT-creek" },
-            { SourceType.Lake, "YYWT-lake" },
-            { SourceType.River, "YYWT-river" },
-            { SourceType.Sea, "YYWT-sea" },
-            { SourceType.AutofillingLake, "YYWT-autofilling-lake" },
-            { SourceType.DetentionBasin, "YYWT-detention-basin" },
-            { SourceType.RetentionBasin, "YYWT-retention-basin" },
-        };
-
-        private readonly Dictionary<string, SourceType> m_ButtonIDsToSourceType = new Dictionary<string, SourceType>()
-        {
-            { "YYWT-creek", SourceType.Creek },
-            { "YYWT-lake", SourceType.Lake },
-            { "YYWT-river", SourceType.River },
-            { "YYWT-sea", SourceType.Sea },
-            { "YYWT-autofilling-lake", SourceType.AutofillingLake },
-            { "YYWT-detention-basin", SourceType.DetentionBasin },
-            { "YYWT-retention-basin", SourceType.RetentionBasin },
-        };
-
         private View m_UiView;
         private ToolSystem m_ToolSystem;
         private string m_InjectedJS = string.Empty;
@@ -86,12 +64,12 @@ namespace Water_Features.Tools
             /// <summary>
             /// Constant Rate Water Sources that may vary with season and precipitation.
             /// </summary>
-            Creek,
+            Stream,
 
             /// <summary>
             /// Constant level water sources.
             /// </summary>
-            Lake,
+            VanillaLake,
 
             /// <summary>
             /// Border River water sources.
@@ -104,9 +82,9 @@ namespace Water_Features.Tools
             Sea,
 
             /// <summary>
-            /// Starts as a creek and settles into a lake.
+            /// Starts as a stream and settles into a vanilla lake.
             /// </summary>
-            AutofillingLake,
+            Lake,
 
             /// <summary>
             /// Pond that fills when its rainy but will empty completely eventually.
@@ -342,7 +320,7 @@ namespace Water_Features.Tools
                         m_AmountIsElevation = false;
                     }
 
-                    if (waterSourcePrefab.m_SourceType == SourceType.Creek)
+                    if (waterSourcePrefab.m_SourceType == SourceType.Stream)
                     {
                         unit = string.Empty;
                     }
@@ -554,7 +532,7 @@ namespace Water_Features.Tools
                 if (m_CustomWaterToolSystem.GetPrefab() != null)
                 {
                     WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
-                    if (waterSourcePrefab.m_SourceType == SourceType.Creek)
+                    if (waterSourcePrefab.m_SourceType == SourceType.Stream)
                     {
                         unit = string.Empty;
                     }
@@ -635,7 +613,7 @@ namespace Water_Features.Tools
             if (m_CustomWaterToolSystem.GetPrefab() != null)
             {
                 WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
-                if (waterSourcePrefab.m_SourceType == SourceType.Creek)
+                if (waterSourcePrefab.m_SourceType == SourceType.Stream)
                 {
                     unit = string.Empty;
                 }
@@ -688,7 +666,7 @@ namespace Water_Features.Tools
             if (m_CustomWaterToolSystem.GetPrefab() != null)
             {
                 WaterSourcePrefab waterSourcePrefab = m_CustomWaterToolSystem.GetPrefab() as WaterSourcePrefab;
-                if (waterSourcePrefab.m_SourceType == SourceType.Creek)
+                if (waterSourcePrefab.m_SourceType == SourceType.Stream)
                 {
                     unit = string.Empty;
                 }
@@ -848,7 +826,7 @@ namespace Water_Features.Tools
                 UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
 
                 string unit = " m";
-                if (waterSourcePrefab.m_SourceType == SourceType.Creek)
+                if (waterSourcePrefab.m_SourceType == SourceType.Stream)
                 {
                     unit = string.Empty;
                 }
