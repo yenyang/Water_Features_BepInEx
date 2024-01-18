@@ -23,6 +23,7 @@ namespace Water_Features.Systems
         private float m_TimeLastChanged = 0f;
         private float m_DateLastChange = 0f;
         private ILog m_Log;
+        private float m_OriginalDamping = 0.995f;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChangeWaterSystemValues"/> class.
@@ -42,6 +43,7 @@ namespace Water_Features.Systems
             base.OnCreate();
             m_Log = WaterFeaturesMod.Instance.Log;
             m_WaterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
+            m_OriginalDamping = m_WaterSystem.m_Damping;
             m_TimeSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TimeSystem>();
             m_Log.Info($"[{nameof(ChangeWaterSystemValues)}] {nameof(OnCreate)}");
             Enabled = false;
@@ -72,9 +74,13 @@ namespace Water_Features.Systems
             }
 
             // This is for changing the damping constant with the settings.
-            if (!Mathf.Approximately(m_WaterSystem.m_Damping, WaterFeaturesMod.Settings.Damping))
+            if (!Mathf.Approximately(m_WaterSystem.m_Damping, WaterFeaturesMod.Settings.Damping) && WaterFeaturesMod.Settings.EnableWavesAndTides)
             {
                 m_WaterSystem.m_Damping = WaterFeaturesMod.Settings.Damping;
+            }
+            else if (!Mathf.Approximately(m_WaterSystem.m_Damping, m_OriginalDamping) && !WaterFeaturesMod.Settings.EnableWavesAndTides)
+            {
+                m_WaterSystem.m_Damping = m_OriginalDamping;
             }
         }
     }

@@ -362,6 +362,8 @@ namespace Water_Features.Settings
                     findWaterSourcesSystem.Enabled = false;
                     disableWavesAndTidesSystem.Enabled = true;
                 }
+
+                m_ChangeWaterSystemValues.Enabled = true;
             }
 
             WaterSystem waterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
