@@ -31,6 +31,8 @@ namespace Water_Features.Systems
         private Entity m_DummySeaWaterSource = Entity.Null;
         private float m_PreviousWaveAndTideHeight = 0f;
         private WaterSystem m_WaterSystem;
+        private ToolSystem m_ToolSystem;
+        private TerrainToolSystem m_TerrainToolSystem;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TidesAndWavesSystem"/> class.
@@ -63,6 +65,8 @@ namespace Water_Features.Systems
             m_Log = WaterFeaturesMod.Instance.Log;
             m_TimeSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TimeSystem>();
             m_EndFrameBarrier = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<EndFrameBarrier>();
+            m_ToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ToolSystem>();
+            m_TerrainToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TerrainToolSystem>();
             m_WaterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
             m_WaterSourceQuery = GetEntityQuery(new EntityQueryDesc[]
             {
@@ -97,7 +101,7 @@ namespace Water_Features.Systems
             __TypeHandle.__Unity_Entities_Entity_TypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__TidesAndWavesData_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
 
-            if (m_WaterSystem.WaterSimSpeed == 0)
+            if (m_WaterSystem.WaterSimSpeed == 0 && m_ToolSystem.activeTool != m_TerrainToolSystem)
             {
                 m_WaterSystem.WaterSimSpeed = 1;
             }
