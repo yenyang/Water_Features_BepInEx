@@ -2,7 +2,7 @@
 // Copyright (c) Yenyang's Mods. MIT License. All rights reserved.
 // </copyright>
 
-#define DEBUG // Change before release.
+#define RELEASE // Change before release.
 namespace Water_Features
 {
     using System.IO;
@@ -68,7 +68,6 @@ namespace Water_Features
             Instance = this;
             Log = LogManager.GetLogger("Mods_Yenyang_Water_Features", false);
             Log.Info($"[{nameof(WaterFeaturesMod)}] {nameof(OnLoad)}");
-            
         }
 
         /// <inheritdoc/>
