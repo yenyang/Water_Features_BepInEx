@@ -23,7 +23,6 @@ namespace Water_Features.Tools
     using Water_Features;
     using Water_Features.Prefabs;
     using Water_Features.Settings;
-    using Water_Features.Systems;
     using Water_Features.Utils;
 
     /// <summary>
@@ -457,10 +456,24 @@ namespace Water_Features.Tools
             }
             else if (m_Radius < 10000)
             {
-                m_Radius += 1 * m_RadiusRateOfChange;
+                if (m_RadiusRateOfChange == 1f && m_Radius == 0.125f)
+                {
+                    m_Radius = 1f;
+                }
+                else
+                {
+                    m_Radius += 1 * m_RadiusRateOfChange;
+                }
             }
 
-            m_Radius = Mathf.Clamp(m_Radius, 5f, 10000f);
+            if (WaterFeaturesMod.Settings.TrySmallerRadii)
+            {
+                m_Radius = Mathf.Clamp(m_Radius, 0.125f, 10000f);
+            }
+            else
+            {
+                m_Radius = Mathf.Clamp(m_Radius, 5f, 10000f);
+            }
 
             // This script sets the radius field to the desired radius;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");
@@ -468,7 +481,7 @@ namespace Water_Features.Tools
 
         private void DecreaseRadius()
         {
-            if (m_Radius <= 10 && m_Radius > 5)
+            if (m_Radius <= 10 && m_Radius > 0.125f)
             {
                 m_Radius -= 1 * m_RadiusRateOfChange;
             }
@@ -489,7 +502,14 @@ namespace Water_Features.Tools
                 m_Radius -= 500 * m_RadiusRateOfChange;
             }
 
-            m_Radius = Mathf.Clamp(m_Radius, 5f, 10000f);
+            if (WaterFeaturesMod.Settings.TrySmallerRadii)
+            {
+                m_Radius = Mathf.Clamp(m_Radius, 0.125f, 10000f);
+            }
+            else
+            {
+                m_Radius = Mathf.Clamp(m_Radius, 5f, 10000f);
+            }
 
             // This script sets the radius field to the desired radius;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.radiusField = document.getElementById(\"YYWT-radius-field\"); if (yyWaterTool.radiusField) yyWaterTool.radiusField.innerHTML = \"{m_Radius} m\";");

@@ -117,8 +117,8 @@ namespace Water_Features.Tools
                 }
             }
 
-            // If Radius is too small displays a tooltip. UI should prevent this from happening.
-            if (m_RadiusTooSmall || UnityEngine.Time.time < timeLastWarned + 1f)
+            // If Radius is too small displays a tooltip.
+            if (m_RadiusTooSmall || UnityEngine.Time.time < timeLastWarned + 5f)
             {
                 StringTooltip radiusTooSmallTooltip = new ()
                 {
@@ -126,8 +126,12 @@ namespace Water_Features.Tools
                     value = LocalizedString.IdWithFallback("Tooltip.LABEL[YY.WT.RadiusTooSmall]", "The radius is too small and has been automically increased."),
                 };
                 AddMouseTooltip(radiusTooSmallTooltip);
+                if (m_RadiusTooSmall)
+                {
+                    timeLastWarned = UnityEngine.Time.time;
+                }
+
                 m_RadiusTooSmall = false;
-                timeLastWarned = UnityEngine.Time.time;
             }
 
             // Displays a tooltip while hovering over a water source.

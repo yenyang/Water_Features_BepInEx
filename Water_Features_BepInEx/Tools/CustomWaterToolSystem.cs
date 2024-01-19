@@ -512,7 +512,7 @@ namespace Water_Features.Tools
 
                     if (waterSourceDataComponent.m_Multiplier == 1f)
                     {
-                        waterSourceDataComponent.m_Radius++;
+                        waterSourceDataComponent.m_Radius += 1f;
                         unacceptableMultiplier = true;
                     }
                 }
@@ -521,7 +521,7 @@ namespace Water_Features.Tools
             if (unacceptableMultiplier == true)
             {
                 m_WaterTooltipSystem.RadiusTooSmall = true;
-                m_Log.InfoFormat("{WaterToolUpdate.TryAddWaterSource} Radius to small. Increased radius to {0}", waterSourceDataComponent.m_Radius);
+                m_Log.Info($"{nameof(CustomWaterToolSystem)}.{nameof(TryAddWaterSource)} Radius too small. Increased radius to {waterSourceDataComponent.m_Radius}.");
             }
 
             if (acceptableMultiplier)
@@ -547,6 +547,12 @@ namespace Water_Features.Tools
                 else if (m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.Lake)
                 {
                     waterSourceDataComponent.m_Amount *= 0.4f;
+
+                    if (waterSourceDataComponent.m_Radius < 20f)
+                    {
+                        waterSourceDataComponent.m_Amount *= Mathf.Pow(waterSourceDataComponent.m_Radius / 20f, 2);
+                    }
+
                     AddAutoFillingLakeJob addAutoFillingLakeJob = new ()
                     {
                         autoFillingLakeData = new AutofillingLake() { m_MaximumWaterHeight = amount + position.y },

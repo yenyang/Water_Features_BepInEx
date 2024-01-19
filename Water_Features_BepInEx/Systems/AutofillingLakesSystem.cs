@@ -15,6 +15,7 @@ namespace Water_Features.Systems
     using Unity.Entities;
     using Unity.Jobs;
     using Unity.Mathematics;
+    using UnityEngine;
     using Water_Features.Components;
     using Water_Features.Tools;
 
@@ -30,19 +31,12 @@ namespace Water_Features.Systems
         {
         }
 
-        public static readonly int kUpdatesPerDay = 256;
         private TypeHandle __TypeHandle;
         private EndFrameBarrier m_EndFrameBarrier;
         private WaterSystem m_WaterSystem;
         private TerrainSystem m_TerrainSystem;
         private EntityQuery m_AutofillingLakesQuery;
         private ILog m_Log;
-
-        /// <inheritdoc/>
-        public override int GetUpdateInterval(SystemUpdatePhase phase)
-        {
-            return 262144 / kUpdatesPerDay;
-        }
 
         /// <inheritdoc/>
         protected override void OnCreate()
@@ -155,6 +149,11 @@ namespace Water_Features.Systems
                     {
                         currentWaterSourceData.m_ConstantDepth = 0; // Stream
                         currentWaterSourceData.m_Amount = maxDepth * 0.1f;
+                        if (currentWaterSourceData.m_Radius < 20f)
+                        {
+                            currentWaterSourceData.m_Amount *= Mathf.Pow(currentWaterSourceData.m_Radius / 20f, 2);
+                        }
+
                         if (currentWaterSourceData.m_ConstantDepth != 0) // Stream
                         {
                             currentWaterSourceData.m_ConstantDepth = 0; // Stream
@@ -168,6 +167,11 @@ namespace Water_Features.Systems
                     {
                         currentWaterSourceData.m_ConstantDepth = 0; // Stream
                         currentWaterSourceData.m_Amount = maxDepth * 0.4f;
+                        if (currentWaterSourceData.m_Radius < 20f)
+                        {
+                            currentWaterSourceData.m_Amount *= Mathf.Pow(currentWaterSourceData.m_Radius / 20f, 2);
+                        }
+
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                     }
 

@@ -70,6 +70,12 @@ namespace Water_Features.Settings
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to Try Smaller Radii.
+        /// </summary>
+        [SettingsUISection(WaterToolGroup, WaterToolGroup)]
+        public bool TrySmallerRadii { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether to Include Detention Basins.
         /// </summary>
         [SettingsUISection(WaterToolGroup, WaterToolGroup)]
@@ -257,6 +263,7 @@ namespace Water_Features.Settings
         public void ResetWaterToolSettings()
         {
             EvaporationRate = 0.0001f;
+            TrySmallerRadii = false;
             IncludeDetentionBasins = false;
             IncludeRetentionBasins = false;
         }
@@ -302,6 +309,7 @@ namespace Water_Features.Settings
         public override void SetDefaults()
         {
             Contra = true;
+            TrySmallerRadii = false;
             EvaporationRate = 0.0001f;
             IncludeDetentionBasins = false;
             IncludeRetentionBasins = false;
