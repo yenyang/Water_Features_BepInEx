@@ -118,7 +118,7 @@ namespace Water_Features.Tools
             }
 
             // If Radius is too small displays a tooltip.
-            if (m_RadiusTooSmall || UnityEngine.Time.time < timeLastWarned + 5f)
+            if (m_RadiusTooSmall || UnityEngine.Time.time < timeLastWarned + 3f)
             {
                 StringTooltip radiusTooSmallTooltip = new ()
                 {
