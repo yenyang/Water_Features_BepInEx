@@ -260,7 +260,7 @@ namespace Water_Features.Tools
                 return inputDeps;
             }
 
-            if (m_ApplyAction.WasPressedThisFrame())
+            if (m_ApplyAction.WasPressedThisFrame() && m_HoveredWaterSources.IsEmpty)
             {
                 // Checks for valid placement of Seas, and water sources placed within the playable area.
                 if ((m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.River && m_ActivePrefab.m_SourceType != WaterToolUISystem.SourceType.Sea && IsPositionWithinBorder(m_RaycastPoint.m_HitPosition)) || (IsPositionNearBorder(m_RaycastPoint.m_HitPosition, m_WaterToolUISystem.Radius, false) && m_ActivePrefab.m_SourceType == WaterToolUISystem.SourceType.Sea))
