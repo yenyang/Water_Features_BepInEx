@@ -8,6 +8,7 @@ namespace Water_Features.Tools
     using Colossal.Logging;
     using Game.Simulation;
     using Game.Tools;
+    using Game.UI;
     using Game.UI.Localization;
     using Game.UI.Tooltip;
     using Unity.Entities;
@@ -164,6 +165,7 @@ namespace Water_Features.Tools
                             FloatTooltip amountTooltip = new FloatTooltip
                             {
                                 value = waterSourceData.m_Amount,
+                                unit = "floatSingleFraction",
                                 path = amountLocaleKey,
                                 label = LocalizedString.IdWithFallback(amountLocaleKey, fallback),
                             };
@@ -172,6 +174,7 @@ namespace Water_Features.Tools
                             FloatTooltip radiusTooltip = new FloatTooltip
                             {
                                 value = waterSourceData.m_Radius,
+                                unit = "floatSingleFraction",
                                 path = "YY_WATER_FEATURES.Radius",
                                 label = LocalizedString.IdWithFallback("YY_WATER_FEATURES.Radius", "Radius"),
                             };
@@ -183,6 +186,7 @@ namespace Water_Features.Tools
                             FloatTooltip maxElevationTooptip = new FloatTooltip
                             {
                                 value = detentionBasin.m_MaximumWaterHeight,
+                                unit = "floatSingleFraction",
                                 path = "YY_WATER_FEATURES.MaxElevation",
                                 label = LocalizedString.IdWithFallback("YY_WATER_FEATURES.MaxElevation", "Max Elevation"),
                             };
@@ -192,6 +196,7 @@ namespace Water_Features.Tools
                                 FloatTooltip snowAccumulation = new FloatTooltip
                                 {
                                     value = detentionBasin.m_SnowAccumulation,
+                                    unit = "floatSingleFraction",
                                     path = "YY_WATER_FEATURES.SnowAccumulation",
                                     label = LocalizedString.IdWithFallback("YY_WATER_FEATURES.SnowAccumulation", "Snow Accumulation"),
                                 };
@@ -203,6 +208,7 @@ namespace Water_Features.Tools
                             FloatTooltip maxElevationTooptip = new FloatTooltip
                             {
                                 value = lake.m_MaximumWaterHeight,
+                                unit = "floatSingleFraction",
                                 path = "YY_WATER_FEATURES.MaxElevation",
                                 label = LocalizedString.IdWithFallback("YY_WATER_FEATURES.MaxElevation", "Max Elevation"),
                             };
@@ -213,6 +219,7 @@ namespace Water_Features.Tools
                             FloatTooltip maxElevationTooptip = new FloatTooltip
                             {
                                 value = retentionBasin.m_MaximumWaterHeight,
+                                unit = "floatSingleFraction",
                                 path = "YY_WATER_FEATURES.MaxElevation",
                                 label = LocalizedString.IdWithFallback("YY_WATER_FEATURES.MaxElevation", "Max Elevation"),
                             };
@@ -220,6 +227,7 @@ namespace Water_Features.Tools
                             FloatTooltip minElevationTooptip = new FloatTooltip
                             {
                                 value = retentionBasin.m_MinimumWaterHeight,
+                                unit = "floatSingleFraction",
                                 path = "YY_WATER_FEATURES.MinElevation",
                                 label = LocalizedString.IdWithFallback("YY_WATER_FEATURES.MinElevation", "Min Elevation"),
                             };
@@ -229,6 +237,7 @@ namespace Water_Features.Tools
                                 FloatTooltip snowAccumulation = new FloatTooltip
                                 {
                                     value = retentionBasin.m_SnowAccumulation,
+                                    unit = "floatSingleFraction",
                                     path = "YY_WATER_FEATURES.SnowAccumulation",
                                     label = LocalizedString.IdWithFallback("YY_WATER_FEATURES.SnowAccumulation", "Snow Accumulation"),
                                 };
@@ -240,6 +249,7 @@ namespace Water_Features.Tools
                             FloatTooltip originalAmount = new FloatTooltip
                             {
                                 value = seasonalStreamsData.m_OriginalAmount,
+                                unit = "floatSingleFraction",
                                 path = "YY_WATER_FEATURES.OriginalFlow",
                                 label = LocalizedString.IdWithFallback("YY_WATER_FEATURES.OriginalFlow", "Original Flow"),
                             };
@@ -250,6 +260,7 @@ namespace Water_Features.Tools
                                 FloatTooltip snowAccumulation = new FloatTooltip
                                 {
                                     value = seasonalStreamsData.m_SnowAccumulation,
+                                    unit = "floatSingleFraction",
                                     path = "YY_WATER_FEATURES.SnowAccumulation",
                                     label = LocalizedString.IdWithFallback("YY_WATER_FEATURES.SnowAccumulation", "Snow Accumulation"),
                                 };
@@ -261,6 +272,7 @@ namespace Water_Features.Tools
                             FloatTooltip maxElevationTooptip = new FloatTooltip
                             {
                                 value = tidesAndWavesData.m_OriginalAmount,
+                                unit = "floatSingleFraction",
                                 path = "YY_WATER_FEATURES.MaxElevation",
                                 label = LocalizedString.IdWithFallback("YY_WATER_FEATURES.MaxElevation", "Max Elevation"),
                             };
