@@ -438,21 +438,21 @@ namespace Water_Features.Tools
 
         private void IncreaseRadius()
         {
-            if (m_Radius >= 1000 && m_Radius < 10000)
+            if (m_Radius >= 1000f && m_Radius < 10000f)
             {
-                m_Radius += 500 * m_RadiusRateOfChange;
+                m_Radius += 500f * m_RadiusRateOfChange;
             }
-            else if (m_Radius >= 500 && m_Radius < 1000)
+            else if (m_Radius >= 500f && m_Radius < 1000f)
             {
-                m_Radius += 100 * m_RadiusRateOfChange;
+                m_Radius += 100f * m_RadiusRateOfChange;
             }
-            else if (m_Radius >= 100 && m_Radius < 500)
+            else if (m_Radius >= 100f && m_Radius < 500f)
             {
-                m_Radius += 50 * m_RadiusRateOfChange;
+                m_Radius += 50f * m_RadiusRateOfChange;
             }
-            else if (m_Radius >= 10 && m_Radius < 100)
+            else if (m_Radius >= 10f && m_Radius < 100f)
             {
-                m_Radius += 10 * m_RadiusRateOfChange;
+                m_Radius += 10f * m_RadiusRateOfChange;
             }
             else if (m_Radius < 10000)
             {
@@ -462,7 +462,7 @@ namespace Water_Features.Tools
                 }
                 else
                 {
-                    m_Radius += 1 * m_RadiusRateOfChange;
+                    m_Radius += 1f * m_RadiusRateOfChange;
                 }
             }
 
@@ -481,25 +481,25 @@ namespace Water_Features.Tools
 
         private void DecreaseRadius()
         {
-            if (m_Radius <= 10 && m_Radius > 0.125f)
+            if (m_Radius <= 10f && m_Radius > 0.125f)
             {
-                m_Radius -= 1 * m_RadiusRateOfChange;
+                m_Radius -= 1f * m_RadiusRateOfChange;
             }
-            else if (m_Radius <= 100 && m_Radius > 10)
+            else if (m_Radius <= 100f && m_Radius > 10f)
             {
-                m_Radius -= 10 * m_RadiusRateOfChange;
+                m_Radius -= 10f * m_RadiusRateOfChange;
             }
-            else if (m_Radius <= 500 && m_Radius > 100)
+            else if (m_Radius <= 500f && m_Radius > 100f)
             {
-                m_Radius -= 50 * m_RadiusRateOfChange;
+                m_Radius -= 50f * m_RadiusRateOfChange;
             }
-            else if (m_Radius <= 1000 && m_Radius > 500)
+            else if (m_Radius <= 1000f && m_Radius > 500f)
             {
-                m_Radius -= 100 * m_RadiusRateOfChange;
+                m_Radius -= 100f * m_RadiusRateOfChange;
             }
-            else if (m_Radius > 1000)
+            else if (m_Radius > 1000f)
             {
-                m_Radius -= 500 * m_RadiusRateOfChange;
+                m_Radius -= 500f * m_RadiusRateOfChange;
             }
 
             if (WaterFeaturesMod.Settings.TrySmallerRadii)
@@ -517,31 +517,28 @@ namespace Water_Features.Tools
 
         private void IncreaseMinDepth()
         {
-            if (m_MinDepth >= 500 && m_MinDepth < 1000)
+            if (m_MinDepth >= 500f && m_MinDepth < 1000f)
             {
-                m_MinDepth += 100 * m_MinDepthRateOfChange;
+                m_MinDepth += 100f * m_MinDepthRateOfChange;
             }
-            else if (m_MinDepth >= 100 && m_MinDepth < 500)
+            else if (m_MinDepth >= 100f && m_MinDepth < 500f)
             {
-                m_MinDepth += 50 * m_MinDepthRateOfChange;
+                m_MinDepth += 50f * m_MinDepthRateOfChange;
             }
-            else if (m_MinDepth < 100 && m_MinDepth >= 10)
+            else if (m_MinDepth < 100f && m_MinDepth >= 10f)
             {
-                m_MinDepth += 10 * m_MinDepthRateOfChange;
+                m_MinDepth += 10f * m_MinDepthRateOfChange;
             }
-            else if (m_MinDepth < 1000)
+            else if (m_MinDepth < 10f && m_MinDepth >= 1f)
             {
-                if (m_MinDepthRateOfChange == 1f && m_MinDepth == 0.125f)
-                {
-                    m_MinDepth = 1f;
-                }
-                else
-                {
-                    m_MinDepth += 1 * m_MinDepthRateOfChange;
-                }
+                m_MinDepth += 1f * m_MinDepthRateOfChange;
+            }
+            else if (m_MinDepth < 1f)
+            {
+                m_MinDepth += 0.1f * m_MinDepthRateOfChange;
             }
 
-            m_MinDepth = Mathf.Clamp(m_MinDepth, 0.125f, 1000f);
+            m_MinDepth = Mathf.Clamp(m_MinDepth, 0.025f, 1000f);
 
             if (m_MinDepth > m_Amount)
             {
@@ -568,24 +565,28 @@ namespace Water_Features.Tools
 
         private void DecreaseMinDepth()
         {
-            if (m_MinDepth <= 10 && m_MinDepth > 0.125f)
+            if (m_MinDepth <= 1f)
             {
-                m_MinDepth -= 1 * m_MinDepthRateOfChange;
+                m_MinDepth -= 0.1f * m_MinDepthRateOfChange;
             }
-            else if (m_MinDepth <= 100 && m_MinDepth > 10)
+            else if (m_MinDepth <= 10f && m_MinDepth > 1f)
             {
-                m_MinDepth -= 10 * m_MinDepthRateOfChange;
+                m_MinDepth -= 1f * m_MinDepthRateOfChange;
             }
-            else if (m_MinDepth <= 500 && m_MinDepth > 100)
+            else if (m_MinDepth <= 100f && m_MinDepth > 10f)
             {
-                m_MinDepth -= 50 * m_MinDepthRateOfChange;
+                m_MinDepth -= 10f * m_MinDepthRateOfChange;
             }
-            else if (m_MinDepth > 500)
+            else if (m_MinDepth <= 500f && m_MinDepth > 100f)
             {
-                m_MinDepth -= 100 * m_MinDepthRateOfChange;
+                m_MinDepth -= 50f * m_MinDepthRateOfChange;
+            }
+            else if (m_MinDepth > 500f)
+            {
+                m_MinDepth -= 100f * m_MinDepthRateOfChange;
             }
 
-            m_MinDepth = Mathf.Clamp(m_MinDepth, 0.125f, 1000f);
+            m_MinDepth = Mathf.Clamp(m_MinDepth, 0.025f, 1000f);
 
             // This script sets the radius field to the desired radius;
             UIFileUtils.ExecuteScript(m_UiView, $"yyWaterTool.minDepthField = document.getElementById(\"YYWT-min-depth-field\"); if (yyWaterTool.minDepthField) yyWaterTool.minDepthField.innerHTML = \"{m_MinDepth} m\";");
@@ -595,35 +596,32 @@ namespace Water_Features.Tools
         {
             if (!m_AmountIsElevation)
             {
-                if (m_Amount >= 500 && m_Amount < 1000)
+                if (m_Amount >= 500f && m_Amount < 1000f)
                 {
-                    m_Amount += 100 * m_AmountRateOfChange;
+                    m_Amount += 100f * m_AmountRateOfChange;
                 }
-                else if (m_Amount >= 100 && m_Amount < 500)
+                else if (m_Amount >= 100f && m_Amount < 500f)
                 {
-                    m_Amount += 50 * m_AmountRateOfChange;
+                    m_Amount += 50f * m_AmountRateOfChange;
                 }
-                else if (m_Amount < 100 && m_Amount >= 10)
+                else if (m_Amount < 100f && m_Amount >= 10f)
                 {
-                    m_Amount += 10 * m_AmountRateOfChange;
+                    m_Amount += 10f * m_AmountRateOfChange;
                 }
-                else if (m_Amount < 1000)
+                else if (m_Amount < 10f && m_Amount >= 1f)
                 {
-                    if (m_AmountRateOfChange == 1f && m_Amount == 0.125f)
-                    {
-                        m_Amount = 1f;
-                    }
-                    else
-                    {
-                        m_Amount += 1 * m_AmountRateOfChange;
-                    }
+                    m_Amount += 1f * m_AmountRateOfChange;
+                }
+                else if (m_Amount < 1f)
+                {
+                    m_Amount += 0.1f * m_AmountRateOfChange;
                 }
 
-                m_Amount = Mathf.Clamp(m_Amount, 0.125f, 1000f);
+                m_Amount = Mathf.Clamp(m_Amount, 0.025f, 1000f);
             }
             else
             {
-                m_Amount += 10 * m_AmountRateOfChange;
+                m_Amount += 10f * m_AmountRateOfChange;
                 m_Amount = Mathf.Round(m_Amount * 10f) / 10f;
                 m_Amount = Mathf.Clamp(m_Amount, m_TerrainSystem.GetTerrainBounds().min.y, m_TerrainSystem.GetTerrainBounds().max.y);
             }
@@ -647,28 +645,32 @@ namespace Water_Features.Tools
         {
             if (!m_AmountIsElevation)
             {
-                if (m_Amount <= 10 && m_Amount > 0.125f)
+                if (m_Amount <= 1f)
                 {
-                    m_Amount -= 1 * m_AmountRateOfChange;
+                    m_Amount -= 0.1f * m_AmountRateOfChange;
                 }
-                else if (m_Amount <= 100 && m_Amount > 10)
+                else if (m_Amount <= 10f && m_Amount > 1f)
                 {
-                    m_Amount -= 10 * m_AmountRateOfChange;
+                    m_Amount -= 1f * m_AmountRateOfChange;
                 }
-                else if (m_Amount <= 500 && m_Amount > 100)
+                else if (m_Amount <= 100f && m_Amount > 10f)
                 {
-                    m_Amount -= 50 * m_AmountRateOfChange;
+                    m_Amount -= 10f * m_AmountRateOfChange;
                 }
-                else if (m_Amount > 500)
+                else if (m_Amount <= 500f && m_Amount > 100f)
                 {
-                    m_Amount -= 100 * m_AmountRateOfChange;
+                    m_Amount -= 50f * m_AmountRateOfChange;
+                }
+                else if (m_Amount > 500f)
+                {
+                    m_Amount -= 100f * m_AmountRateOfChange;
                 }
 
-                m_Amount = Mathf.Clamp(m_Amount, 0.125f, 1000f);
+                m_Amount = Mathf.Clamp(m_Amount, 0.025f, 1000f);
             }
             else
             {
-                m_Amount -= 10 * m_AmountRateOfChange;
+                m_Amount -= 10f * m_AmountRateOfChange;
                 m_Amount = Mathf.Round(m_Amount * 10f) / 10f;
                 m_Amount = Mathf.Clamp(m_Amount, m_TerrainSystem.GetTerrainBounds().min.y, m_TerrainSystem.GetTerrainBounds().max.y);
             }
