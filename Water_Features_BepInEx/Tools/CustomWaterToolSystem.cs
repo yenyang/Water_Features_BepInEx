@@ -5,6 +5,7 @@
 namespace Water_Features.Tools
 {
     using System.Runtime.CompilerServices;
+    using Colossal.Entities;
     using Colossal.Logging;
     using Game.Common;
     using Game.Input;
@@ -104,6 +105,37 @@ namespace Water_Features.Tools
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Loops through hovered entities and finds the one that is closest to the position.
+        /// </summary>
+        /// <param name="position">Should be raycast hit position.</param>
+        /// <returns>Entity.null if it can't find anything otherwise Entity of closest hovered source.</returns>
+        public Entity GetHoveredEntity(float3 position)
+        {
+            if (m_HoveredWaterSources.IsEmpty)
+            {
+                return Entity.Null;
+            }
+
+            position.y = 0f;
+            float distance = float.MaxValue;
+            Entity entity = Entity.Null;
+            foreach (Entity e in m_HoveredWaterSources)
+            {
+                if (EntityManager.TryGetComponent(e, out Game.Objects.Transform transform)) 
+                {
+                    transform.m_Position.y = 0f;
+                    if (math.distance(transform.m_Position, position) < distance)
+                    {
+                        distance = math.distance(transform.m_Position, position);
+                        entity = e;
+                    }
+                }
+            }
+
+            return entity;
         }
 
         /// <summary>
