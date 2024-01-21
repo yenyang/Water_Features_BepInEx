@@ -338,18 +338,34 @@ namespace Water_Features.Tools
             // This section is for removing water sources. The player must have hovered over one in the previous frame.
             else if (m_SecondaryApplyAction.WasReleasedThisFrame() && m_HoveredWaterSources.Length > 0)
             {
-                RemoveWaterSourcesJob removeWaterSourcesJob = new ()
+                Entity closestWaterSource = GetHoveredEntity(m_RaycastPoint.m_HitPosition);
+                if (closestWaterSource != Entity.Null)
                 {
-                    m_SourceType = __TypeHandle.__Game_Simulation_WaterSourceData_RO_ComponentTypeHandle,
-                    m_EntityType = __TypeHandle.__Unity_Entities_Entity_TypeHandle,
-                    m_Position = m_RaycastPoint.m_HitPosition,
-                    m_TransformType = __TypeHandle.__Game_Objects_Transform_RO_ComponentTypeHandle,
-                    buffer = m_ToolOutputBarrier.CreateCommandBuffer(),
-                    m_MapExtents = MapExtents,
-                };
-                JobHandle jobHandle = JobChunkExtensions.Schedule(removeWaterSourcesJob, m_WaterSourcesQuery, inputDeps);
-                m_ToolOutputBarrier.AddJobHandleForProducer(jobHandle);
-                inputDeps = jobHandle;
+                    RemoveEntityJob removeEntityJob = new RemoveEntityJob()
+                    {
+                        m_Entity = closestWaterSource,
+                        buffer = m_ToolOutputBarrier.CreateCommandBuffer(),
+                    };
+
+                    JobHandle jobHandle1 = removeEntityJob.Schedule(inputDeps);
+                    m_ToolOutputBarrier.AddJobHandleForProducer(jobHandle1);
+                    inputDeps = jobHandle1;
+                }
+                else
+                {
+                    RemoveWaterSourcesJob removeWaterSourcesJob = new ()
+                    {
+                        m_SourceType = __TypeHandle.__Game_Simulation_WaterSourceData_RO_ComponentTypeHandle,
+                        m_EntityType = __TypeHandle.__Unity_Entities_Entity_TypeHandle,
+                        m_Position = m_RaycastPoint.m_HitPosition,
+                        m_TransformType = __TypeHandle.__Game_Objects_Transform_RO_ComponentTypeHandle,
+                        buffer = m_ToolOutputBarrier.CreateCommandBuffer(),
+                        m_MapExtents = MapExtents,
+                    };
+                    JobHandle jobHandle = JobChunkExtensions.Schedule(removeWaterSourcesJob, m_WaterSourcesQuery, inputDeps);
+                    m_ToolOutputBarrier.AddJobHandleForProducer(jobHandle);
+                    inputDeps = jobHandle;
+                }
             }
 
             // This section is for setting the target elevation with sources other than Streams.
@@ -636,6 +652,21 @@ namespace Water_Features.Tools
 
             m_FindWaterSourcesSystem.Enabled = true;
         }
+
+        /// <summary>
+        /// This job removes any Entity.
+        /// </summary>
+        private struct RemoveEntityJob : IJob
+        {
+            public Entity m_Entity;
+            public EntityCommandBuffer buffer;
+
+            public void Execute()
+            {
+                buffer.DestroyEntity(m_Entity);
+            }
+        }
+
 
         /// <summary>
         /// This job removes a water source.
