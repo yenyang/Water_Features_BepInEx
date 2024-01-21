@@ -438,25 +438,32 @@ namespace Water_Features.Tools
 
         private void IncreaseRadius()
         {
+
+            float signaficantFigures = Mathf.Pow(10f, -1f * Mathf.Log(m_RadiusRateOfChange, 2f));
             if (m_Radius >= 1000f && m_Radius < 10000f)
             {
                 m_Radius += 500f * m_RadiusRateOfChange;
+                m_Radius = Mathf.Round(m_Radius * 0.01f * signaficantFigures) / (0.01f * signaficantFigures);
             }
             else if (m_Radius >= 500f && m_Radius < 1000f)
             {
                 m_Radius += 100f * m_RadiusRateOfChange;
+                m_Radius = Mathf.Round(m_Radius * 0.01f * signaficantFigures) / (0.01f * signaficantFigures);
             }
             else if (m_Radius >= 100f && m_Radius < 500f)
             {
                 m_Radius += 50f * m_RadiusRateOfChange;
+                m_Radius = Mathf.Round(m_Radius * 0.1f * signaficantFigures) / (0.1f * signaficantFigures);
             }
             else if (m_Radius >= 10f && m_Radius < 100f)
             {
                 m_Radius += 10f * m_RadiusRateOfChange;
+                m_Radius = Mathf.Round(m_Radius * 0.1f * signaficantFigures) / (0.1f * signaficantFigures);
             }
             else if (m_Radius < 10000)
             {
                m_Radius += 1f * m_RadiusRateOfChange;
+               m_Radius = Mathf.Round(m_Radius * signaficantFigures) / signaficantFigures;
             }
 
             if (WaterFeaturesMod.Settings.TrySmallerRadii)
@@ -474,25 +481,31 @@ namespace Water_Features.Tools
 
         private void DecreaseRadius()
         {
+            float signaficantFigures = Mathf.Pow(10f, -1f * Mathf.Log(m_RadiusRateOfChange, 2f));
             if (m_Radius <= 10f && m_Radius > 1f)
             {
                 m_Radius -= 1f * m_RadiusRateOfChange;
+                m_Radius = Mathf.Round(m_Radius * signaficantFigures) / signaficantFigures;
             }
             else if (m_Radius <= 100f && m_Radius > 10f)
             {
                 m_Radius -= 10f * m_RadiusRateOfChange;
+                m_Radius = Mathf.Round(m_Radius * 0.1f * signaficantFigures) / (0.1f * signaficantFigures);
             }
             else if (m_Radius <= 500f && m_Radius > 100f)
             {
                 m_Radius -= 50f * m_RadiusRateOfChange;
+                m_Radius = Mathf.Round(m_Radius * 0.1f * signaficantFigures) / (0.1f * signaficantFigures);
             }
             else if (m_Radius <= 1000f && m_Radius > 500f)
             {
                 m_Radius -= 100f * m_RadiusRateOfChange;
+                m_Radius = Mathf.Round(m_Radius * 0.01f * signaficantFigures) / (0.01f * signaficantFigures);
             }
             else if (m_Radius > 1000f)
             {
                 m_Radius -= 500f * m_RadiusRateOfChange;
+                m_Radius = Mathf.Round(m_Radius * 0.01f * signaficantFigures) / (0.01f * signaficantFigures);
             }
 
             if (WaterFeaturesMod.Settings.TrySmallerRadii)
