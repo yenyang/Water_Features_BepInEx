@@ -102,10 +102,9 @@ namespace Water_Features.Settings
         [SettingsUISection(WaterToolGroup, WaterToolGroup)]
         public bool WaterCleanUpCycleButton
         {
-            set 
-            { 
+            set
+            {
                 m_ChangeWaterSystemValues.ApplyNewEvaporationRate = true;
-                m_ChangeWaterSystemValues.Enabled = true;
             }
         }
 
@@ -286,11 +285,11 @@ namespace Water_Features.Settings
         /// </summary>
         public void ResetWavesAndTidesSettings()
         {
-            WaveHeight = 7f;
+            WaveHeight = 5f;
             TideHeight = 3f;
-            WaveFrequency = 200f;
+            WaveFrequency = 130f;
             TideClassification = TideClassificationYYTAW.Semidiurnal;
-            Damping = 0.999f;
+            Damping = 0.9995f;
         }
 
         /// <summary>
@@ -319,11 +318,11 @@ namespace Water_Features.Settings
             MinimumMultiplier = 0f;
             MaximumMultiplier = 1.0f;
             SimulateSnowMelt = true;
-            WaveHeight = 7f;
+            WaveHeight = 5f;
             TideHeight = 3f;
-            WaveFrequency = 200f;
+            WaveFrequency = 130f;
             TideClassification = TideClassificationYYTAW.Semidiurnal;
-            Damping = 0.999f;
+            Damping = 0.9995f;
             EnableSeasonalStreams = true;
             EnableWavesAndTides = false;
         }
@@ -370,15 +369,9 @@ namespace Water_Features.Settings
                     findWaterSourcesSystem.Enabled = false;
                     disableWavesAndTidesSystem.Enabled = true;
                 }
-
-                m_ChangeWaterSystemValues.Enabled = true;
             }
 
             WaterSystem waterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
-            if (!Mathf.Approximately(WaterFeaturesMod.Settings.EvaporationRate, waterSystem.m_Evaporation) || (!Mathf.Approximately(waterSystem.m_Damping, WaterFeaturesMod.Settings.Damping) && EnableWavesAndTides))
-            {
-                m_ChangeWaterSystemValues.Enabled = true;
-            }
 
             if (WaveHeight + TideHeight != tidesAndWavesSystem.PreviousWaveAndTideHeight)
             {

@@ -25,6 +25,7 @@ namespace Water_Features.Systems
         private float m_DateLastChange = 0f;
         private ILog m_Log;
         private float m_OriginalDamping = 0.995f;
+        private bool m_TemporarilyUseOriginalDamping = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChangeWaterSystemValues"/> class.
@@ -37,6 +38,11 @@ namespace Water_Features.Systems
         /// Gets or sets a value indicating whether to apply a new evaporation rate. Toggled by WaterFeaturesSetting Button.
         /// </summary>
         public bool ApplyNewEvaporationRate { get => applyNewEvaporationRate; set => applyNewEvaporationRate = value; }
+
+        /// <summary>
+        /// Sets a value indicating whether to temporarily apply a new evaporation rate.
+        /// </summary>
+        public bool TemporarilyUseOriginalDamping { set => m_TemporarilyUseOriginalDamping = value; }
 
         /// <inheritdoc/>
         protected override void OnCreate()
@@ -74,23 +80,14 @@ namespace Water_Features.Systems
             }
 
             // This is for changing the damping constant with the settings.
-            if (!Mathf.Approximately(m_WaterSystem.m_Damping, WaterFeaturesMod.Settings.Damping) && WaterFeaturesMod.Settings.EnableWavesAndTides)
+            if (!Mathf.Approximately(m_WaterSystem.m_Damping, WaterFeaturesMod.Settings.Damping) && WaterFeaturesMod.Settings.EnableWavesAndTides && !m_TemporarilyUseOriginalDamping)
             {
                 m_WaterSystem.m_Damping = WaterFeaturesMod.Settings.Damping;
             }
-            else if (!Mathf.Approximately(m_WaterSystem.m_Damping, m_OriginalDamping) && !WaterFeaturesMod.Settings.EnableWavesAndTides)
+            else if (!Mathf.Approximately(m_WaterSystem.m_Damping, m_OriginalDamping))
             {
                 m_WaterSystem.m_Damping = m_OriginalDamping;
             }
-
-            Enabled = false;
-        }
-
-        /// <inheritdoc/>
-        protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
-        {
-            base.OnGameLoadingComplete(purpose, mode);
-            Enabled = true;
         }
     }
 }

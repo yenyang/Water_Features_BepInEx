@@ -33,6 +33,8 @@ namespace Water_Features.Systems
         private WaterSystem m_WaterSystem;
         private ToolSystem m_ToolSystem;
         private TerrainToolSystem m_TerrainToolSystem;
+        private int m_TerrainToolCooloff;
+        private ChangeWaterSystemValues m_ChangeWaterSystemValues;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TidesAndWavesSystem"/> class.
@@ -68,6 +70,8 @@ namespace Water_Features.Systems
             m_ToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ToolSystem>();
             m_TerrainToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TerrainToolSystem>();
             m_WaterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
+            m_ChangeWaterSystemValues = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ChangeWaterSystemValues>();
+            m_TerrainToolCooloff = 15;
             m_WaterSourceQuery = GetEntityQuery(new EntityQueryDesc[]
             {
                 new EntityQueryDesc
@@ -101,9 +105,24 @@ namespace Water_Features.Systems
             __TypeHandle.__Unity_Entities_Entity_TypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__TidesAndWavesData_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
 
+            if (m_ToolSystem.activeTool == m_TerrainToolSystem)
+            {
+                m_TerrainToolCooloff = 15;
+            }
+
             if (m_WaterSystem.WaterSimSpeed == 0 && m_ToolSystem.activeTool != m_TerrainToolSystem)
             {
-                m_WaterSystem.WaterSimSpeed = 1;
+                if (m_TerrainToolCooloff == 0)
+                {
+                    m_Log.Debug($"{nameof(TidesAndWavesSystem)}.{nameof(OnUpdate)} Back to modded damping values.");
+                    m_ChangeWaterSystemValues.TemporarilyUseOriginalDamping = false;
+                    m_WaterSystem.WaterSimSpeed = 1;
+                }
+                else
+                {
+                    m_ChangeWaterSystemValues.TemporarilyUseOriginalDamping = true;
+                    m_TerrainToolCooloff -= 1;
+                }
             }
 
             // This section adds the dummy water source if it does not exist.
