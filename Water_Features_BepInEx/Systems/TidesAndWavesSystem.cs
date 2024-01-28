@@ -120,7 +120,7 @@ namespace Water_Features.Systems
                 }
 
                 m_PreviousWaveAndTideHeight = WaterFeaturesMod.Settings.WaveHeight + WaterFeaturesMod.Settings.TideHeight;
-                seaLevel -= WaterFeaturesMod.Settings.TideHeight;
+                seaLevel -= WaterFeaturesMod.Settings.TideHeight + WaterFeaturesMod.Settings.WaveHeight;
                 WaterSourceData waterSourceData = new WaterSourceData()
                 {
                     m_Amount = seaLevel,
