@@ -239,7 +239,7 @@ namespace Water_Features.Settings
         /// Gets or sets a value with a slider indicating the damping factor of the water system.
         /// </summary>
         [SettingsUISection(WavesAndTides, WavesAndTides)]
-        [SettingsUISlider(min = 99f, max = 99.9f, step = 0.1f, unit = "percentageSingleFraction", scalarMultiplier = 100f)]
+        [SettingsUISlider(min = 9950f, max = 9999f, step = 1f, unit = "floatSingleFraction", scalarMultiplier = 10000f)]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsWavesAndTidesDisabled))]
         public float Damping { get; set; }
 
@@ -319,11 +319,11 @@ namespace Water_Features.Settings
             MinimumMultiplier = 0f;
             MaximumMultiplier = 1.0f;
             SimulateSnowMelt = true;
-            WaveHeight = 3f;
+            WaveHeight = 7f;
             TideHeight = 3f;
-            WaveFrequency = 130f;
+            WaveFrequency = 200f;
             TideClassification = TideClassificationYYTAW.Semidiurnal;
-            Damping = 0.998f;
+            Damping = 0.999f;
             EnableSeasonalStreams = true;
             EnableWavesAndTides = false;
         }

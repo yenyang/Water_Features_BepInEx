@@ -5,6 +5,7 @@
 namespace Water_Features.Systems
 {
     using Colossal.Logging;
+    using Colossal.Serialization.Entities;
     using Game;
     using Game.Simulation;
     using Unity.Entities;
@@ -46,7 +47,6 @@ namespace Water_Features.Systems
             m_OriginalDamping = m_WaterSystem.m_Damping;
             m_TimeSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TimeSystem>();
             m_Log.Info($"[{nameof(ChangeWaterSystemValues)}] {nameof(OnCreate)}");
-            Enabled = false;
         }
 
         /// <inheritdoc/>
@@ -82,6 +82,15 @@ namespace Water_Features.Systems
             {
                 m_WaterSystem.m_Damping = m_OriginalDamping;
             }
+
+            Enabled = false;
+        }
+
+        /// <inheritdoc/>
+        protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
+        {
+            base.OnGameLoadingComplete(purpose, mode);
+            Enabled = true;
         }
     }
 }
