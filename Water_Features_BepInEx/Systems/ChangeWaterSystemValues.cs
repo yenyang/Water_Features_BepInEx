@@ -44,6 +44,11 @@ namespace Water_Features.Systems
         /// </summary>
         public bool TemporarilyUseOriginalDamping { set => m_TemporarilyUseOriginalDamping = value; }
 
+        /// <summary>
+        /// Gets a value indicating the original damping value.
+        /// </summary>
+        public float OriginalDamping { get => m_OriginalDamping; }
+
         /// <inheritdoc/>
         protected override void OnCreate()
         {

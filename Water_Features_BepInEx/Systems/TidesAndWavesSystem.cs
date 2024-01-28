@@ -107,20 +107,26 @@ namespace Water_Features.Systems
 
             if (m_ToolSystem.activeTool == m_TerrainToolSystem)
             {
+                m_ChangeWaterSystemValues.TemporarilyUseOriginalDamping = true;
+                m_WaterSystem.m_Damping = m_ChangeWaterSystemValues.OriginalDamping;
                 m_TerrainToolCooloff = 15;
             }
 
-            if (m_WaterSystem.WaterSimSpeed == 0 && m_ToolSystem.activeTool != m_TerrainToolSystem)
+            if (m_ToolSystem.activeTool != m_TerrainToolSystem)
             {
                 if (m_TerrainToolCooloff == 0)
                 {
                     m_Log.Debug($"{nameof(TidesAndWavesSystem)}.{nameof(OnUpdate)} Back to modded damping values.");
                     m_ChangeWaterSystemValues.TemporarilyUseOriginalDamping = false;
-                    m_WaterSystem.WaterSimSpeed = 1;
+                    if (m_WaterSystem.WaterSimSpeed == 0)
+                    {
+                        m_WaterSystem.WaterSimSpeed = 1;
+                    }
                 }
                 else
                 {
                     m_ChangeWaterSystemValues.TemporarilyUseOriginalDamping = true;
+                    m_WaterSystem.m_Damping = m_ChangeWaterSystemValues.OriginalDamping;
                     m_TerrainToolCooloff -= 1;
                 }
             }
