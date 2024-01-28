@@ -154,7 +154,7 @@ namespace Water_Features.Systems
                 m_SourceType = __TypeHandle.__Game_Simulation_WaterSourceData_RW_ComponentTypeHandle,
                 m_TidesAndWavesDataType = __TypeHandle.__TidesAndWavesData_RO_ComponentTypeHandle,
                 buffer = m_EndFrameBarrier.CreateCommandBuffer(),
-                m_WaveHeight = (WaterFeaturesMod.Settings.WaveHeight / 2f * Mathf.Sin(2f * Mathf.PI * WaterFeaturesMod.Settings.WaveFrequency * m_TimeSystem.normalizedTime)) - (WaterFeaturesMod.Settings.TideHeight / 2f * Mathf.Cos(2f * Mathf.PI * (float)WaterFeaturesMod.Settings.TideClassification * m_TimeSystem.normalizedDate)) + (WaterFeaturesMod.Settings.WaveHeight / 2) - (WaterFeaturesMod.Settings.TideHeight / 2),
+                m_WaveHeight = (WaterFeaturesMod.Settings.WaveHeight / 2f * Mathf.Sin(2f * Mathf.PI * WaterFeaturesMod.Settings.WaveFrequency * m_TimeSystem.normalizedTime)) - (WaterFeaturesMod.Settings.TideHeight / 2f * Mathf.Cos(2f * Mathf.PI * (float)WaterFeaturesMod.Settings.TideClassification * m_TimeSystem.normalizedDate)) + (WaterFeaturesMod.Settings.WaveHeight / 2f) - (WaterFeaturesMod.Settings.TideHeight / 2f),
             };
             JobHandle jobHandle = JobChunkExtensions.Schedule(alterSeaWaterSourcesJob, m_WaterSourceQuery, Dependency);
             m_EndFrameBarrier.AddJobHandleForProducer(jobHandle);

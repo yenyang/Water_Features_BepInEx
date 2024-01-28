@@ -87,10 +87,10 @@ namespace Water_Features.Systems
         }
 
         /// <inheritdoc/>
-        protected override void OnGameLoaded(Context serializationContext)
+        protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
         {
             Enabled = true;
-            base.OnGameLoaded(serializationContext);
+            base.OnGameLoadingComplete(purpose, mode);
         }
 
         /// <inheritdoc/>

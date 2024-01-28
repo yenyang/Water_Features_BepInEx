@@ -286,11 +286,11 @@ namespace Water_Features.Settings
         /// </summary>
         public void ResetWavesAndTidesSettings()
         {
-            WaveHeight = 3f;
+            WaveHeight = 7f;
             TideHeight = 3f;
-            WaveFrequency = 130f;
+            WaveFrequency = 200f;
             TideClassification = TideClassificationYYTAW.Semidiurnal;
-            Damping = 0.998f;
+            Damping = 0.999f;
         }
 
         /// <summary>
@@ -375,7 +375,7 @@ namespace Water_Features.Settings
             }
 
             WaterSystem waterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
-            if (!Mathf.Approximately(WaterFeaturesMod.Settings.EvaporationRate, waterSystem.m_Evaporation) || !Mathf.Approximately(waterSystem.m_Damping, WaterFeaturesMod.Settings.Damping))
+            if (!Mathf.Approximately(WaterFeaturesMod.Settings.EvaporationRate, waterSystem.m_Evaporation) || (!Mathf.Approximately(waterSystem.m_Damping, WaterFeaturesMod.Settings.Damping) && EnableWavesAndTides))
             {
                 m_ChangeWaterSystemValues.Enabled = true;
             }
