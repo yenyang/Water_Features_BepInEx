@@ -200,7 +200,7 @@ namespace Water_Features.Systems
                 }
 
                 m_PreviousWaveAndTideHeight = WaterFeaturesMod.Settings.WaveHeight + WaterFeaturesMod.Settings.TideHeight;
-                seaLevel -= (WaterFeaturesMod.Settings.TideHeight / 2f * Mathf.Cos(2f * Mathf.PI * (float)WaterFeaturesMod.Settings.TideClassification * m_TimeSystem.normalizedDate)) + (WaterFeaturesMod.Settings.WaveHeight / 2f) + (WaterFeaturesMod.Settings.TideHeight / 2f);
+                seaLevel -= (WaterFeaturesMod.Settings.TideHeight / 2f * Mathf.Cos(2f * Mathf.PI * (float)WaterFeaturesMod.Settings.TideClassification * m_TimeSystem.normalizedDate)) + WaterFeaturesMod.Settings.WaveHeight + (WaterFeaturesMod.Settings.TideHeight / 2f);
                 dummySeaWaterSourceData.m_Amount = seaLevel;
                 EntityManager.SetComponentData(m_DummySeaWaterSource, dummySeaWaterSourceData);
             }
