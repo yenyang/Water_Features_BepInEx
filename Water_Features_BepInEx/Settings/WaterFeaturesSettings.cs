@@ -207,7 +207,7 @@ namespace Water_Features.Settings
         /// Gets or sets a value with a slider indicating the height of waves generated.
         /// </summary>
         [SettingsUISection(WavesAndTides, WavesAndTides)]
-        [SettingsUISlider(min = 0f, max = 15f, step = 0.1f, unit = "floatSingleFraction")]
+        [SettingsUISlider(min = 0f, max = 50f, step = 1f, unit = "floatSingleFraction")]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsWavesAndTidesDisabled))]
         public float WaveHeight { get; set; }
 
@@ -223,7 +223,7 @@ namespace Water_Features.Settings
         /// Gets or sets a value with a slider indicating the height of tides generated.
         /// </summary>
         [SettingsUISection(WavesAndTides, WavesAndTides)]
-        [SettingsUISlider(min = 0f, max = 15f, step = 0.1f, unit = "floatSingleFraction")]
+        [SettingsUISlider(min = 0f, max = 15f, step = 0.5f, unit = "floatSingleFraction")]
         [SettingsUIHideByCondition(typeof(WaterFeaturesSettings), nameof(IsWavesAndTidesDisabled))]
         public float TideHeight { get; set; }
 
