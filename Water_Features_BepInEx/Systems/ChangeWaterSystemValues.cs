@@ -40,9 +40,9 @@ namespace Water_Features.Systems
         public bool ApplyNewEvaporationRate { get => applyNewEvaporationRate; set => applyNewEvaporationRate = value; }
 
         /// <summary>
-        /// Sets a value indicating whether to temporarily apply a new evaporation rate.
+        /// Gets or Sets a value indicating whether to temporarily apply a new evaporation rate.
         /// </summary>
-        public bool TemporarilyUseOriginalDamping { set => m_TemporarilyUseOriginalDamping = value; }
+        public bool TemporarilyUseOriginalDamping { get => m_TemporarilyUseOriginalDamping; set => m_TemporarilyUseOriginalDamping = value; }
 
         /// <summary>
         /// Gets a value indicating the original damping value.

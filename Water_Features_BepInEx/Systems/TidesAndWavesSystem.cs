@@ -5,6 +5,7 @@
 namespace Water_Features.Systems
 {
     using System.Runtime.CompilerServices;
+    using Colossal.Entities;
     using Colossal.Logging;
     using Colossal.Serialization.Entities;
     using Game;
@@ -34,6 +35,7 @@ namespace Water_Features.Systems
         private ToolSystem m_ToolSystem;
         private TerrainToolSystem m_TerrainToolSystem;
         private int m_TerrainToolCooloff;
+        private TerrainSystem m_TerrainSystem;
         private ChangeWaterSystemValues m_ChangeWaterSystemValues;
 
         /// <summary>
@@ -71,7 +73,8 @@ namespace Water_Features.Systems
             m_TerrainToolSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TerrainToolSystem>();
             m_WaterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
             m_ChangeWaterSystemValues = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<ChangeWaterSystemValues>();
-            m_TerrainToolCooloff = 15;
+            m_TerrainSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TerrainSystem>();
+            m_TerrainToolCooloff = -1;
             m_WaterSourceQuery = GetEntityQuery(new EntityQueryDesc[]
             {
                 new EntityQueryDesc
@@ -107,9 +110,14 @@ namespace Water_Features.Systems
 
             if (m_ToolSystem.activeTool == m_TerrainToolSystem)
             {
+                if (!m_ChangeWaterSystemValues.TemporarilyUseOriginalDamping)
+                {
+                    m_Log.Debug($"{nameof(TidesAndWavesSystem)}.{nameof(OnUpdate)} Back to original damping values.");
+                }
+
                 m_ChangeWaterSystemValues.TemporarilyUseOriginalDamping = true;
                 m_WaterSystem.m_Damping = m_ChangeWaterSystemValues.OriginalDamping;
-                m_TerrainToolCooloff = 15;
+                m_TerrainToolCooloff = 300;
             }
 
             if (m_ToolSystem.activeTool != m_TerrainToolSystem)
@@ -122,9 +130,16 @@ namespace Water_Features.Systems
                     {
                         m_WaterSystem.WaterSimSpeed = 1;
                     }
+
+                    m_TerrainToolCooloff -= 1;
                 }
-                else
+                else if (m_TerrainToolCooloff > 0)
                 {
+                    if (!m_ChangeWaterSystemValues.TemporarilyUseOriginalDamping)
+                    {
+                        m_Log.Debug($"{nameof(TidesAndWavesSystem)}.{nameof(OnUpdate)} Back to original damping values.");
+                    }
+
                     m_ChangeWaterSystemValues.TemporarilyUseOriginalDamping = true;
                     m_WaterSystem.m_Damping = m_ChangeWaterSystemValues.OriginalDamping;
                     m_TerrainToolCooloff -= 1;
@@ -145,7 +160,7 @@ namespace Water_Features.Systems
                 }
 
                 m_PreviousWaveAndTideHeight = WaterFeaturesMod.Settings.WaveHeight + WaterFeaturesMod.Settings.TideHeight;
-                seaLevel -= WaterFeaturesMod.Settings.TideHeight + WaterFeaturesMod.Settings.WaveHeight;
+                seaLevel -= (WaterFeaturesMod.Settings.TideHeight / 2f * Mathf.Cos(2f * Mathf.PI * (float)WaterFeaturesMod.Settings.TideClassification * m_TimeSystem.normalizedDate)) + (WaterFeaturesMod.Settings.WaveHeight / 2f) + (WaterFeaturesMod.Settings.TideHeight / 2f);
                 WaterSourceData waterSourceData = new WaterSourceData()
                 {
                     m_Amount = seaLevel,
@@ -171,6 +186,23 @@ namespace Water_Features.Systems
                 EntityManager.SetComponentData(m_DummySeaWaterSource, waterSourceData);
                 EntityManager.AddComponent(m_DummySeaWaterSource, ComponentType.ReadWrite<Game.Objects.Transform>());
                 EntityManager.SetComponentData(m_DummySeaWaterSource, transform);
+            }
+            else if (EntityManager.TryGetComponent(m_DummySeaWaterSource, out WaterSourceData dummySeaWaterSourceData))
+            {
+                float seaLevel = float.MaxValue;
+                NativeArray<TidesAndWavesData> seaWaterSources = m_WaterSourceQuery.ToComponentDataArray<TidesAndWavesData>(Allocator.Temp);
+                foreach (TidesAndWavesData seaData in seaWaterSources)
+                {
+                    if (seaLevel > seaData.m_OriginalAmount)
+                    {
+                        seaLevel = seaData.m_OriginalAmount;
+                    }
+                }
+
+                m_PreviousWaveAndTideHeight = WaterFeaturesMod.Settings.WaveHeight + WaterFeaturesMod.Settings.TideHeight;
+                seaLevel -= (WaterFeaturesMod.Settings.TideHeight / 2f * Mathf.Cos(2f * Mathf.PI * (float)WaterFeaturesMod.Settings.TideClassification * m_TimeSystem.normalizedDate)) + (WaterFeaturesMod.Settings.WaveHeight / 2f) + (WaterFeaturesMod.Settings.TideHeight / 2f);
+                dummySeaWaterSourceData.m_Amount = seaLevel;
+                EntityManager.SetComponentData(m_DummySeaWaterSource, dummySeaWaterSourceData);
             }
 
             AlterSeaWaterSourcesJob alterSeaWaterSourcesJob = new ()
