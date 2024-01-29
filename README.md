@@ -38,6 +38,7 @@ The point of the waves feature is to make the shore move in and out and make san
 Waves are generated at the map boundary where there is a Sea water source. Once generated they head towards shore. Maps were not necessarily designed for these waves, but the waves will always be lower than the sea level from the original map.
 Tides are the biggest waves and they cause the sea to rise and fall along the shore. Tides can add sandy graphics along shorelines but the sand may not persist the entire time between low tide and high tide. 
 Option to change the global damping value. The setting is inverted though so higher numbers mean less damping and stronger waves.
+Maps such as San Fransisco with shallow seas will need waves and tides with smaller heights to avoid large swathes of non-playable area becoming dry sand.
 
 ### Saving
 Before saving, the mod always resets all water sources including the custom ones in a manner that can be loaded safely without the mod, so that the mod can be removed at any time.

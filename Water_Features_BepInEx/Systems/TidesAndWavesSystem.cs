@@ -99,11 +99,6 @@ namespace Water_Features.Systems
         /// <inheritdoc/>
         protected override void OnUpdate()
         {
-            if (WaterFeaturesMod.Settings.WaveHeight == 0f && WaterFeaturesMod.Settings.TideHeight == 0f)
-            {
-                return;
-            }
-
             __TypeHandle.__Game_Simulation_WaterSourceData_RW_ComponentTypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__Unity_Entities_Entity_TypeHandle.Update(ref CheckedStateRef);
             __TypeHandle.__TidesAndWavesData_RO_ComponentTypeHandle.Update(ref CheckedStateRef);
