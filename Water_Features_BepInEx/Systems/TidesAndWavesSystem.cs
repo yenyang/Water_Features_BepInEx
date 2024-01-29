@@ -187,6 +187,8 @@ namespace Water_Features.Systems
                 EntityManager.SetComponentData(m_DummySeaWaterSource, waterSourceData);
                 EntityManager.AddComponent(m_DummySeaWaterSource, ComponentType.ReadWrite<Game.Objects.Transform>());
                 EntityManager.SetComponentData(m_DummySeaWaterSource, transform);
+                m_WaterSystem.WaterSimSpeed = 0;
+                m_TerrainToolCooloff = 300;
             }
 
             AlterSeaWaterSourcesJob alterSeaWaterSourcesJob = new ()

@@ -1,7 +1,9 @@
 # Water_Features_BepInEx
 In-Game Water Tool - Place and remove water sources.
 Optional Opt-out: Seasonal Streams - Flow rates vary with season, precipitation, and snow melt.
-Optional Opt-in: Waves and Tides - Sea level rises and falls. 
+Optional Opt-in: Waves and Tides - Sea level rises and falls.
+
+Sully has made an outstanding demo video for this including some exquisite detailing work. Availabe on [Youtube].
 ## Dependencies
 [Unified Icon Library](https://thunderstore.io/c/cities-skylines-ii/p/algernon/Unified_Icon_Library/)
 
@@ -35,7 +37,7 @@ This feature is dependent on map design. Maps with a sea water source and a sing
 The point of the waves feature is to make the shore move in and out and make sand along the shoreline. A better way to make beaches is to just paint them with surface painter instead. 
 Waves are generated at the map boundary where there is a Sea water source. Once generated they head towards shore. Maps were not necessarily designed for these waves, but the waves will always be lower than the sea level from the original map.
 Tides are the biggest waves and they cause the sea to rise and fall along the shore. Tides can add sandy graphics along shorelines but the sand may not persist the entire time between low tide and high tide. 
-Option to change the global damping value.
+Option to change the global damping value. The setting is inverted though so higher numbers mean less damping and stronger waves.
 
 ### Saving
 Before saving, the mod always resets all water sources including the custom ones in a manner that can be loaded safely without the mod, so that the mod can be removed at any time.
@@ -45,17 +47,19 @@ Adjust the global evaporation rate which can be helpful with Detention and Reten
 Water Clean Up Cycle is an emergency solution for removing water in developed areas by increasing the global evaporation rate for a short time. Better option: Lakes with an elevation below the ground surface drain water faster than evaporation.
 
 ## Planned Features
-Adjust position and depth of water sources after placement.
+Adjust position and depth/elevation of water sources after placement.
 Option to add polluted water sources...?
+Rainfall 2 including storm drains might be included as opt-in option eventually.
+Tying snow melt simulation to snow system graphics.
 
 ## Support
 I will respond on the code modding channels on **Cities: Skylines Modding Discord**
 
 ## Credits 
 * yenyang - Mod Author
+* Sully - Testing, Feedback, and Promotional Material
 * Chameleon TBN - Testing, Feedback, Icons, & Logo
-* Sully - Testing, Feedback, and Promotional Material.
 * Algernon, Alpha Gaming - Help with UI, Cooperative Development & Code Sharing
 * T.D.W., Klyte45, krzychu124, & Quboid - Cooperative Development & Code Sharing
 * ST-Apps - Help with UI & Code Sharing
-* Dante - Testing, Feedback
+* Tigon Ologdring, Dante - Testing, Feedback

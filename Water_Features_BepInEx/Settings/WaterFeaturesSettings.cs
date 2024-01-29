@@ -285,11 +285,11 @@ namespace Water_Features.Settings
         /// </summary>
         public void ResetWavesAndTidesSettings()
         {
-            WaveHeight = 5f;
-            TideHeight = 3f;
-            WaveFrequency = 130f;
+            WaveHeight = 15f;
+            TideHeight = 0f;
+            WaveFrequency = 200f;
             TideClassification = TideClassificationYYTAW.Semidiurnal;
-            Damping = 0.9995f;
+            Damping = 0.9999f;
         }
 
         /// <summary>
@@ -318,11 +318,11 @@ namespace Water_Features.Settings
             MinimumMultiplier = 0f;
             MaximumMultiplier = 1.0f;
             SimulateSnowMelt = true;
-            WaveHeight = 5f;
-            TideHeight = 3f;
-            WaveFrequency = 130f;
+            WaveHeight = 15f;
+            TideHeight = 0f;
+            WaveFrequency = 200f;
             TideClassification = TideClassificationYYTAW.Semidiurnal;
-            Damping = 0.9995f;
+            Damping = 0.9999f;
             EnableSeasonalStreams = true;
             EnableWavesAndTides = false;
         }
