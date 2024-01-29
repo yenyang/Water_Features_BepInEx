@@ -160,7 +160,7 @@ namespace Water_Features.Systems
                 }
 
                 m_PreviousWaveAndTideHeight = WaterFeaturesMod.Settings.WaveHeight + WaterFeaturesMod.Settings.TideHeight;
-                seaLevel -= (WaterFeaturesMod.Settings.TideHeight / 2f * Mathf.Cos(2f * Mathf.PI * (float)WaterFeaturesMod.Settings.TideClassification * m_TimeSystem.normalizedDate)) + (WaterFeaturesMod.Settings.WaveHeight / 2f) + (WaterFeaturesMod.Settings.TideHeight / 2f);
+                seaLevel -= WaterFeaturesMod.Settings.WaveHeight + WaterFeaturesMod.Settings.TideHeight;
                 WaterSourceData waterSourceData = new WaterSourceData()
                 {
                     m_Amount = seaLevel,
@@ -186,23 +186,6 @@ namespace Water_Features.Systems
                 EntityManager.SetComponentData(m_DummySeaWaterSource, waterSourceData);
                 EntityManager.AddComponent(m_DummySeaWaterSource, ComponentType.ReadWrite<Game.Objects.Transform>());
                 EntityManager.SetComponentData(m_DummySeaWaterSource, transform);
-            }
-            else if (EntityManager.TryGetComponent(m_DummySeaWaterSource, out WaterSourceData dummySeaWaterSourceData))
-            {
-                float seaLevel = float.MaxValue;
-                NativeArray<TidesAndWavesData> seaWaterSources = m_WaterSourceQuery.ToComponentDataArray<TidesAndWavesData>(Allocator.Temp);
-                foreach (TidesAndWavesData seaData in seaWaterSources)
-                {
-                    if (seaLevel > seaData.m_OriginalAmount)
-                    {
-                        seaLevel = seaData.m_OriginalAmount;
-                    }
-                }
-
-                m_PreviousWaveAndTideHeight = WaterFeaturesMod.Settings.WaveHeight + WaterFeaturesMod.Settings.TideHeight;
-                seaLevel -= (WaterFeaturesMod.Settings.TideHeight / 2f * Mathf.Cos(2f * Mathf.PI * (float)WaterFeaturesMod.Settings.TideClassification * m_TimeSystem.normalizedDate)) + WaterFeaturesMod.Settings.WaveHeight + (WaterFeaturesMod.Settings.TideHeight / 2f);
-                dummySeaWaterSourceData.m_Amount = seaLevel;
-                EntityManager.SetComponentData(m_DummySeaWaterSource, dummySeaWaterSourceData);
             }
 
             AlterSeaWaterSourcesJob alterSeaWaterSourcesJob = new ()
