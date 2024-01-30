@@ -1,4 +1,4 @@
-# Water_Features_BepInEx
+# Water_Features
 In-Game Water Tool - Place and remove water sources. Lakes, Streams, Rivers, and Seas.
 Optional Opt-out: Seasonal Streams - Flow rates vary with season, precipitation, and snow melt.
 Optional Opt-in: Waves and Tides - Sea level rises and falls.
