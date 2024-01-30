@@ -92,6 +92,10 @@ namespace Water_Features.Systems
             else if ((!Mathf.Approximately(m_WaterSystem.m_Damping, m_OriginalDamping) && !WaterFeaturesMod.Settings.EnableWavesAndTides) || m_TemporarilyUseOriginalDamping)
             {
                 m_WaterSystem.m_Damping = m_OriginalDamping;
+                if (m_WaterSystem.WaterSimSpeed == 0 && !WaterFeaturesMod.Settings.EnableWavesAndTides)
+                {
+                    m_WaterSystem.WaterSimSpeed = 1;
+                }
             }
         }
     }

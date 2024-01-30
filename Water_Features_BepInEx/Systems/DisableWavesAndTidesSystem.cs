@@ -8,6 +8,7 @@ namespace Water_Features.Systems
     using Colossal.Logging;
     using Game;
     using Game.Common;
+    using Game.Simulation;
     using Game.Tools;
     using Unity.Burst.Intrinsics;
     using Unity.Collections;
@@ -24,6 +25,7 @@ namespace Water_Features.Systems
         private TidesAndWavesSystem m_TidesAndWavesSystem;
         private ILog m_Log;
         private EndFrameBarrier m_EndFrameBarrier;
+        private WaterSystem m_WaterSystem;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DisableWavesAndTidesSystem"/> class.
@@ -38,6 +40,7 @@ namespace Water_Features.Systems
             base.OnCreate();
             m_Log = WaterFeaturesMod.Instance.Log;
             m_TidesAndWavesSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TidesAndWavesSystem>();
+            m_WaterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
             m_TidesAndWavesDataQuery = GetEntityQuery(new EntityQueryDesc[]
             {
                 new EntityQueryDesc
@@ -76,6 +79,11 @@ namespace Water_Features.Systems
             };
             Dependency = JobChunkExtensions.Schedule(resetTidesAndWavesJob, m_TidesAndWavesDataQuery, Dependency);
             m_EndFrameBarrier.AddJobHandleForProducer(Dependency);
+            if (m_WaterSystem.WaterSimSpeed == 0)
+            {
+                m_WaterSystem.WaterSimSpeed = 1;
+            }
+
             Enabled = false;
         }
 
