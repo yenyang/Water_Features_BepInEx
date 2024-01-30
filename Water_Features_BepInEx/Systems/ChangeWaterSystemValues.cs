@@ -5,13 +5,14 @@
 namespace Water_Features.Systems
 {
     using Colossal.Logging;
+    using Colossal.Serialization.Entities;
     using Game;
     using Game.Simulation;
     using Unity.Entities;
     using UnityEngine;
 
     /// <summary>
-    /// Changes the various rates of the vanilla water system.
+    /// Changes the various rates of the vanilla water system. Some or all of this could be incorporated into the Settings Apply method.
     /// </summary>
     public partial class ChangeWaterSystemValues : GameSystemBase
     {
@@ -23,6 +24,8 @@ namespace Water_Features.Systems
         private float m_TimeLastChanged = 0f;
         private float m_DateLastChange = 0f;
         private ILog m_Log;
+        private float m_OriginalDamping = 0.995f;
+        private bool m_TemporarilyUseOriginalDamping = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChangeWaterSystemValues"/> class.
@@ -36,12 +39,23 @@ namespace Water_Features.Systems
         /// </summary>
         public bool ApplyNewEvaporationRate { get => applyNewEvaporationRate; set => applyNewEvaporationRate = value; }
 
+        /// <summary>
+        /// Gets or Sets a value indicating whether to temporarily apply a new evaporation rate.
+        /// </summary>
+        public bool TemporarilyUseOriginalDamping { get => m_TemporarilyUseOriginalDamping; set => m_TemporarilyUseOriginalDamping = value; }
+
+        /// <summary>
+        /// Gets a value indicating the original damping value.
+        /// </summary>
+        public float OriginalDamping { get => m_OriginalDamping; }
+
         /// <inheritdoc/>
         protected override void OnCreate()
         {
             base.OnCreate();
             m_Log = WaterFeaturesMod.Instance.Log;
             m_WaterSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<WaterSystem>();
+            m_OriginalDamping = m_WaterSystem.m_Damping;
             m_TimeSystem = World.DefaultGameObjectInjectionWorld?.GetOrCreateSystemManaged<TimeSystem>();
             m_Log.Info($"[{nameof(ChangeWaterSystemValues)}] {nameof(OnCreate)}");
         }
@@ -49,6 +63,7 @@ namespace Water_Features.Systems
         /// <inheritdoc/>
         protected override void OnUpdate()
         {
+            // This is for the water cleanup cycle.
             if (ApplyNewEvaporationRate)
             {
                 m_WaterSystem.m_Evaporation = m_TemporaryEvaporation;
@@ -59,6 +74,7 @@ namespace Water_Features.Systems
                 WaterFeaturesMod.Settings.ApplyAndSave();
             }
 
+            // This is for changin the evaporation rate with the settings.
             if (!Mathf.Approximately(WaterFeaturesMod.Settings.EvaporationRate, m_WaterSystem.m_Evaporation))
             {
                 if (m_TimeSystem.normalizedTime > m_TimeLastChanged + m_ResetTimeLimit || m_DateLastChange > m_DateLastChange + m_ResetTimeLimit)
@@ -68,9 +84,18 @@ namespace Water_Features.Systems
                 }
             }
 
-            if (!Mathf.Approximately(m_WaterSystem.m_Damping, WaterFeaturesMod.Settings.Damping))
+            // This is for changing the damping constant with the settings.
+            if (!Mathf.Approximately(m_WaterSystem.m_Damping, WaterFeaturesMod.Settings.Damping) && WaterFeaturesMod.Settings.EnableWavesAndTides && !m_TemporarilyUseOriginalDamping)
             {
                 m_WaterSystem.m_Damping = WaterFeaturesMod.Settings.Damping;
+            }
+            else if ((!Mathf.Approximately(m_WaterSystem.m_Damping, m_OriginalDamping) && !WaterFeaturesMod.Settings.EnableWavesAndTides) || m_TemporarilyUseOriginalDamping)
+            {
+                m_WaterSystem.m_Damping = m_OriginalDamping;
+                if (m_WaterSystem.WaterSimSpeed == 0 && !WaterFeaturesMod.Settings.EnableWavesAndTides)
+                {
+                    m_WaterSystem.WaterSimSpeed = 1;
+                }
             }
         }
     }

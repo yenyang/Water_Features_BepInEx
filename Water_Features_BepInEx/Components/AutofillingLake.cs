@@ -10,10 +10,10 @@ namespace Water_Features.Components
     /// <summary>
     /// A custom component for Autofilling Lakes.
     /// </summary>
-    public struct AutofillingLake : IComponentData, IQueryTypeParameter, IEmptySerializable
+    public struct AutofillingLake : IComponentData, IQueryTypeParameter, ISerializable
     {
         /// <summary>
-        /// The maximum height that the water will raise to.
+        /// The maximum Water Surface Elevation that the water will raise to.
         /// </summary>
         public float m_MaximumWaterHeight;
 

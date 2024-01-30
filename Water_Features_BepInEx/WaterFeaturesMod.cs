@@ -2,7 +2,7 @@
 // Copyright (c) Yenyang's Mods. MIT License. All rights reserved.
 // </copyright>
 
-#define DEBUG // Change before release.
+#define RELEASE // Change before release.
 namespace Water_Features
 {
     using System.IO;
@@ -11,9 +11,11 @@ namespace Water_Features
     using Game;
     using Game.Modding;
     using Game.SceneFlow;
+    using Game.UI;
     using Water_Features.Settings;
     using Water_Features.Systems;
     using Water_Features.Tools;
+    using Water_Features.Utils;
 
     /// <summary>
     ///  A mod that adds Water Tool, Seasonal Streams, and Experimetnal Waves and Tides.
@@ -65,6 +67,12 @@ namespace Water_Features
         {
             Instance = this;
             Log = LogManager.GetLogger("Mods_Yenyang_Water_Features", false);
+            Log.Info($"[{nameof(WaterFeaturesMod)}] {nameof(OnLoad)}");
+        }
+
+        /// <inheritdoc/>
+        public void OnCreateWorld(UpdateSystem updateSystem)
+        {
 #if DEBUG
             Log.effectivenessLevel = Colossal.Logging.Level.Debug;
 #endif
@@ -74,17 +82,13 @@ namespace Water_Features
 #if VERBOSE
             Log.effectivenessLevel = Colossal.Logging.Level.Verbose;
 #endif
-            Log.Info($"[{nameof(WaterFeaturesMod)}] {nameof(OnLoad)}");
-        }
-
-        /// <inheritdoc/>
-        public void OnCreateWorld(UpdateSystem updateSystem)
-        {
             Log.Info("Initializing Settings.");
             Settings = new (this);
             Settings.RegisterInOptionsUI();
             AssetDatabase.global.LoadSettings("Mods_Yenyang_Water_Features", Settings, new WaterFeaturesSettings(this));
             Settings.Contra = false;
+            GameUIResourceHandler uiResourceHandler = GameManager.instance.userInterface.view.uiSystem.resourceHandler as GameUIResourceHandler;
+            uiResourceHandler?.HostLocationsMap.Add("yy-water-tool", new System.Collections.Generic.List<string> { UIFileUtils.AssemblyPath });
             Log.Info("Handling create world");
             Log.Info("ModInstallFolder = " + ModInstallFolder);
             LoadLocales();
@@ -99,7 +103,14 @@ namespace Water_Features
             updateSystem.UpdateBefore<BeforeSerializeSystem>(SystemUpdatePhase.Serialize);
             updateSystem.UpdateAfter<TidesAndWavesSystem>(SystemUpdatePhase.Serialize);
             updateSystem.UpdateAt<SeasonalStreamsSystem>(SystemUpdatePhase.GameSimulation);
+            updateSystem.UpdateAt<DisableSeasonalStreamSystem>(SystemUpdatePhase.GameSimulation);
+            updateSystem.UpdateAt<DisableWavesAndTidesSystem>(SystemUpdatePhase.GameSimulation);
             updateSystem.UpdateAfter<SeasonalStreamsSystem>(SystemUpdatePhase.Serialize);
+            updateSystem.UpdateAfter<AutofillingLakesSystem>(SystemUpdatePhase.Serialize);
+            updateSystem.UpdateAfter<DetentionBasinSystem>(SystemUpdatePhase.Serialize);
+            updateSystem.UpdateAfter<RetentionBasinSystem>(SystemUpdatePhase.Serialize);
+            updateSystem.UpdateAt<AddPrefabsSystem>(SystemUpdatePhase.PrefabUpdate);
+            updateSystem.UpdateAt<WaterToolUISystem>(SystemUpdatePhase.UIUpdate);
         }
 
         /// <inheritdoc/>

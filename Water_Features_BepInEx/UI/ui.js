@@ -19,9 +19,10 @@ if (typeof yyWaterTool.setupButton !== 'function') {
             return;
         }
         button.onclick = function () {
-            engine.trigger(this.id);
+            engine.trigger('Change-Value', this.id);
         }
         yyWaterTool.setTooltip(buttonId, toolTipKey);
+
     }
 }
 
@@ -138,16 +139,13 @@ if (typeof yyWaterTool.hideTooltip !== 'function') {
     }
 }
 
-yyWaterTool.setupButton("YYWT-creek", "YY_WATER_FEATURES.creek");
-yyWaterTool.setupButton("YYWT-lake", "YY_WATER_FEATURES.lake");
-yyWaterTool.setupButton("YYWT-river", "YY_WATER_FEATURES.river");
-yyWaterTool.setupButton("YYWT-sea", "YY_WATER_FEATURES.sea");
-yyWaterTool.setupButton("YYWT-autofilling-lake", "YY_WATER_FEATURES.autofilling-lake");
-yyWaterTool.setupButton("YYWT-detention-basin", "YY_WATER_FEATURES.detention-basin");
-yyWaterTool.setupButton("YYWT-retention-basin", "YY_WATER_FEATURES.retention-basin");
+yyWaterTool.applyLocalization(document.getElementById("YYWT-amount-item"));
+yyWaterTool.applyLocalization(document.getElementById("YYWT-radius-item"));
+yyWaterTool.setupButton("YYWT-amount-down-arrow", "amount-down-arrow");
+yyWaterTool.setupButton("YYWT-amount-up-arrow", "amount-up-arrow");
 
-yyWaterTool.setupButton("YYWT-amount-down-arrow", "YY_WATER_FEATURES.amount-down-arrow");
-yyWaterTool.setupButton("YYWT-amount-up-arrow", "YY_WATER_FEATURES.amount-up-arrow");
+yyWaterTool.setupButton("YYWT-radius-down-arrow", "radius-down-arrow");
+yyWaterTool.setupButton("YYWT-radius-up-arrow", "radius-up-arrow");
 
-yyWaterTool.setupButton("YYWT-radius-down-arrow", "YY_WATER_FEATURES.radius-down-arrow");
-yyWaterTool.setupButton("YYWT-radius-up-arrow", "YY_WATER_FEATURES.radius-up-arrow");
+yyWaterTool.setupButton("YYWT-amount-rate-of-change", "amount-rate-of-change");
+yyWaterTool.setupButton("YYWT-radius-rate-of-change", "radius-rate-of-change");

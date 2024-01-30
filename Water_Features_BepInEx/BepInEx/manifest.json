@@ -1,10 +1,10 @@
 {
   "name": "Water_Features",
-  "description": "Water Tool, Seasonal Streams, Experimental Waves and Tides",
+  "description": "In-Game Water Tool, Optional Seasonal Streams, and Optional Waves and Tides",
   "version_number": "1.0.0",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100",
-    "algernon-Unified_Icon_Library-1.0.6"
+    "algernon-Unified_Icon_Library-1.0.7"
   ],
   "website_url": "https://github.com/yenyang/Water_Features_BepInEx"
 }

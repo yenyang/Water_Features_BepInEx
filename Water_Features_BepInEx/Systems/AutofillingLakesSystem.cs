@@ -15,6 +15,7 @@ namespace Water_Features.Systems
     using Unity.Entities;
     using Unity.Jobs;
     using Unity.Mathematics;
+    using UnityEngine;
     using Water_Features.Components;
     using Water_Features.Tools;
 
@@ -30,19 +31,12 @@ namespace Water_Features.Systems
         {
         }
 
-        public static readonly int kUpdatesPerDay = 256;
         private TypeHandle __TypeHandle;
         private EndFrameBarrier m_EndFrameBarrier;
         private WaterSystem m_WaterSystem;
         private TerrainSystem m_TerrainSystem;
         private EntityQuery m_AutofillingLakesQuery;
         private ILog m_Log;
-
-        /// <inheritdoc/>
-        public override int GetUpdateInterval(SystemUpdatePhase phase)
-        {
-            return 262144 / kUpdatesPerDay;
-        }
 
         /// <inheritdoc/>
         protected override void OnCreate()
@@ -105,6 +99,13 @@ namespace Water_Features.Systems
             __TypeHandle.AssignHandles(ref CheckedStateRef);
         }
 
+        /// <summary>
+        /// This job checks the water level of the automatic filling lake.
+        /// At first the autofilling lake is a stream water source that is filling up the lake with water.
+        /// When it reaches 75% full then the amount is throttled.
+        /// When it reaches 100% full or higher the water source is converted to a lake.
+        /// The component for automatic filling is then removed.
+        /// </summary>
         private struct AutofillingLakesJob : IJobChunk
         {
             public ComponentTypeHandle<AutofillingLake> m_AutofillingLakeType;
@@ -130,27 +131,47 @@ namespace Water_Features.Systems
                     Entity currentEntity = entityNativeArray[i];
                     float3 terrainPosition = new (currentTransform.m_Position.x, TerrainUtils.SampleHeight(ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
                     float3 waterPosition = new (currentTransform.m_Position.x, WaterUtils.SampleHeight(ref m_WaterSurfaceData, ref m_TerrainHeightData, currentTransform.m_Position), currentTransform.m_Position.z);
-                    float waterHeight = waterPosition.y - terrainPosition.y;
+                    float waterHeight = waterPosition.y;
+                    float waterDepth = waterPosition.y - terrainPosition.y;
+                    float maxDepth = currentAutofillingLake.m_MaximumWaterHeight - terrainPosition.y;
 
+                    // When it reaches 100% full or higher the water source is converted to a lake.
                     if (waterHeight > currentAutofillingLake.m_MaximumWaterHeight)
                     {
-                        currentWaterSourceData.m_ConstantDepth = (int)WaterToolUISystem.SourceType.Lake;
+                        currentWaterSourceData.m_ConstantDepth = (int)WaterToolUISystem.SourceType.VanillaLake;
+                        currentWaterSourceData.m_Amount = currentAutofillingLake.m_MaximumWaterHeight;
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                         buffer.RemoveComponent<AutofillingLake>(currentEntity);
                     }
-                    else if (waterHeight >= 0.95f * currentAutofillingLake.m_MaximumWaterHeight)
+
+                    // When it reaches 75% full then the amount is throttled.
+                    else if (waterDepth >= 0.75f * maxDepth)
                     {
-                        currentWaterSourceData.m_Amount = currentAutofillingLake.m_MaximumWaterHeight * 0.1f;
-                        if (currentWaterSourceData.m_ConstantDepth != 0) // Creek
+                        currentWaterSourceData.m_ConstantDepth = 0; // Stream
+                        currentWaterSourceData.m_Amount = maxDepth * 0.1f;
+                        if (currentWaterSourceData.m_Radius < 20f)
                         {
-                            currentWaterSourceData.m_ConstantDepth = 0; // Creek
+                            currentWaterSourceData.m_Amount *= Mathf.Pow(currentWaterSourceData.m_Radius / 20f, 2);
+                        }
+
+                        if (currentWaterSourceData.m_ConstantDepth != 0) // Stream
+                        {
+                            currentWaterSourceData.m_ConstantDepth = 0; // Stream
                         }
 
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                     }
-                    else if (currentWaterSourceData.m_ConstantDepth != 0) // Creek
+
+                    // If an automatic filling lake was saved and converted to a vanilla lake, then this converts it back into a stream to continue filling.
+                    else if (currentWaterSourceData.m_ConstantDepth != 0) // Stream
                     {
-                        currentWaterSourceData.m_ConstantDepth = 0; // Creek
+                        currentWaterSourceData.m_ConstantDepth = 0; // Stream
+                        currentWaterSourceData.m_Amount = maxDepth * 0.4f;
+                        if (currentWaterSourceData.m_Radius < 20f)
+                        {
+                            currentWaterSourceData.m_Amount *= Mathf.Pow(currentWaterSourceData.m_Radius / 20f, 2);
+                        }
+
                         buffer.SetComponent(currentEntity, currentWaterSourceData);
                     }
 

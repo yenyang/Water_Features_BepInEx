@@ -5,8 +5,9 @@
 namespace Water_Features.Prefabs
 {
     using System;
+    using System.Collections.Generic;
     using Game.Prefabs;
-    using UnityEngine;
+    using Unity.Entities;
     using Water_Features.Tools;
 
     /// <summary>
@@ -21,8 +22,30 @@ namespace Water_Features.Prefabs
         public WaterToolUISystem.SourceType m_SourceType;
 
         /// <summary>
-        /// Color for overlay rendering.
+        /// The locale key for this type of water source for the amount row.
         /// </summary>
-        public Color m_Color;
+        public string m_AmountLocaleKey;
+
+        /// <summary>
+        /// The default value for the radius field.
+        /// </summary>
+        public float m_DefaultRadius;
+
+        /// <summary>
+        /// The default value for the amount field.
+        /// </summary>
+        public float m_DefaultAmount;
+
+        /// <inheritdoc/>
+        public override void GetPrefabComponents(HashSet<ComponentType> components)
+        {
+            base.GetPrefabComponents(components);
+        }
+
+        /// <inheritdoc/>
+        public override void GetArchetypeComponents(HashSet<ComponentType> components)
+        {
+            base.GetArchetypeComponents(components);
+        }
     }
 }
