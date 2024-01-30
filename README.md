@@ -1,9 +1,9 @@
 # Water_Features_BepInEx
-In-Game Water Tool - Place and remove water sources.
+In-Game Water Tool - Place and remove water sources. Lakes, Streams, Rivers, and Seas.
 Optional Opt-out: Seasonal Streams - Flow rates vary with season, precipitation, and snow melt.
 Optional Opt-in: Waves and Tides - Sea level rises and falls.
 
-Sully has made an outstanding demo video for this including some exquisite detailing work. Availabe on [Youtube].
+Sully has made an outstanding demo video covering the new features related to water. Available on [Youtube](https://www.youtube.com/watch?v=Q9QZ0n60i9c).
 ## Dependencies
 [Unified Icon Library](https://thunderstore.io/c/cities-skylines-ii/p/algernon/Unified_Icon_Library/)
 
