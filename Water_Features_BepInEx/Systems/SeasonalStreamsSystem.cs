@@ -127,11 +127,18 @@ namespace Water_Features.Systems
                 buffer = m_EndFrameBarrier.CreateCommandBuffer(),
             };
 
+            // This deals with maps with 0 mean precipitation.
+            float seasonalFlows = 0f;
+            if (m_MaxSeasonMeanPrecipitation > 0)
+            {
+                seasonalFlows = m_CurrentSeasonMeanPrecipitation / m_MaxSeasonMeanPrecipitation * WaterFeaturesMod.Settings.StreamSeasonality;
+            }
+
             // If it's not snowing, according to the climate system calculate runoff for job.
             if (m_ClimateSystem.isSnowing == false)
             {
                 // Calculate water source multiplier based on precipiattion, spring water, and seasonality.
-                reviseWaterSourcesJob.m_WaterSourceMultiplier = Mathf.Clamp((m_CurrentSeasonMeanPrecipitation / m_MaxSeasonMeanPrecipitation * WaterFeaturesMod.Settings.StreamSeasonality) + (m_ClimateSystem.precipitation * WaterFeaturesMod.Settings.StreamStormwaterEffects) + WaterFeaturesMod.Settings.ConstantFlowRate, WaterFeaturesMod.Settings.MinimumMultiplier, WaterFeaturesMod.Settings.MaximumMultiplier);
+                reviseWaterSourcesJob.m_WaterSourceMultiplier = Mathf.Clamp(seasonalFlows + (m_ClimateSystem.precipitation * WaterFeaturesMod.Settings.StreamStormwaterEffects) + WaterFeaturesMod.Settings.ConstantFlowRate, WaterFeaturesMod.Settings.MinimumMultiplier, WaterFeaturesMod.Settings.MaximumMultiplier);
                 reviseWaterSourcesJob.m_SnowAccumulationMultiplier = 0f;
 
                 // If the temperature is high enough to melt snow record the temperature and the leftover multiplier that can be used for snow melt.
@@ -151,7 +158,7 @@ namespace Water_Features.Systems
             else if (WaterFeaturesMod.Settings.SimulateSnowMelt == true)
             {
                 // Seasonal water flow and spring water still continue during snow.
-                reviseWaterSourcesJob.m_WaterSourceMultiplier = Mathf.Clamp((m_CurrentSeasonMeanPrecipitation / m_MaxSeasonMeanPrecipitation * WaterFeaturesMod.Settings.StreamSeasonality) + WaterFeaturesMod.Settings.ConstantFlowRate, WaterFeaturesMod.Settings.MinimumMultiplier, WaterFeaturesMod.Settings.MaximumMultiplier);
+                reviseWaterSourcesJob.m_WaterSourceMultiplier = Mathf.Clamp(seasonalFlows + WaterFeaturesMod.Settings.ConstantFlowRate, WaterFeaturesMod.Settings.MinimumMultiplier, WaterFeaturesMod.Settings.MaximumMultiplier);
                 reviseWaterSourcesJob.m_SnowAccumulationMultiplier = m_ClimateSystem.precipitation * WaterFeaturesMod.Settings.StreamStormwaterEffects;
                 reviseWaterSourcesJob.m_PotentialSnowMeltMultiplier = 0f;
                 reviseWaterSourcesJob.m_TemperatureDifferential = 0f;
