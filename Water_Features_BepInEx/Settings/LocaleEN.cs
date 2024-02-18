@@ -4,7 +4,10 @@
 
 namespace Water_Features.Settings
 {
+    using System;
     using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
     using Colossal;
 
     /// <summary>
@@ -14,6 +17,8 @@ namespace Water_Features.Settings
     {
         private readonly WaterFeaturesSettings m_Setting;
 
+        private Dictionary<string, string> m_Localization;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LocaleEN"/> class.
         /// </summary>
@@ -21,12 +26,8 @@ namespace Water_Features.Settings
         public LocaleEN(WaterFeaturesSettings setting)
         {
             m_Setting = setting;
-        }
 
-        /// <inheritdoc/>
-        public IEnumerable<KeyValuePair<string, string>> ReadEntries(IList<IDictionaryEntryError> errors, Dictionary<string, int> indexCounts)
-        {
-            return new Dictionary<string, string>
+            m_Localization = new Dictionary<string, string>()
             {
                 { m_Setting.GetSettingsLocaleID(), "Water Features" },
                 { m_Setting.GetOptionTabLocaleID(WaterFeaturesSettings.SeasonalStreams), "Seasonal Streams" },
@@ -133,9 +134,69 @@ namespace Water_Features.Settings
             };
         }
 
+
+        /// <inheritdoc/>
+        public IEnumerable<KeyValuePair<string, string>> ReadEntries(IList<IDictionaryEntryError> errors, Dictionary<string, int> indexCounts)
+        {
+            return m_Localization;
+        }
+
         /// <inheritdoc/>
         public void Unload()
         {
+        }
+
+        /// <summary>
+        /// Exports a localization CSV template with this files dictionary as default entries.
+        /// </summary>
+        /// <param name="folderPath">the path of where the file should be created.</param>
+        /// <param name="langCodes">the language codes to be included in the template file.</param>
+        /// <returns>True if the file is created. False if not.</returns>
+        public bool ExportLocalizationCSV(string folderPath, string[] langCodes)
+        {
+            System.IO.Directory.CreateDirectory(folderPath);
+            string localizationFilePath = Path.Combine(folderPath, $"l10n.csv");
+            if (!File.Exists(localizationFilePath))
+            {
+                try
+                {
+                    using (StreamWriter streamWriter = new(File.Create(localizationFilePath)))
+                    {
+                        StringBuilder topLine = new StringBuilder();
+                        topLine.Append("key\t");
+                        foreach (string langCode in langCodes)
+                        {
+                            topLine.Append(langCode);
+                            topLine.Append("\t");
+                        }
+
+                        streamWriter.WriteLine(topLine.ToString());
+
+                        foreach (KeyValuePair<string, string> kvp in m_Localization)
+                        {
+                            StringBuilder currentLine = new StringBuilder();
+                            currentLine.Append(kvp.Key);
+                            currentLine.Append("\t");
+                            foreach (string langCode in langCodes)
+                            {
+                                currentLine.Append(kvp.Value);
+                                currentLine.Append("\t");
+                            }
+
+                            streamWriter.WriteLine(currentLine.ToString());
+                        }
+
+                        return true;
+                    }
+                }
+                catch (Exception e)
+                {
+                    WaterFeaturesMod.Instance.Log.Warn($"{typeof(LocaleEN)}.{nameof(ExportLocalizationCSV)} Encountered Exception {e} while trying to export localization csv.");
+                    return false;
+                }
+            }
+
+            return false;
         }
     }
 }
