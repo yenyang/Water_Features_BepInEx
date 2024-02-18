@@ -238,6 +238,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="BepInEx\manifest.json" />
+    <None Include="l10n\l10n.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

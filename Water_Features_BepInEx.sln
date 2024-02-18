@@ -7,6 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Water_Features_BepInEx", "W
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DDB50348-2575-44B1-A1C9-C3B7C1DB1E31}"
 	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.md = CHANGELOG.md
 		README.md = README.md
 	EndProjectSection
 EndProject
