@@ -71,7 +71,6 @@ namespace Water_Features.Systems
                 m_TimeLastChanged = m_TimeSystem.normalizedTime;
                 m_DateLastChange = m_TimeSystem.normalizedDate;
                 ApplyNewEvaporationRate = false;
-                WaterFeaturesMod.Settings.ApplyAndSave();
             }
 
             // This is for changin the evaporation rate with the settings.

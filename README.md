@@ -8,6 +8,18 @@ Sully has made an outstanding demo video covering the new features related to wa
 [Unified Icon Library](https://thunderstore.io/c/cities-skylines-ii/p/algernon/Unified_Icon_Library/)
 
 [BepInExPack](https://thunderstore.io/c/cities-skylines-ii/p/BepInEx/BepInExPack/)
+
+## Change Log
+[Available on Github](https://github.com/yenyang/Water_Features_BepInEx/blob/master/CHANGELOG.md)
+
+## Donations
+If you want to say thank you with a donation you can do so on [Buy Me A Coffee](https://www.buymeacoffee.com/yenyang_mods).
+
+## Translations
+I am looking for volunteers to help translate the mod into the official languages. For those interested please go to [CrowdIn](https://crowdin.com/project/csl2-mod-tree-controller).
+Sorry the link says tree controller, I accidently uploaded the wrong file to one of the projects so the URLs are swapped.
+Current Localization Support: Spanish by Nyoko & Citadino, German by Hendrix, Partial Portuguese by Luiz Fernando de Paula
+
 ## Detailed Descrption
 ### Water Tool
 Water Sources:
@@ -62,5 +74,6 @@ I will respond on the code modding channels on **Cities: Skylines Modding Discor
 * Chameleon TBN - Testing, Feedback, Icons, & Logo
 * Algernon, Alpha Gaming - Help with UI, Cooperative Development & Code Sharing
 * T.D.W., Klyte45, krzychu124, & Quboid - Cooperative Development & Code Sharing
+* Localization: Hendrix (German), Nyoko & Citadino (Spanish), Luiz Fernando de Paula (Partial Portuguese)
 * ST-Apps - Help with UI & Code Sharing
 * Tigon Ologdring, Dante - Testing, Feedback
