@@ -9,6 +9,7 @@ namespace Water_Features.Settings
     using System.IO;
     using System.Text;
     using Colossal;
+    using Colossal.IO.AssetDatabase.Internal;
 
     /// <summary>
     /// Localization for <see cref="WaterFeaturesMod"/> in English.
@@ -131,6 +132,7 @@ namespace Water_Features.Settings
                 { "Tooltip.LABEL[YY.WT.RemoveWaterSource]", "Right click to remove water source." },
                 { "Tooltip.LABEL[YY.WT.PlaceInsideBorder]", "This water source must be placed inside the playable map." },
                 { "Tooltip.LABEL[YY.WT.MustTouchBorder]", "Sea water sources must touch the map border." },
+                { "Tooltip.LABEL[YY.WT.LockElevation]", "Right click to designate the water surface elevation." },
             };
         }
 
